@@ -1,0 +1,108 @@
+.\"
+.\" Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-HTTP 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Http
+.Nd asynchronous HTTP API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Fn Irccd.Http.request "options, callback"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+Execute asynchronous HTTP requests.
+.Pp
+This module is optional and only available if irccd was build with HTTP
+support. Make sure to test availability of
+.Nm
+before using it.
+.\" METHODS
+.Sh METHODS
+The
+.Fn Irccd.Http.request
+starts a new asynchronous HTTP request using the object
+.Fa options
+which should have the following properties:
+.Bl -tag
+.It Fa url No (string)
+The destination URL which should start with the scheme
+.Dq http://
+or
+.Dq https:// .
+.It Fa method No (string)
+The HTTP method to use, examples:
+.Dq GET ,
+.Dq POST ,
+.Dq DELETE .
+If not set, defaults to
+.Dq GET .
+.It Fa body No (string)
+A body to send to the request, if value is not a string it will be coerced
+in-place.
+.It Fa timeout No (int)
+Maximum number of seconds to wait. If unset, waits indefinitely.
+.El
+.Pp
+The argument
+.Fa callback
+must have the signature
+.Fn fn "result"
+which unique argument
+.Fa result
+is an object with the following properties:
+.Bl -tag
+.It Fa status No (int)
+If non-zero, contains a native platform error code which indicates that the
+operation could not complete.
+.It Fa code No (int)
+HTTP return code, examples
+.Dq 200 ,
+.Dq 404 .
+It it set to 0 if
+.Fa status
+is non-zero (operation failed).
+.It Fa body No (string)
+Content of body request.
+.El
+.\" EXAMPLES
+.Sh EXAMPLES
+Perform a POST request with a JSON body which will be converted on the fly.
+.Bd -literal
+const options = {
+	url: "http://foo.org",
+	method: "POST",
+	body: {
+		user: "francis",
+		password: "sicnarf"
+	}
+};
+
+Irccd.Http.request(options, function (r) {
+	if (r.status === 0)
+		Irccd.Logger.info("operation complete");
+});
+.Ed
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3
+.\" AUTHORS
+.Sh AUTHORS
+The
+.Nm irccd
+daemon was written by
+.An David Demelier Aq Mt markand@malikania.fr .

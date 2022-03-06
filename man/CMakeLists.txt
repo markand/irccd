@@ -30,6 +30,7 @@ set(
 	${man_SOURCE_DIR}/irccd-api-directory.3
 	${man_SOURCE_DIR}/irccd-api-file.3
 	${man_SOURCE_DIR}/irccd-api-hook.3
+	${man_SOURCE_DIR}/irccd-api-http.3
 	${man_SOURCE_DIR}/irccd-api-logger.3
 	${man_SOURCE_DIR}/irccd-api-plugin.3
 	${man_SOURCE_DIR}/irccd-api-rule.3
