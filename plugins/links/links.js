@@ -2281,10 +2281,8 @@ function parse(server, origin, channel, result)
 {
 	const regex = /<title>([^<]+)<\/title>/i;
 
-	if (result.status !== 0 || !result.body) {
-		Irccd.Logger.info("Fialed");
+	if (result.status !== 0 || !result.body)
 		return;
-	}
 
 	const match = regex.exec(result.body);
 
