@@ -106,6 +106,7 @@ op_new(duk_context *ctx)
 	    CURLPROTO_HTTP | CURLPROTO_HTTPS);
 	curl_easy_setopt(op->curl, CURLOPT_WRITEFUNCTION, op_write);
 	curl_easy_setopt(op->curl, CURLOPT_WRITEDATA, op);
+	curl_easy_setopt(op->curl, CURLOPT_FOLLOWLOCATION, 1L);
 
 	return op;
 

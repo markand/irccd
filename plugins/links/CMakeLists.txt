@@ -18,11 +18,8 @@
 
 project(plugin-links)
 
-find_package(CURL REQUIRED)
-
-irccd_define_native_plugin(
+irccd_define_javascript_plugin(
 	NAME links
+	SCRIPT ${plugin-links_SOURCE_DIR}/links.js
 	MAN ${plugin-links_SOURCE_DIR}/links.7
-	SOURCES ${plugin-links_SOURCE_DIR}/links.c
-	LIBRARIES CURL::libcurl
 )

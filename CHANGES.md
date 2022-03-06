@@ -6,6 +6,18 @@ irccd 4.1.0 ????-??-??
 
 - Add `irc_bot_pollable_add` to insert a custom interface into the main irccd
   loop.
+- A new option `IRCCD_WITH_HTTP` has been added to accommodate the new curl
+  dependency for `Irccd.Http` API.
+
+javascript API
+--------------
+
+- Brand new asynchronous `Irccd.Http` API.
+
+plugins
+-------
+
+- links: rewritten in Javascript using the brand new `Irccd.Http` API.
 
 irccd 4.0.1 2022-02-07
 ======================
