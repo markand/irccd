@@ -38,7 +38,7 @@ project(irccd
 	LANGUAGES C
 	DESCRIPTION "IRC Client Daemon"
 	HOMEPAGE_URL "http://projects.malikania.fr/irccd"
-	VERSION 4.0.1
+	VERSION 4.1.0
 )
 
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
@@ -55,13 +55,13 @@ endif ()
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
-option(IRCCD_WITH_HTTP "Enable HTTP support (requires libcurl)" On)
 option(IRCCD_WITH_EXAMPLES "Enable example files" On)
+option(IRCCD_WITH_HTTP "Enable HTTP support (requires libcurl)" On)
 option(IRCCD_WITH_JS "Enable Javascript" On)
 option(IRCCD_WITH_MAN "Enable manual pages" On)
+option(IRCCD_WITH_PKGCONFIG "Enable installation of pkg-config file" On)
 option(IRCCD_WITH_SSL "Enable SSL (requires OpenSSL)" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" On)
-option(IRCCD_WITH_PKGCONFIG "Enable installation of pkg-config file" On)
 
 set(IRCCD_MAN_DATE "February 7, 2022")
 set(IRCCD_WITH_UID "irccd" CACHE STRING "Default uid to run irccd as")
