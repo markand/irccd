@@ -64,16 +64,40 @@ if (IRCCD_WITH_JS)
 	)
 endif ()
 
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-find_package(Threads REQUIRED)
+find_program(LEX_EXECUTABLE lex flex)
+find_program(YACC_EXECUTABLE yacc bison)
 
-bison_target(yacc ${irccd_SOURCE_DIR}/conf.y
-	${irccd_BINARY_DIR}/conf.c
-	DEFINES_FILE ${irccd_BINARY_DIR}/conf.h
+if (NOT LEX_EXECUTABLE)
+	message(FATAL_ERROR "No lex/flex tool available")
+endif ()
+if (NOT YACC_EXECUTABLE)
+	message(FATAL_ERROR "No yacc/bison tool available")
+endif ()
+
+add_custom_command(
+	OUTPUT
+		${irccd_BINARY_DIR}/conf.tab.c
+		${irccd_BINARY_DIR}/conf.tab.h
+	DEPENDS ${irccd_SOURCE_DIR}/conf.y
+	COMMAND ${YACC_EXECUTABLE} -b conf -d ${irccd_SOURCE_DIR}/conf.y
+	WORKING_DIRECTORY ${irccd_BINARY_DIR}
 )
-flex_target(lex ${irccd_SOURCE_DIR}/lex.l ${irccd_BINARY_DIR}/lex.c)
-add_flex_bison_dependency(lex yacc)
+
+add_custom_command(
+	OUTPUT ${irccd_BINARY_DIR}/lex.yy.c
+	DEPENDS
+		${irccd_SOURCE_DIR}/lex.l
+		${irccd_BINARY_DIR}/conf.tab.h
+	COMMAND ${LEX_EXECUTABLE} ${irccd_SOURCE_DIR}/lex.l
+	WORKING_DIRECTORY ${irccd_BINARY_DIR}
+)
+
+if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+	set_property(
+		SOURCE ${irccd_BINARY_DIR}/lex.yy.c
+		PROPERTY COMPILE_OPTIONS -Wno-unused-function
+	)
+endif ()
 
 if (IRCCD_WITH_HTTP AND IRCCD_WITH_JS)
 	find_package(CURL REQUIRED)
@@ -88,12 +112,14 @@ endif ()
 # libirccd-static
 # -------------------------------------------------------------------
 #
+find_package(Threads REQUIRED)
+
 add_library(
 	irccd-static OBJECT
 	${SOURCES}
-	${irccd_BINARY_DIR}/lex.c
-	${irccd_BINARY_DIR}/conf.c
-	${irccd_BINARY_DIR}/conf.h
+	${irccd_BINARY_DIR}/lex.yy.c
+	${irccd_BINARY_DIR}/conf.tab.c
+	${irccd_BINARY_DIR}/conf.tab.h
 )
 target_include_directories(irccd-static
 	PRIVATE $<BUILD_INTERFACE:${irccd_SOURCE_DIR}>

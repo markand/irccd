@@ -697,6 +697,12 @@ yyerror(const char *err)
 	irc_util_die("%s:%d: %s\n", confpath, yylineno, err);
 }
 
+int
+yywrap(void)
+{
+	return 1;
+}
+
 void
 config_open(const char *path)
 {

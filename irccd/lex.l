@@ -16,11 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-%option noyywrap
-%option nounput
-%option noinput
-%option yylineno
-
 %{
 
 #include <sys/types.h>
@@ -28,7 +23,9 @@
 #include <irccd/limits.h>
 #include <irccd/rule.h>
 
-#include "conf.h"
+#include "conf.tab.h"
+
+int yylineno;
 
 void
 yyerror(const char *);
@@ -72,7 +69,8 @@ brace_close     \}
 comma           ,
 semicolon       ;
 
-ws              [ \t\n]+
+ws              [ \t]+
+nl              \n
 comment         #.*$
 number          [0-9]+
 word            [A-Za-z_][^{};,"\r\n\t ]*
@@ -82,6 +80,7 @@ catchall        .
 %%
 
 {ws}                    ;
+{nl}                    yylineno++;
 {comment}               ;
 
 {brace_close}           return T_BRACE_CLOSE;
