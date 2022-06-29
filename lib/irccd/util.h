@@ -20,7 +20,6 @@
 #define IRCCD_UTIL_H
 
 #include <stddef.h>
-#include <stdnoreturn.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -64,7 +63,7 @@ irc_util_split(char *, const char **, size_t, char);
 char *
 irc_util_printf(char *, size_t, const char *, ...);
 
-noreturn void
+void
 irc_util_die(const char *, ...);
 
 int

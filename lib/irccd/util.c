@@ -171,7 +171,7 @@ irc_util_printf(char *buf, size_t bufsz, const char *fmt, ...)
 	return buf;
 }
 
-noreturn void
+void
 irc_util_die(const char *fmt, ...)
 {
 	assert(fmt);
