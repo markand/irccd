@@ -8,6 +8,9 @@ irccd 4.1.0 ????-??-??
   loop.
 - A new option `IRCCD_WITH_HTTP` has been added to accommodate the new curl
   dependency for `Irccd.Http` API.
+- The plugin `history` manages two different timestamps for message and
+  visibility. This helps showing the last message date of someone who is present
+  on a channel but idle.
 
 javascript API
 --------------

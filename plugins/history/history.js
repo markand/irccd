@@ -36,6 +36,7 @@ Plugin.templates = {
 	"error":        "#{nickname}, I'm sorry, something went wrong.",
 	"seen":         "#{nickname}, I've seen #{target} for the last time the %d-%m-%Y %H:%M",
 	"said":         "#{nickname}, #{target} said on %d-%m-%Y %H:%M: #{message}",
+	"silent":       "#{nickname}, #{target} hasn't said anything yet.",
 	"unknown":      "#{nickname}, I've never seen #{target}.",
 	"usage":        "#{nickname}, usage: #{plugin} seen | said <target>."
 };
@@ -102,7 +103,11 @@ function write(server, channel, nickname, message)
 	var file = new File(path(server, channel), "wt");
 
 	entry.timestamp = Date.now();
-	entry.message = (message) ? message : entry.message;
+
+	if (message) {
+		entry.message = message;
+		entry.messageTimestamp = entry.timestamp;
+	}
 
 	file.write(JSON.stringify(db));
 }
@@ -151,14 +156,30 @@ function onCommand(server, origin, channel, message)
 		kw.target = args[1];
 
 		if (!info) {
-			server.message(channel, Util.format(Plugin.templates.unknown, kw));
+			server.message(channel, Util.format(Plugin.templates["unknown"], kw));
 			return;
 		}
 
 		kw.date = info.timestamp;
-		kw.message = info.message ? info.message : "";
 
-		server.message(channel, Util.format(Plugin.templates[args[0] == "seen" ? "seen" : "said"], kw));
+		if (args[0] === "seen")
+			template = Plugin.templates["seen"];
+		else {
+			/*
+			 * If there is a message, we're more interested in the
+			 * message timestamp rather than when he was seen
+			 * because someone may be on a channel for a long time
+			 * (seen) but hasn't talk for long.
+			 */
+			if (info.message) {
+				kw.message = info.message;
+				kw.date = info.messageTimestamp;
+				template = Plugin.templates["said"];
+			} else
+				template = Plugin.templates["silent"];
+		}
+
+		server.message(channel, Util.format(template, kw));
 	} catch (e) {
 		server.message(channel, Util.format(Plugin.templates["error"], kw));
 	}

@@ -84,8 +84,13 @@ supports the following template properties:
 .Bl -tag -width unknown
 .It Va error
 Template when an internal error occured. Keywords:
+.Em target , (date) .
+.It Va silent
+Template when someone has been seen but who has never wrote any message.
+Keywords:
+.Em target , (date) .
 .It Va seen
-Template for showing last seen. Keywords:
+Template for showing last time someone was seen. Keywords:
 .Em target , (date) .
 .It Va said
 Template for showing the last message. Keywords:
