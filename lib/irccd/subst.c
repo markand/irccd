@@ -139,15 +139,13 @@ ccat(char **out, size_t *outsz, char c)
 static void
 attributes_parse(const char *key, struct attributes *attrs)
 {
-	char attributes[64] = {0};
+	char attributes[64] = {0}, *p;
 
 	memset(attrs, 0, sizeof (*attrs));
 	sscanf(key, "%15[^,],%15[^,],%63s", attrs->fg, attrs->bg, attributes);
 
 	for (char *attr = attributes; *attr; ) {
-		char *p = strchr(attr, ',');
-
-		if (p)
+		if ((p = strchr(attr, ',')))
 			*p = 0;
 
 		irc_util_strlcpy(attrs->attrs[attrs->attrsz++], attr, sizeof (attrs->attrs[0]));
@@ -252,7 +250,7 @@ subst_irc_attrs(const char *key, char **out, size_t *outsz)
 
 	attributes_parse(key, &attrs);
 
-	if (attrs.fg[0] || attrs.attrs[0]) {
+	if (attrs.fg[0] || attrs.attrsz) {
 		if (ccat(out, outsz, '\x03') < 0)
 			return -1;
 
