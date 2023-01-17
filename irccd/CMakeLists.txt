@@ -64,8 +64,8 @@ if (IRCCD_WITH_JS)
 	)
 endif ()
 
-find_program(LEX_EXECUTABLE lex flex)
-find_program(YACC_EXECUTABLE yacc bison)
+find_program(LEX_EXECUTABLE NAMES lex flex)
+find_program(YACC_EXECUTABLE NAMES yacc bison)
 
 if (NOT LEX_EXECUTABLE)
 	message(FATAL_ERROR "No lex/flex tool available")
