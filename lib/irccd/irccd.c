@@ -632,6 +632,8 @@ irc_bot_dequeue(struct irc_event *ev)
 {
 	struct irc_server *s;
 
+	memset(ev, 0, sizeof (*ev));
+
 	LL_FOREACH(irc.servers, s) {
 		if (irc_server_poll(s, ev)) {
 			invoke(ev);
