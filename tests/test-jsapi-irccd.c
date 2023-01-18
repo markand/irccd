@@ -64,7 +64,7 @@ basics_version(void)
 	const int ret = duk_peval_string(ctx,
 		"major = Irccd.Version.Major;"
 		"minor = Irccd.Version.Minor;"
-		"patch = Irccd.Version.Match;"
+		"patch = Irccd.Version.Patch;"
 	);
 
 	if (ret != 0)
