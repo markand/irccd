@@ -22,6 +22,11 @@ plugins
 
 - links: rewritten in Javascript using the brand new `Irccd.Http` API.
 
+irccd 4.0.2 2023-01-18
+======================
+
+- Fix crash because of undefined variable.
+
 irccd 4.0.1 2022-02-07
 ======================
 
