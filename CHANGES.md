@@ -1,7 +1,7 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd 4.0.3 ????-??-??
+irccd 4.0.3 2023-02-08
 ======================
 
 - Fix build on NetBSD 9.3.
