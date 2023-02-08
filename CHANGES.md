@@ -22,6 +22,11 @@ plugins
 
 - links: rewritten in Javascript using the brand new `Irccd.Http` API.
 
+irccd 4.0.3 2023-02-08
+======================
+
+- Fix build on NetBSD 9.3.
+
 irccd 4.0.2 2023-01-18
 ======================
 
