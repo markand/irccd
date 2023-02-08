@@ -27,7 +27,7 @@
 #       include <windows.h>
 #elif defined(__linux__)
 #       include <sys/sysinfo.h>
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__NetBSD__)
 #       include <sys/types.h>
 #       include <sys/sysctl.h>
 #endif
@@ -168,7 +168,7 @@ System_uptime(duk_context *ctx)
 		jsapi_system_raise(ctx);
 
 	duk_push_uint(ctx, info.uptime);
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__NetBSD__)
 	struct timeval boottime;
 	size_t length = sizeof (boottime);
 	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
