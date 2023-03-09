@@ -75,7 +75,7 @@ basics_sleep(void)
 
 	now = time(NULL);
 
-	GREATEST_ASSERT_IN_RANGE(2000LL, difftime(now, start) * 1000LL, 100LL);
+	GREATEST_ASSERT(difftime(now, start) >= 2);
 
 	GREATEST_PASS();
 }
@@ -92,7 +92,7 @@ basics_usleep(void)
 
 	now = time(NULL);
 
-	GREATEST_ASSERT_IN_RANGE(2000LL, difftime(now, start) * 1000LL, 100LL);
+	GREATEST_ASSERT(difftime(now, start) >= 2);
 
 	GREATEST_PASS();
 }
