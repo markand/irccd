@@ -214,19 +214,19 @@ subst_shell(const char *key, char **out, size_t *outsz)
 {
 	FILE *fp;
 	size_t written;
+	char *end;
 
 	/* Accept silently. */
 	if (!(fp = popen(key, "r")))
 		return;
 
 	/*
-	 * Since we cannot determine the number of bytes that must be read, read until the end of
-	 * the output string and cut at the number of bytes read if lesser.
+	 * Since we cannot determine the number of bytes that must be read,
+	 * read until the end of the output string and cut at the number of
+	 * bytes read if lesser.
 	 */
 	if ((written = fread(*out, 1, *outsz - 1, fp)) > 0) {
 		/* Remove '\r\n' */
-		char *end;
-
 		if ((end = memchr(*out, '\r', written)) || (end = memchr(*out, '\n', written)))
 			*end = '\0';
 		else
@@ -330,9 +330,8 @@ subst_default(const char **p, char **out, size_t *outsz, const char *key)
 static int
 substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *subst)
 {
-	char key[64] = {0};
+	char key[64] = {0}, *end;
 	size_t keysz;
-	char *end;
 	int replaced = 1;
 
 	if (!**p)
@@ -436,6 +435,7 @@ irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst
 		if (!is_reserved(*i)) {
 			if (ccat(&o, &outsz, *i++) < 0)
 				goto err;
+
 			continue;
 		}
 
