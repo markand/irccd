@@ -411,7 +411,9 @@ response_list(const char *cmd)
 static void
 cmd_hook_add(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+	(void)argv;
+
 	++argv;
 
 	req("HOOK-ADD %s %s", argv[0], argv[1]);
@@ -430,7 +432,8 @@ cmd_hook_list(int argc, char **argv)
 static void
 cmd_hook_remove(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("HOOK-REMOVE %s", argv[0]);
@@ -455,7 +458,8 @@ cmd_plugin_config(int argc, char **argv)
 static void
 cmd_plugin_info(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	const char *response;
@@ -484,7 +488,8 @@ cmd_plugin_list(int argc, char **argv)
 static void
 cmd_plugin_load(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("PLUGIN-LOAD %s", argv[0]);
@@ -634,7 +639,8 @@ cmd_rule_list(int argc, char **argv)
 static void
 cmd_rule_move(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	long long from, to;
@@ -651,7 +657,8 @@ cmd_rule_move(int argc, char **argv)
 static void
 cmd_rule_remove(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("RULE-REMOVE %s", argv[0]);
@@ -725,7 +732,8 @@ cmd_server_disconnect(int argc, char **argv)
 static void
 cmd_server_info(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	char *list;
@@ -782,7 +790,8 @@ cmd_server_list(int argc, char **argv)
 static void
 cmd_server_message(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("SERVER-MESSAGE %s %s %s", argv[0], argv[1], argv[2]);
@@ -792,7 +801,8 @@ cmd_server_message(int argc, char **argv)
 static void
 cmd_server_me(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("SERVER-ME %s %s %s", argv[0], argv[1], argv[2]);
@@ -814,7 +824,8 @@ cmd_server_mode(int argc, char **argv)
 static void
 cmd_server_nick(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("SERVER-NICK %s %s", argv[0], argv[1]);
@@ -824,7 +835,8 @@ cmd_server_nick(int argc, char **argv)
 static void
 cmd_server_notice(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("SERVER-NOTICE %s %s %s", argv[0], argv[1], argv[2]);
@@ -860,7 +872,8 @@ cmd_server_reconnect(int argc, char **argv)
 static void
 cmd_server_topic(int argc, char **argv)
 {
-	--argc;
+	(void)argc;
+
 	++argv;
 
 	req("SERVER-TOPIC %s %s %s", argv[0], argv[1], argv[2]);
