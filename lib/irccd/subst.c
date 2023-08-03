@@ -139,15 +139,13 @@ ccat(char **out, size_t *outsz, char c)
 static void
 attributes_parse(const char *key, struct attributes *attrs)
 {
-	char attributes[64] = {0};
+	char attributes[64] = {0}, *p;
 
 	memset(attrs, 0, sizeof (*attrs));
 	sscanf(key, "%15[^,],%15[^,],%63s", attrs->fg, attrs->bg, attributes);
 
 	for (char *attr = attributes; *attr; ) {
-		char *p = strchr(attr, ',');
-
-		if (p)
+		if ((p = strchr(attr, ',')))
 			*p = 0;
 
 		irc_util_strlcpy(attrs->attrs[attrs->attrsz++], attr, sizeof (attrs->attrs[0]));
@@ -216,19 +214,19 @@ subst_shell(const char *key, char **out, size_t *outsz)
 {
 	FILE *fp;
 	size_t written;
+	char *end;
 
 	/* Accept silently. */
 	if (!(fp = popen(key, "r")))
 		return;
 
 	/*
-	 * Since we cannot determine the number of bytes that must be read, read until the end of
-	 * the output string and cut at the number of bytes read if lesser.
+	 * Since we cannot determine the number of bytes that must be read,
+	 * read until the end of the output string and cut at the number of
+	 * bytes read if lesser.
 	 */
 	if ((written = fread(*out, 1, *outsz - 1, fp)) > 0) {
 		/* Remove '\r\n' */
-		char *end;
-
 		if ((end = memchr(*out, '\r', written)) || (end = memchr(*out, '\n', written)))
 			*end = '\0';
 		else
@@ -252,7 +250,8 @@ subst_irc_attrs(const char *key, char **out, size_t *outsz)
 
 	attributes_parse(key, &attrs);
 
-	if (attrs.fg[0] || attrs.attrs[0]) {
+	/* At least a foreground or a font attribute is present. */
+	if (attrs.fg[0] || attrs.attrs[0][0]) {
 		if (ccat(out, outsz, '\x03') < 0)
 			return -1;
 
@@ -331,9 +330,8 @@ subst_default(const char **p, char **out, size_t *outsz, const char *key)
 static int
 substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *subst)
 {
-	char key[64] = {0};
+	char key[64] = {0}, *end;
 	size_t keysz;
-	char *end;
 	int replaced = 1;
 
 	if (!**p)
@@ -437,6 +435,7 @@ irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst
 		if (!is_reserved(*i)) {
 			if (ccat(&o, &outsz, *i++) < 0)
 				goto err;
+
 			continue;
 		}
 
