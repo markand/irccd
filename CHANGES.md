@@ -1,7 +1,7 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd 4.0.4 ????-??-??
+irccd 4.0.4 2023-08-03
 ======================
 
 - Improve tests running on a slow machines.
