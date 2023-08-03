@@ -22,6 +22,12 @@ plugins
 
 - links: rewritten in Javascript using the brand new `Irccd.Http` API.
 
+irccd 4.0.4 2023-08-03
+======================
+
+- Improve tests running on a slow machines.
+- Fix a warning on a invalid comparison.
+
 irccd 4.0.3 2023-02-08
 ======================
 
