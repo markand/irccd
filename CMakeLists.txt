@@ -63,7 +63,7 @@ option(IRCCD_WITH_PKGCONFIG "Enable installation of pkg-config file" On)
 option(IRCCD_WITH_SSL "Enable SSL (requires OpenSSL)" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" On)
 
-set(IRCCD_MAN_DATE "February 7, 2022")
+set(IRCCD_MAN_DATE "August 3, 2023")
 set(IRCCD_WITH_UID "irccd" CACHE STRING "Default uid to run irccd as")
 set(IRCCD_WITH_GID "irccd" CACHE STRING "Default gid to run irccd as")
 set(IRCCD_WITH_PKGCONFIGDIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig"

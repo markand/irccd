@@ -102,11 +102,16 @@ op_new(duk_context *ctx)
 		goto enomem;
 
 	curl_easy_setopt(op->curl, CURLOPT_NOSIGNAL, 1L);
-	curl_easy_setopt(op->curl, CURLOPT_PROTOCOLS,
-	    CURLPROTO_HTTP | CURLPROTO_HTTPS);
 	curl_easy_setopt(op->curl, CURLOPT_WRITEFUNCTION, op_write);
 	curl_easy_setopt(op->curl, CURLOPT_WRITEDATA, op);
 	curl_easy_setopt(op->curl, CURLOPT_FOLLOWLOCATION, 1L);
+
+	/* CURLOPT_PROTOCOLS is deprecated since 7.85.0. */
+#if LIBCURL_VERSION_MAJOR >= 8 || (LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 85)
+	curl_easy_setopt(op->curl, CURLOPT_PROTOCOLS_STR, "http,https");
+#else
+	curl_easy_setopt(op->curl, CURLOPT_PROTOCOLS_STR, (long)CURLPROTO_HTTP | CURLPROTO_HTTPS);
+#endif
 
 	return op;
 
