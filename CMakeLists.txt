@@ -32,7 +32,7 @@
 # - irccdctl (irccdctl, executable): contain irccdctl(1) utility.
 #
 
-cmake_minimum_required(VERSION 2.20)
+cmake_minimum_required(VERSION 3.20)
 cmake_policy(SET CMP0048 NEW)
 project(irccd
 	LANGUAGES C

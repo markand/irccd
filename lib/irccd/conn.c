@@ -1,5 +1,5 @@
 /*
- * conn.c -- an IRC server channel
+ * conn.c -- abstract IRC server connection
  *
  * Copyright (c) 2013-2023 David Demelier <markand@malikania.fr>
  *
@@ -33,7 +33,7 @@
 #include "util.h"
 
 static void
-cleanup(struct irc_conn *conn)
+cleanup(struct irc__conn *conn)
 {
 	if (conn->fd != 0)
 		close(conn->fd);
@@ -44,13 +44,13 @@ cleanup(struct irc_conn *conn)
 	if (conn->ctx)
 		SSL_CTX_free(conn->ctx);
 
-	conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
-	conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
+	conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
+	conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
 	conn->ssl = NULL;
 	conn->ctx = NULL;
 #endif
 
-	conn->state = IRC_CONN_STATE_NONE;
+	conn->state = IRC__CONN_STATE_NONE;
 	conn->fd = -1;
 }
 
@@ -67,7 +67,7 @@ scan(char **line, char **str)
 }
 
 static int
-parse(struct irc_conn_msg *msg, const char *line)
+parse(struct irc__conn_msg *msg, const char *line)
 {
 	char *ptr = msg->buf;
 	size_t a;
@@ -103,7 +103,7 @@ parse(struct irc_conn_msg *msg, const char *line)
 }
 
 static int
-create(struct irc_conn *conn)
+create(struct irc__conn *conn)
 {
 	struct addrinfo *ai = conn->aip;
 	int cflags = 0;
@@ -123,7 +123,7 @@ create(struct irc_conn *conn)
 #if defined(IRCCD_WITH_SSL)
 
 static inline int
-update_ssl_state(struct irc_conn *conn, int ret)
+update_ssl_state(struct irc__conn *conn, int ret)
 {
 	char error[1024];
 	int num;
@@ -132,17 +132,17 @@ update_ssl_state(struct irc_conn *conn, int ret)
 	case SSL_ERROR_WANT_READ:
 		irc_log_debug("server %s: step %d now needs read condition",
 		    conn->sv->name, conn->ssl_step);
-		conn->ssl_cond = IRC_CONN_SSL_ACT_READ;
+		conn->ssl_cond = IRC__CONN_SSL_ACT_READ;
 		break;
 	case SSL_ERROR_WANT_WRITE:
 		irc_log_debug("server %s: step %d now needs write condition",
 		    conn->sv->name, conn->ssl_step);
-		conn->ssl_cond = IRC_CONN_SSL_ACT_WRITE;
+		conn->ssl_cond = IRC__CONN_SSL_ACT_WRITE;
 		break;
 	case SSL_ERROR_SSL:
 		irc_log_warn("server %s: SSL error: %s", conn->sv->name,
 		    ERR_error_string(num, error));
-		return irc_conn_disconnect(conn), -1;
+		return irc__conn_disconnect(conn), -1;
 	default:
 		break;
 	}
@@ -151,21 +151,21 @@ update_ssl_state(struct irc_conn *conn, int ret)
 }
 
 static inline ssize_t
-input_ssl(struct irc_conn *conn, char *dst, size_t dstsz)
+input_ssl(struct irc__conn *conn, char *dst, size_t dstsz)
 {
 	int nr;
 
 	if ((nr = SSL_read(conn->ssl, dst, dstsz)) <= 0) {
 		irc_log_debug("server %s: SSL read incomplete", conn->sv->name);
-		conn->ssl_step = IRC_CONN_SSL_ACT_READ;
+		conn->ssl_step = IRC__CONN_SSL_ACT_READ;
 		return update_ssl_state(conn, nr);
 	}
 
 	if (conn->ssl_cond)
 		irc_log_debug("server %s: condition back to normal", conn->sv->name);
 
-	conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
-	conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
+	conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
+	conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
 
 	return nr;
 }
@@ -173,27 +173,27 @@ input_ssl(struct irc_conn *conn, char *dst, size_t dstsz)
 #endif
 
 static inline ssize_t
-input_clear(struct irc_conn *conn, char *buf, size_t bufsz)
+input_clear(struct irc__conn *conn, char *buf, size_t bufsz)
 {
 	ssize_t nr;
 
 	if ((nr = recv(conn->fd, buf, bufsz, 0)) <= 0) {
 		errno = ECONNRESET;
-		return irc_conn_disconnect(conn), -1;
+		return irc__conn_disconnect(conn), -1;
 	}
 
 	return nr;
 }
 
 static int
-input(struct irc_conn *conn)
+input(struct irc__conn *conn)
 {
 	size_t len = strlen(conn->in);
 	size_t cap = sizeof (conn->in) - len - 1;
 	ssize_t nr = 0;
 
 #if defined(IRCCD_WITH_SSL)
-	if (conn->flags & IRC_CONN_SSL)
+	if (conn->flags & IRC__CONN_SSL)
 		nr = input_ssl(conn, conn->in + len, cap);
 	else
 #endif
@@ -208,21 +208,21 @@ input(struct irc_conn *conn)
 #if defined(IRCCD_WITH_SSL)
 
 static inline ssize_t
-output_ssl(struct irc_conn *conn)
+output_ssl(struct irc__conn *conn)
 {
 	int ns;
 
 	if ((ns = SSL_write(conn->ssl, conn->out, strlen(conn->out))) <= 0) {
 		irc_log_debug("server %s: SSL write incomplete", conn->sv->name);
-		conn->ssl_step = IRC_CONN_SSL_ACT_WRITE;
+		conn->ssl_step = IRC__CONN_SSL_ACT_WRITE;
 		return update_ssl_state(conn, ns);
 	}
 
 	if (conn->ssl_cond)
 		irc_log_debug("server %s: condition back to normal", conn->sv->name);
 
-	conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
-	conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
+	conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
+	conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
 
 	return ns;
 }
@@ -230,23 +230,23 @@ output_ssl(struct irc_conn *conn)
 #endif
 
 static inline ssize_t
-output_clear(struct irc_conn *conn)
+output_clear(struct irc__conn *conn)
 {
 	ssize_t ns;
 
 	if ((ns = send(conn->fd, conn->out, strlen(conn->out), 0)) < 0)
-		return irc_conn_disconnect(conn), -1;
+		return irc__conn_disconnect(conn), -1;
 
 	return ns;
 }
 
 static int
-output(struct irc_conn *conn)
+output(struct irc__conn *conn)
 {
 	ssize_t ns = 0;
 
 #if defined(IRCCD_WITH_SSL)
-	if (conn->flags & IRC_CONN_SSL)
+	if (conn->flags & IRC__CONN_SSL)
 		ns = output_ssl(conn);
 	else
 #endif
@@ -264,13 +264,13 @@ output(struct irc_conn *conn)
 }
 
 static int
-handshake(struct irc_conn *conn)
+handshake(struct irc__conn *conn)
 {
 #if defined(IRCCD_WITH_SSL)
-	if (conn->flags & IRC_CONN_SSL) {
+	if (conn->flags & IRC__CONN_SSL) {
 		int r;
 
-		conn->state = IRC_CONN_STATE_HANDSHAKING;
+		conn->state = IRC__CONN_STATE_HANDSHAKING;
 
 		/*
 		 * This function is called several time until it completes so we
@@ -304,23 +304,23 @@ handshake(struct irc_conn *conn)
 		}
 
 		conn->statetime = time(NULL);
-		conn->state = IRC_CONN_STATE_READY;
-		conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
-		conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
+		conn->state = IRC__CONN_STATE_READY;
+		conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
+		conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
 	} else
 #endif
-		conn->state = IRC_CONN_STATE_READY;
+		conn->state = IRC__CONN_STATE_READY;
 
 	return 0;
 }
 
 static int
-dial(struct irc_conn *conn)
+dial(struct irc__conn *conn)
 {
 	/* No more address available. */
 	if (conn->aip == NULL) {
 		irc_log_warn("server %s: could not connect", conn->sv->name);
-		return irc_conn_disconnect(conn), -1;
+		return irc__conn_disconnect(conn), -1;
 	}
 
 	for (; conn->aip; conn->aip = conn->aip->ai_next) {
@@ -336,7 +336,7 @@ dial(struct irc_conn *conn)
 
 		/* Connect "succeeds" but isn't complete yet. */
 		if (errno == EINPROGRESS || errno == EAGAIN) {
-			conn->state = IRC_CONN_STATE_CONNECTING;
+			conn->state = IRC__CONN_STATE_CONNECTING;
 			return 0;
 		}
 	}
@@ -345,7 +345,7 @@ dial(struct irc_conn *conn)
 }
 
 static int
-lookup(struct irc_conn *conn)
+lookup(struct irc__conn *conn)
 {
 	struct addrinfo hints = {
 		.ai_socktype = SOCK_STREAM,
@@ -367,7 +367,7 @@ lookup(struct irc_conn *conn)
 }
 
 static int
-check_connect(struct irc_conn *conn)
+check_connect(struct irc__conn *conn)
 {
 	int res, err = -1;
 	socklen_t len = sizeof (int);
@@ -382,14 +382,14 @@ check_connect(struct irc_conn *conn)
 #if defined(IRCCD_WITH_SSL)
 
 static inline void
-prepare_ssl(const struct irc_conn *conn, struct pollfd *pfd)
+prepare_ssl(const struct irc__conn *conn, struct pollfd *pfd)
 {
 	switch (conn->ssl_cond) {
-	case IRC_CONN_SSL_ACT_READ:
+	case IRC__CONN_SSL_ACT_READ:
 		irc_log_debug("server %s: need read condition", conn->sv->name);
 		pfd->events |= POLLIN;
 		break;
-	case IRC_CONN_SSL_ACT_WRITE:
+	case IRC__CONN_SSL_ACT_WRITE:
 		irc_log_debug("server %s: need write condition", conn->sv->name);
 		pfd->events |= POLLOUT;
 		break;
@@ -399,11 +399,11 @@ prepare_ssl(const struct irc_conn *conn, struct pollfd *pfd)
 }
 
 static inline int
-renegotiate(struct irc_conn *conn)
+renegotiate(struct irc__conn *conn)
 {
 	irc_log_debug("server %s: renegociate step=%d", conn->sv->name, conn->ssl_step);
 
-	return conn->ssl_step == IRC_CONN_SSL_ACT_READ
+	return conn->ssl_step == IRC__CONN_SSL_ACT_READ
 		? input(conn)
 		: output(conn);
 }
@@ -411,7 +411,7 @@ renegotiate(struct irc_conn *conn)
 #endif
 
 int
-irc_conn_connect(struct irc_conn *conn)
+irc__conn_connect(struct irc__conn *conn)
 {
 	assert(conn);
 
@@ -427,13 +427,13 @@ irc_conn_connect(struct irc_conn *conn)
 #endif
 
 	if (lookup(conn) < 0)
-		return irc_conn_disconnect(conn), -1;
+		return irc__conn_disconnect(conn), -1;
 
 	return dial(conn);
 }
 
 void
-irc_conn_disconnect(struct irc_conn *conn)
+irc__conn_disconnect(struct irc__conn *conn)
 {
 	assert(conn);
 
@@ -441,7 +441,7 @@ irc_conn_disconnect(struct irc_conn *conn)
 }
 
 void
-irc_conn_prepare(const struct irc_conn *conn, struct pollfd *pfd)
+irc__conn_prepare(const struct irc__conn *conn, struct pollfd *pfd)
 {
 	assert(conn);
 	assert(pfd);
@@ -454,10 +454,10 @@ irc_conn_prepare(const struct irc_conn *conn, struct pollfd *pfd)
 	else {
 #endif
 		switch (conn->state) {
-		case IRC_CONN_STATE_CONNECTING:
+		case IRC__CONN_STATE_CONNECTING:
 			pfd->events = POLLOUT;
 			break;
-		case IRC_CONN_STATE_READY:
+		case IRC__CONN_STATE_READY:
 			pfd->events = POLLIN;
 
 			if (conn->out[0])
@@ -472,30 +472,30 @@ irc_conn_prepare(const struct irc_conn *conn, struct pollfd *pfd)
 }
 
 int
-irc_conn_flush(struct irc_conn *conn, const struct pollfd *pfd)
+irc__conn_flush(struct irc__conn *conn, const struct pollfd *pfd)
 {
 	assert(conn);
 	assert(pfd);
 
 	switch (conn->state) {
-	case IRC_CONN_STATE_CONNECTING:
+	case IRC__CONN_STATE_CONNECTING:
 		return check_connect(conn);
-	case IRC_CONN_STATE_HANDSHAKING:
+	case IRC__CONN_STATE_HANDSHAKING:
 		return handshake(conn);
-	case IRC_CONN_STATE_READY:
+	case IRC__CONN_STATE_READY:
 		if (pfd->revents & (POLLERR | POLLHUP))
-			return irc_conn_disconnect(conn), -1;
+			return irc__conn_disconnect(conn), -1;
 
 #if defined(IRCCD_WITH_SSL)
 		if (conn->ssl_cond) {
 			if (renegotiate(conn) < 0)
-				return irc_conn_disconnect(conn), -1;
+				return irc__conn_disconnect(conn), -1;
 		} else {
 #endif
 			if (pfd->revents & POLLIN && input(conn) < 0)
-				return irc_conn_disconnect(conn), -1;
+				return irc__conn_disconnect(conn), -1;
 			if (pfd->revents & POLLOUT && output(conn) < 0)
-				return irc_conn_disconnect(conn), -1;
+				return irc__conn_disconnect(conn), -1;
 #if defined(IRCCD_WITH_SSL)
 		}
 #endif
@@ -508,7 +508,7 @@ irc_conn_flush(struct irc_conn *conn, const struct pollfd *pfd)
 }
 
 int
-irc_conn_poll(struct irc_conn *conn, struct irc_conn_msg *msg)
+irc__conn_poll(struct irc__conn *conn, struct irc__conn_msg *msg)
 {
 	assert(conn);
 	assert(msg);
@@ -533,7 +533,7 @@ irc_conn_poll(struct irc_conn *conn, struct irc_conn_msg *msg)
 }
 
 int
-irc_conn_send(struct irc_conn *conn, const char *data)
+irc__conn_send(struct irc__conn *conn, const char *data)
 {
 	assert(conn);
 	assert(data);
@@ -547,7 +547,7 @@ irc_conn_send(struct irc_conn *conn, const char *data)
 }
 
 void
-irc_conn_finish(struct irc_conn *conn)
+irc__conn_finish(struct irc__conn *conn)
 {
 	assert(conn);
 

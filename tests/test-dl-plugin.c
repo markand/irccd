@@ -133,7 +133,7 @@ GREATEST_SUITE(suite_templates)
 GREATEST_TEST
 calls_simple(void)
 {
-	struct irc_conn conn = {0};
+	struct irc__conn conn = {0};
 	struct irc_server server = {
 		.state = IRC_SERVER_STATE_CONNECTED,
 		.conn = &conn

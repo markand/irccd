@@ -63,7 +63,7 @@ clear_channels(struct irc_server *s, int free)
 static inline void
 clear_server(struct irc_server *s)
 {
-	irc_conn_finish(s->conn);
+	irc__conn_finish(s->conn);
 
 	free(s->bufwhois.nickname);
 	free(s->bufwhois.username);
@@ -197,7 +197,7 @@ fail(struct irc_server *s)
 }
 
 static void
-handle_connect(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_connect(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)msg;
 
@@ -224,7 +224,7 @@ handle_disconnect(struct irc_server *s, struct irc_event *ev)
 }
 
 static void
-handle_support(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_support(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)ev;
 
@@ -277,7 +277,7 @@ handle_support(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *
 }
 
 static void
-handle_invite(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_invite(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	ev->type = IRC_EVENT_INVITE;
 	ev->invite.origin = irc_util_strdup(msg->prefix);
@@ -290,7 +290,7 @@ handle_invite(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *m
 }
 
 static void
-handle_join(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_join(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	ev->type = IRC_EVENT_JOIN;
 	ev->join.origin = irc_util_strdup(msg->prefix);
@@ -303,7 +303,7 @@ handle_join(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 }
 
 static void
-handle_kick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_kick(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	ev->type = IRC_EVENT_KICK;
 	ev->kick.origin = irc_util_strdup(msg->prefix);
@@ -330,7 +330,7 @@ handle_kick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 }
 
 static void
-handle_mode(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_mode(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)s;
 	(void)ev;
@@ -397,7 +397,7 @@ handle_mode(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 }
 
 static void
-handle_part(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_part(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	struct irc_channel *ch;
 
@@ -416,7 +416,7 @@ handle_part(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 }
 
 static void
-handle_msg(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_msg(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)s;
 
@@ -464,7 +464,7 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 }
 
 static void
-handle_nick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_nick(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	ev->type = IRC_EVENT_NICK;
 	ev->nick.origin = irc_util_strdup(msg->prefix);
@@ -479,7 +479,7 @@ handle_nick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 }
 
 static void
-handle_notice(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_notice(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)s;
 
@@ -490,7 +490,7 @@ handle_notice(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *m
 }
 
 static void
-handle_topic(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_topic(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)s;
 
@@ -501,7 +501,7 @@ handle_topic(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *ms
 }
 
 static void
-handle_ping(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_ping(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)ev;
 	(void)msg;
@@ -511,7 +511,7 @@ handle_ping(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 }
 
 static void
-handle_names(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_names(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)ev;
 
@@ -532,7 +532,7 @@ handle_names(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *ms
 }
 
 static void
-handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	FILE *fp;
 	size_t length;
@@ -563,7 +563,7 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_ms
 }
 
 static void
-handle_nicknameinuse(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_nicknameinuse(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)msg;
 	(void)ev;
@@ -573,7 +573,7 @@ handle_nicknameinuse(struct irc_server *s, struct irc_event *ev, struct irc_conn
 }
 
 static void
-handle_error(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_error(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	ev->type = IRC_EVENT_DISCONNECT;
 
@@ -584,7 +584,7 @@ handle_error(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *ms
 }
 
 static void
-handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)s;
 	(void)ev;
@@ -597,7 +597,7 @@ handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg
 }
 
 static void
-handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)ev;
 
@@ -621,7 +621,7 @@ handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct irc_conn
 }
 
 static void
-handle_endofwhois(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle_endofwhois(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	(void)msg;
 
@@ -633,7 +633,7 @@ handle_endofwhois(struct irc_server *s, struct irc_event *ev, struct irc_conn_ms
 
 static const struct handler {
 	const char *command;
-	void (*handle)(struct irc_server *, struct irc_event *, struct irc_conn_msg *);
+	void (*handle)(struct irc_server *, struct irc_event *, struct irc__conn_msg *);
 } handlers[] = {
 	/* Must be kept ordered. */
 	{ "001",        handle_connect          },
@@ -671,7 +671,7 @@ find_handler(const char *name)
 }
 
 static void
-handle(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+handle(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
 {
 	const struct handler *h;
 
@@ -754,11 +754,11 @@ irc_server_connect(struct irc_server *s)
 	assert(s);
 
 	if (s->flags & IRC_SERVER_FLAGS_SSL)
-		s->conn->flags |= IRC_CONN_SSL;
+		s->conn->flags |= IRC__CONN_SSL;
 
 	s->conn->sv = s;
 
-	if (irc_conn_connect(s->conn) < 0)
+	if (irc__conn_connect(s->conn) < 0)
 		fail(s);
 	else
 		s->state = IRC_SERVER_STATE_CONNECTING;
@@ -797,7 +797,7 @@ irc_server_prepare(const struct irc_server *s, struct pollfd *pfd)
 	assert(s);
 	assert(pfd);
 
-	irc_conn_prepare(s->conn, pfd);
+	irc__conn_prepare(s->conn, pfd);
 }
 
 void
@@ -817,7 +817,7 @@ irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 		if (difftime(time(NULL), s->last_tp) >= TIMEOUT) {
 			irc_log_warn("server %s: no message in more than %u seconds", s->name, TIMEOUT);
 			fail(s);
-		} else if (irc_conn_flush(s->conn, pfd) < 0) {
+		} else if (irc__conn_flush(s->conn, pfd) < 0) {
 			irc_log_warn("server %s: %s", s->name, strerror(errno));
 			fail(s);
 		}
@@ -842,7 +842,7 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 	assert(s);
 	assert(ev);
 
-	struct irc_conn_msg msg = {0};
+	struct irc__conn_msg msg = {0};
 
 	/*
 	 * When the server gets disconnected, the state changes to
@@ -857,7 +857,7 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 		return 1;
 	}
 
-	if (irc_conn_poll(s->conn, &msg))
+	if (irc__conn_poll(s->conn, &msg))
 		return handle(s, ev, &msg), 1;
 
 	return 0;
@@ -896,7 +896,7 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	vsnprintf(buf, sizeof (buf), fmt, ap);
 	va_end(ap);
 
-	return irc_conn_send(s->conn, buf);
+	return irc__conn_send(s->conn, buf);
 }
 
 int

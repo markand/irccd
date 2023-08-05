@@ -32,7 +32,7 @@ extern "C" {
 
 struct pollfd;
 
-struct irc_conn;
+struct irc__conn;
 struct irc_channel;
 
 enum irc_server_state {
@@ -92,7 +92,7 @@ struct irc_server {
 	enum irc_server_flags flags;
 	struct irc_channel *channels;
 	struct irc_event_whois bufwhois;
-	struct irc_conn *conn;
+	struct irc__conn *conn;
 	size_t refc;
 	time_t lost_tp, last_tp;
 	struct irc_server *next;

@@ -105,4 +105,4 @@ install(
 )
 
 source_group(extern/libbsd FILES ${LIBBSD_SOURCES})
-source_group(irccd FILES ${SOURCES} ${HEADERS})
+source_group(irccd FILES ${SOURCES} ${HEADERS} ${PRIVHEADERS})
