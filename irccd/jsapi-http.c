@@ -110,7 +110,7 @@ op_new(duk_context *ctx)
 #if LIBCURL_VERSION_MAJOR >= 8 || (LIBCURL_VERSION_MAJOR >= 7 && LIBCURL_VERSION_MINOR >= 85)
 	curl_easy_setopt(op->curl, CURLOPT_PROTOCOLS_STR, "http,https");
 #else
-	curl_easy_setopt(op->curl, CURLOPT_PROTOCOLS_STR, (long)CURLPROTO_HTTP | CURLPROTO_HTTPS);
+	curl_easy_setopt(op->curl, CURLOPT_PROTOCOLS, (long)CURLPROTO_HTTP | CURLPROTO_HTTPS);
 #endif
 
 	return op;
