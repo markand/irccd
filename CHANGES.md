@@ -1,6 +1,27 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 4.1.0 2025-04-22
+======================
+
+- Add `irc_bot_pollable_add` to insert a custom interface into the main irccd
+  loop.
+- A new option `IRCCD_WITH_HTTP` has been added to accommodate the new curl
+  dependency for `Irccd.Http` API.
+- The plugin `history` manages two different timestamps for message and
+  visibility. This helps showing the last message date of someone who is present
+  on a channel but idle.
+
+javascript API
+--------------
+
+- Brand new asynchronous `Irccd.Http` API.
+
+plugins
+-------
+
+- links: rewritten in Javascript using the brand new `Irccd.Http` API.
+
 irccd 4.0.4 2023-08-03
 ======================
 
