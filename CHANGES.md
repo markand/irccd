@@ -1,7 +1,7 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd 4.1.0 ????-??-??
+irccd 4.1.0 2025-04-23
 ======================
 
 - Add `irc_bot_pollable_add` to insert a custom interface into the main irccd
