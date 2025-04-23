@@ -1,7 +1,7 @@
 /*
  * test-dl-plugin.c -- test dl-plugin.h functions
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -133,7 +133,7 @@ GREATEST_SUITE(suite_templates)
 GREATEST_TEST
 calls_simple(void)
 {
-	struct irc_conn conn = {0};
+	struct irc__conn conn = {0};
 	struct irc_server server = {
 		.state = IRC_SERVER_STATE_CONNECTED,
 		.conn = &conn

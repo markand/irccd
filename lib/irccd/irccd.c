@@ -1,7 +1,7 @@
 /*
  * irccd.c -- main irccd object
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -45,6 +45,11 @@ struct defer {
 	struct defer *next;
 };
 
+struct pollable {
+	struct irc_pollable *iface;
+	struct pollable *next;
+};
+
 struct irc irc = {0};
 
 static struct sigaction sa;
@@ -52,6 +57,8 @@ static struct defer *queue;
 static int pipes[2];
 static pthread_t self;
 static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+static struct pollable *pollables;
+static size_t pollablesz;
 
 static int
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
@@ -252,6 +259,16 @@ pipe_flush(const struct pollfd *fd)
 		return;
 	if (read(pipes[0], &dummy, sizeof (int)) != sizeof (int))
 		irc_util_die("read: %s\n", strerror(errno));
+}
+
+static inline void
+delpollable(struct pollable *pb)
+{
+	if (pb->iface->finish)
+		pb->iface->finish(pb->iface->data);
+
+	LL_DELETE(pollables, pb);
+	pollablesz--;
 }
 
 void
@@ -582,7 +599,7 @@ irc_bot_hook_clear(void)
 size_t
 irc_bot_poll_size(void)
 {
-	size_t i = 1;
+	size_t i = 1 + pollablesz;
 	struct irc_server *s;
 
 	LL_FOREACH(irc.servers, s)
@@ -597,6 +614,8 @@ irc_bot_prepare(struct pollfd *fds)
 	assert(fds);
 
 	struct irc_server *s;
+	struct pollable *pb;
+	int frecv = 0, fsend = 0;
 
 	fds->fd = pipes[0];
 	fds->events = POLLIN;
@@ -604,6 +623,11 @@ irc_bot_prepare(struct pollfd *fds)
 
 	LL_FOREACH(irc.servers, s)
 		irc_server_prepare(s, fds++);
+	LL_FOREACH(pollables, pb) {
+		pb->iface->want(&frecv, &fsend, pb->iface->data);
+		fds->fd = pb->iface->fd(pb->iface->data);
+		fds++->events |= (frecv ? POLLIN : 0) | (fsend ? POLLOUT : 0);
+	}
 }
 
 void
@@ -613,6 +637,9 @@ irc_bot_flush(const struct pollfd *fds)
 
 	struct irc_server *s;
 	struct defer *d, *dtmp;
+	struct pollable *pb, *pbnext;
+	size_t pbsz = pollablesz;
+	int frecv, fsend;
 
 	pipe_flush(fds++);
 
@@ -625,6 +652,19 @@ irc_bot_flush(const struct pollfd *fds)
 
 	LL_FOREACH(irc.servers, s)
 		irc_server_flush(s, fds++);
+
+	/*
+	 * We must iterate using the number of pollables because their sync
+	 * function may modify the list.
+	 */
+	for (pb = pollables; pbsz--; pb = pbnext) {
+		pbnext = pb->next;
+		frecv = fds->revents & POLLIN;
+		fsend = fds++->revents & POLLOUT;
+
+		if (pb->iface->sync(frecv, fsend, pb->iface->data) < 0)
+			delpollable(pb);
+	}
 }
 
 int
@@ -669,10 +709,26 @@ irc_bot_post(void (*exec)(void *), void *data)
 }
 
 void
+irc_bot_pollable_add(struct irc_pollable *iface)
+{
+	assert(iface);
+	assert(iface->fd && iface->want && iface->sync);
+
+	struct pollable *pb;
+
+	pb = irc_util_calloc(1, sizeof (*pb));
+	pb->iface = iface;
+
+	LL_APPEND(pollables, pb);
+	pollablesz++;
+}
+
+void
 irc_bot_finish(void)
 {
 	struct irc_plugin_loader *ld, *ldtmp;
 	struct defer *d, *dtmp;
+	struct pollable *pb, *pbtmp;
 
 	close(pipes[0]);
 	close(pipes[1]);
@@ -687,8 +743,17 @@ irc_bot_finish(void)
 	/* Remove all deferred calls. */
 	LL_FOREACH_SAFE(queue, d, dtmp)
 		free(d);
+	LL_FOREACH_SAFE(pollables, pb, pbtmp) {
+		if (pb->iface->finish)
+			pb->iface->finish(pb->iface->data);
+
+		free(pb);
+	}
 
 	queue = NULL;
+	pollables = NULL;
+	pollablesz = 0;
+
 	irc_bot_server_clear();
 	irc_bot_plugin_clear();
 	irc_bot_rule_clear();

@@ -1,7 +1,7 @@
 /*
  * util.c -- miscellaneous utilities
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -171,7 +171,7 @@ irc_util_printf(char *buf, size_t bufsz, const char *fmt, ...)
 	return buf;
 }
 
-noreturn void
+void
 irc_util_die(const char *fmt, ...)
 {
 	assert(fmt);

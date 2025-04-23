@@ -1,7 +1,7 @@
 /*
  * test-event.c -- test event.h functions
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,12 +26,12 @@ GREATEST_TEST
 basics_parse_simple(void)
 {
 	/* This is a TOPIC message. */
-	struct irc_conn conn = {
+	struct irc__conn conn = {
 		.in = ":malikania.fr 332 boris #test :Welcome to #test :: a testing channel\r\n"
 	};
-	struct irc_conn_msg msg = {0};
+	struct irc__conn_msg msg = {0};
 
-	irc_conn_poll(&conn, &msg);
+	irc__conn_poll(&conn, &msg);
 
 	GREATEST_ASSERT_STR_EQ("malikania.fr", msg.prefix);
 	GREATEST_ASSERT_STR_EQ("332", msg.cmd);
@@ -46,12 +46,12 @@ GREATEST_TEST
 basics_parse_noprefix(void)
 {
 	/* Ping messages usually don't have a prefix. */
-	struct irc_conn conn = {
+	struct irc__conn conn = {
 		.in = "PING :malikania.fr\r\n"
 	};
-	struct irc_conn_msg msg = {0};
+	struct irc__conn_msg msg = {0};
 
-	irc_conn_poll(&conn, &msg);
+	irc__conn_poll(&conn, &msg);
 
 	GREATEST_ASSERT(!msg.prefix);
 	GREATEST_ASSERT_STR_EQ("PING", msg.cmd);

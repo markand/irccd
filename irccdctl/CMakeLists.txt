@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,6 @@
 project(irccdctl)
 
 add_executable(irccdctl ${irccdctl_SOURCE_DIR}/irccdctl.c)
-target_link_libraries(irccdctl libirccd libirccd-ketopt)
+target_link_libraries(irccdctl libirccd)
 source_group(TREE ${irccdctl_SOURCE_DIR} FILES ${irccdctl_SOURCE_DIR}/irccdctl.c)
 install(TARGETS irccdctl DESTINATION ${CMAKE_INSTALL_BINDIR})

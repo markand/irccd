@@ -1,7 +1,7 @@
 /*
- * conn.h -- an IRC server channel
+ * conn.h -- abstract IRC server connection
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,28 +38,28 @@ struct pollfd;
 
 struct irc_server;
 
-enum irc_conn_state {
-	IRC_CONN_STATE_NONE,            /* Nothing, default. */
-	IRC_CONN_STATE_CONNECTING,      /* Pending connect(2) call. */
-	IRC_CONN_STATE_HANDSHAKING,     /* SSL connect+handshake. */
-	IRC_CONN_STATE_READY            /* Ready for I/O. */
+enum irc__conn_state {
+	IRC__CONN_STATE_NONE,           /* Nothing, default. */
+	IRC__CONN_STATE_CONNECTING,     /* Pending connect(2) call. */
+	IRC__CONN_STATE_HANDSHAKING,    /* SSL connect+handshake. */
+	IRC__CONN_STATE_READY           /* Ready for I/O. */
 };
 
-enum irc_conn_flags {
-	IRC_CONN_SSL = (1 << 0)
+enum irc__conn_flags {
+	IRC__CONN_SSL = (1 << 0)
 };
 
 #if defined(IRCCD_WITH_SSL)
 
-enum irc_conn_ssl_act {
-	IRC_CONN_SSL_ACT_NONE,
-	IRC_CONN_SSL_ACT_READ,
-	IRC_CONN_SSL_ACT_WRITE,
+enum irc__conn_ssl_act {
+	IRC__CONN_SSL_ACT_NONE,
+	IRC__CONN_SSL_ACT_READ,
+	IRC__CONN_SSL_ACT_WRITE,
 };
 
 #endif
 
-struct irc_conn {
+struct irc__conn {
 	char hostname[IRC_HOST_LEN];
 	unsigned short port;
 	int fd;
@@ -67,20 +67,20 @@ struct irc_conn {
 	struct addrinfo *aip;
 	char in[IRC_BUF_LEN];
 	char out[IRC_BUF_LEN];
-	enum irc_conn_state state;
-	enum irc_conn_flags flags;
+	enum irc__conn_state state;
+	enum irc__conn_flags flags;
 	struct irc_server *sv;
 	time_t statetime;
 
 #if defined(IRCCD_WITH_SSL)
 	SSL_CTX *ctx;
 	SSL *ssl;
-	enum irc_conn_ssl_act ssl_cond;
-	enum irc_conn_ssl_act ssl_step;
+	enum irc__conn_ssl_act ssl_cond;
+	enum irc__conn_ssl_act ssl_step;
 #endif
 };
 
-struct irc_conn_msg {
+struct irc__conn_msg {
 	char *prefix;
 	char *cmd;
 	char *args[IRC_ARGS_MAX];
@@ -88,25 +88,25 @@ struct irc_conn_msg {
 };
 
 int
-irc_conn_connect(struct irc_conn *);
+irc__conn_connect(struct irc__conn *);
 
 void
-irc_conn_disconnect(struct irc_conn *);
+irc__conn_disconnect(struct irc__conn *);
 
 void
-irc_conn_prepare(const struct irc_conn *, struct pollfd *);
+irc__conn_prepare(const struct irc__conn *, struct pollfd *);
 
 int
-irc_conn_flush(struct irc_conn *, const struct pollfd *);
+irc__conn_flush(struct irc__conn *, const struct pollfd *);
 
 int
-irc_conn_poll(struct irc_conn *, struct irc_conn_msg *);
+irc__conn_poll(struct irc__conn *, struct irc__conn_msg *);
 
 int
-irc_conn_send(struct irc_conn *, const char *);
+irc__conn_send(struct irc__conn *, const char *);
 
 void
-irc_conn_finish(struct irc_conn *);
+irc__conn_finish(struct irc__conn *);
 
 #if defined(__cplusplus)
 }

@@ -1,7 +1,7 @@
 /*
  * test-plugin-history.c -- test history plugin
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,7 +31,7 @@
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = t,                                              \
                 .server = server,                                       \
-                        .message = {                                    \
+                .message = {                                            \
                         .origin = "jean!jean@localhost",                \
                         .channel = "#history",                          \
                         .message = m                                    \
@@ -40,11 +40,11 @@
 } while (0)
 
 #define CALL_EX(t, o, c, m) do {                                        \
-        memset(server->conn->out, 0, sizeof (server->conn->out));         \
+        memset(server->conn->out, 0, sizeof (server->conn->out));       \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = t,                                              \
                 .server = server,                                       \
-                        .message = {                                    \
+                .message = {                                            \
                         .origin = o,                                    \
                         .channel = c,                                   \
                         .message = m                                    \
@@ -73,6 +73,7 @@ setup(void *udata)
 	irc_plugin_set_template(plugin, "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}");
 	irc_plugin_set_template(plugin, "seen", "seen=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:%H:%M");
 	irc_plugin_set_template(plugin, "said", "said=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{message}:%H:%M");
+	irc_plugin_set_template(plugin, "silent", "silent=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}");
 	irc_plugin_set_template(plugin, "unknown", "unknown=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}");
 	irc_plugin_set_option(plugin, "file", TOP "/tests/seen.json");
 	irc_plugin_load(plugin);
@@ -128,6 +129,25 @@ basics_said(void)
 }
 
 GREATEST_TEST
+basics_silent(void)
+{
+	/* Join but without any message. */
+	irc_plugin_handle(plugin, &(const struct irc_event) {
+		.type = IRC_EVENT_JOIN,
+		.server = server,
+		.join = {
+			.origin = "jean!jean@localhost",
+			.channel = "#history"
+		}
+	});
+	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "said jean");
+
+	GREATEST_ASSERT_STR_EQ(server->conn->out, "PRIVMSG #history :silent=history:!history:test:#history:francis!francis@localhost:francis:jean\r\n");
+
+	GREATEST_PASS();
+}
+
+GREATEST_TEST
 basics_unknown(void)
 {
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#history", "hello");
@@ -160,6 +180,7 @@ GREATEST_SUITE(suite_basics)
 	GREATEST_RUN_TEST(basics_error);
 	GREATEST_RUN_TEST(basics_seen);
 	GREATEST_RUN_TEST(basics_said);
+	GREATEST_RUN_TEST(basics_silent);
 	GREATEST_RUN_TEST(basics_unknown);
 	GREATEST_RUN_TEST(basics_case_insensitive);
 }
@@ -175,5 +196,3 @@ main(int argc, char **argv)
 
 	return 0;
 }
-
-

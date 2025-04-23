@@ -1,7 +1,7 @@
 /*
  * irccd.h -- main irccd object
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -29,6 +29,14 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
+
+struct irc_pollable {
+	void *data;
+	int (*fd)(void *);
+	void (*want)(int *, int *, void *);
+	int (*sync)(int, int, void *);
+	void (*finish)(void *);
+};
 
 extern struct irc {
 	struct irc_server *servers;
@@ -115,6 +123,9 @@ irc_bot_dequeue(struct irc_event *);
 
 void
 irc_bot_post(void (*)(void *), void *);
+
+void
+irc_bot_pollable_add(struct irc_pollable *);
 
 void
 irc_bot_finish(void);

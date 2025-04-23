@@ -1,7 +1,7 @@
 /*
  * jsapi-plugin.c -- Javascript plugins
  *
- * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -38,6 +38,7 @@
 #include "jsapi-directory.h"
 #include "jsapi-file.h"
 #include "jsapi-hook.h"
+#include "jsapi-http.h"
 #include "jsapi-irccd.h"
 #include "jsapi-logger.h"
 #include "jsapi-plugin.h"
@@ -496,6 +497,9 @@ init(const char *name, const char *path, const char *script)
 	jsapi_directory_load(js->ctx);
 	jsapi_file_load(js->ctx);
 	jsapi_hook_load(js->ctx);
+#if defined(IRCCD_WITH_HTTP)
+	jsapi_http_load(js->ctx);
+#endif
 	jsapi_logger_load(js->ctx);
 	jsapi_plugin_load(js->ctx, &js->plugin);
 	jsapi_rule_load(js->ctx);

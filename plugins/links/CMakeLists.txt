@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,11 +18,8 @@
 
 project(plugin-links)
 
-find_package(CURL REQUIRED)
-
-irccd_define_native_plugin(
+irccd_define_javascript_plugin(
 	NAME links
+	SCRIPT ${plugin-links_SOURCE_DIR}/links.js
 	MAN ${plugin-links_SOURCE_DIR}/links.7
-	SOURCES ${plugin-links_SOURCE_DIR}/links.c
-	LIBRARIES CURL::libcurl
 )

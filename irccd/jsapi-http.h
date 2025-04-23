@@ -1,5 +1,5 @@
 /*
- * hook.h -- irccd hooks
+ * jsapi-http.h -- Irccd.Http API
  *
  * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
@@ -16,36 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_HOOK_H
-#define IRCCD_HOOK_H
+#ifndef IRCCD_JSAPI_HTTP_H
+#define IRCCD_JSAPI_HTTP_H
 
-#include <limits.h>
-
-#include "limits.h"
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-struct irc_event;
-
-struct irc_hook {
-	char name[IRC_ID_LEN];
-	char path[PATH_MAX];
-	struct irc_hook *next;
-};
-
-struct irc_hook *
-irc_hook_new(const char *, const char *);
+#include <duktape.h>
 
 void
-irc_hook_invoke(struct irc_hook *, const struct irc_event *);
+jsapi_http_load(duk_context *);
 
-void
-irc_hook_finish(struct irc_hook *);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* !IRCCD_HOOK_H */
+#endif /* !IRCCD_JSAPI_HTTP_H */

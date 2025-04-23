@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -32,7 +32,7 @@
 # - irccdctl (irccdctl, executable): contain irccdctl(1) utility.
 #
 
-cmake_minimum_required(VERSION 2.20)
+cmake_minimum_required(VERSION 3.20)
 cmake_policy(SET CMP0048 NEW)
 project(irccd
 	LANGUAGES C
@@ -56,11 +56,12 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
 option(IRCCD_WITH_EXAMPLES "Enable example files" On)
+option(IRCCD_WITH_HTTP "Enable HTTP support (requires libcurl)" On)
 option(IRCCD_WITH_JS "Enable Javascript" On)
 option(IRCCD_WITH_MAN "Enable manual pages" On)
+option(IRCCD_WITH_PKGCONFIG "Enable installation of pkg-config file" On)
 option(IRCCD_WITH_SSL "Enable SSL (requires OpenSSL)" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" On)
-option(IRCCD_WITH_PKGCONFIG "Enable installation of pkg-config file" On)
 
 set(IRCCD_MAN_DATE "April 22, 2025")
 set(IRCCD_WITH_UID "irccd" CACHE STRING "Default uid to run irccd as")
@@ -82,7 +83,6 @@ if (IRCCD_WITH_JS)
 endif ()
 
 add_subdirectory(extern/libutlist)
-add_subdirectory(extern/libketopt)
 
 add_subdirectory(lib)
 add_subdirectory(irccd)

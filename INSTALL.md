@@ -15,7 +15,7 @@ Build dependencies:
 Optional runtime dependencies:
 
 - [OpenSSL][]: Used for SSL connections to IRC servers (recommended).
-- [CURL][]: Required for the links plugin.
+- [CURL][]: Required for the Http Javascript API (and links plugin)..
 
 Basic installation
 ------------------
