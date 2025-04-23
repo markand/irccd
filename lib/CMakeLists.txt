@@ -66,7 +66,7 @@ configure_file(
 )
 
 add_library(libirccd STATIC ${LIBBSD_SOURCES} ${SOURCES} ${HEADERS} ${PRIVHEADERS})
-target_link_libraries(libirccd PUBLIC libirccd-utlist)
+target_link_libraries(libirccd PUBLIC libirccd-utlist Ev::Ev)
 target_include_directories(
 	libirccd
 	PUBLIC

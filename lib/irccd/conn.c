@@ -16,42 +16,88 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include <sys/socket.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
-#include <poll.h>
 #include <string.h>
 #include <unistd.h>
 
-#include <openssl/err.h>
-
 #include "conn.h"
-#include "log.h"
+#include "irccd.h"
 #include "server.h"
 #include "util.h"
 
+#define TIMEOUT_PING    300
+#define TIMEOUT_CONNECT 10
+
+static void start(struct irc__conn *, enum irc__conn_state);
+static void stop(struct irc__conn *);
+static void retry(struct irc__conn *);
+
+static void do_connecting(struct irc__conn *);
+static void do_ready(struct irc__conn *, int);
+static void do_handshaking(struct irc__conn *);
+
 static void
-cleanup(struct irc__conn *conn)
+timer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
 {
-	if (conn->fd != 0)
-		close(conn->fd);
+	(void)revents;
 
-#if defined(IRCCD_WITH_SSL)
-	if (conn->ssl)
-		SSL_free(conn->ssl);
-	if (conn->ctx)
-		SSL_CTX_free(conn->ctx);
+	struct irc__conn *conn;
 
-	conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
-	conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
-	conn->ssl = NULL;
-	conn->ctx = NULL;
-#endif
+	conn = IRC_CONTAINER_OF(self, struct irc__conn, timer_fd);
 
-	conn->state = IRC__CONN_STATE_NONE;
-	conn->fd = -1;
+	ev_timer_stop(loop, self);
+
+	switch (conn->state) {
+	case IRC__CONN_STATE_CONNECTING:
+	case IRC__CONN_STATE_HANDSHAKING:
+		/*
+		 * Timer expired while attempting to connect or to handshake
+		 * SSL status. We try the next endpoint if possible.
+		 */
+		retry(conn);
+		break;
+	case IRC__CONN_STATE_READY:
+		/*
+		 * Unrecoverable status as the IRC server didn't sent any
+		 * message in a period of time.
+		 */
+		stop(conn);
+		errno = ETIMEDOUT;
+		conn->on_disconnect(conn);
+		break;
+	default:
+		break;
+	}
+}
+
+static void
+io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
+{
+	(void)loop;
+
+	struct irc__conn *conn;
+
+	conn = IRC_CONTAINER_OF(self, struct irc__conn, io_fd);
+
+	switch (conn->state) {
+	case IRC__CONN_STATE_CONNECTING:
+		do_connecting(conn);
+		break;
+	case IRC__CONN_STATE_HANDSHAKING:
+		do_handshaking(conn);
+		break;
+	case IRC__CONN_STATE_READY:
+		do_ready(conn, revents);
+		break;
+	default:
+		break;
+	}
 }
 
 static inline void
@@ -108,8 +154,6 @@ create(struct irc__conn *conn)
 	struct addrinfo *ai = conn->aip;
 	int cflags = 0;
 
-	cleanup(conn);
-
 	if ((conn->fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol)) < 0)
 		return -1;
 	if ((cflags = fcntl(conn->fd, F_GETFL)) < 0)
@@ -120,32 +164,39 @@ create(struct irc__conn *conn)
 	return 0;
 }
 
+static inline void
+set_events(struct irc__conn *conn, int flags)
+{
+	assert(ev_is_active(&conn->io_fd));
+
+	if (flags != conn->io_fd.events) {
+		ev_io_stop(irc_bot_loop(), &conn->io_fd);
+		ev_io_modify(&conn->io_fd, flags);
+		ev_io_start(irc_bot_loop(), &conn->io_fd);
+	}
+}
+
 #if defined(IRCCD_WITH_SSL)
 
 static inline int
-update_ssl_state(struct irc__conn *conn, int ret)
+set_events_ssl(struct irc__conn *conn, int ret)
 {
-	char error[1024];
-	int num;
+	int num, flags = 0;
 
 	switch ((num = SSL_get_error(conn->ssl, ret))) {
 	case SSL_ERROR_WANT_READ:
-		irc_log_debug("server %s: step %d now needs read condition",
-		    conn->sv->name, conn->ssl_step);
-		conn->ssl_cond = IRC__CONN_SSL_ACT_READ;
+		flags |= EV_READ;
 		break;
 	case SSL_ERROR_WANT_WRITE:
-		irc_log_debug("server %s: step %d now needs write condition",
-		    conn->sv->name, conn->ssl_step);
-		conn->ssl_cond = IRC__CONN_SSL_ACT_WRITE;
+		flags |= EV_WRITE;
 		break;
 	case SSL_ERROR_SSL:
-		irc_log_warn("server %s: SSL error: %s", conn->sv->name,
-		    ERR_error_string(num, error));
-		return irc__conn_disconnect(conn), -1;
+		return -1;
 	default:
 		break;
 	}
+
+	set_events(conn, flags);
 
 	return 0;
 }
@@ -155,19 +206,9 @@ input_ssl(struct irc__conn *conn, char *dst, size_t dstsz)
 {
 	int nr;
 
-	if ((nr = SSL_read(conn->ssl, dst, dstsz)) <= 0) {
-		irc_log_debug("server %s: SSL read incomplete", conn->sv->name);
-		conn->ssl_step = IRC__CONN_SSL_ACT_READ;
-		return update_ssl_state(conn, nr);
-	}
+	nr = SSL_read(conn->ssl, dst, dstsz);
 
-	if (conn->ssl_cond)
-		irc_log_debug("server %s: condition back to normal", conn->sv->name);
-
-	conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
-	conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
-
-	return nr;
+	return set_events_ssl(conn, nr);
 }
 
 #endif
@@ -177,9 +218,15 @@ input_clear(struct irc__conn *conn, char *buf, size_t bufsz)
 {
 	ssize_t nr;
 
-	if ((nr = recv(conn->fd, buf, bufsz, 0)) <= 0) {
+	while ((nr = recv(conn->fd, buf, bufsz, 0)) < 0 && errno == EINTR)
+		continue;
+
+	if (nr < 0) {
+		if (errno == EWOULDBLOCK || errno == EAGAIN)
+			nr = 0;
+	} else if (nr == 0) {
 		errno = ECONNRESET;
-		return irc__conn_disconnect(conn), -1;
+		nr = -1;
 	}
 
 	return nr;
@@ -212,19 +259,9 @@ output_ssl(struct irc__conn *conn)
 {
 	int ns;
 
-	if ((ns = SSL_write(conn->ssl, conn->out, strlen(conn->out))) <= 0) {
-		irc_log_debug("server %s: SSL write incomplete", conn->sv->name);
-		conn->ssl_step = IRC__CONN_SSL_ACT_WRITE;
-		return update_ssl_state(conn, ns);
-	}
+	ns = SSL_write(conn->ssl, conn->out, strlen(conn->out));
 
-	if (conn->ssl_cond)
-		irc_log_debug("server %s: condition back to normal", conn->sv->name);
-
-	conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
-	conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
-
-	return ns;
+	return set_events_ssl(conn, ns);
 }
 
 #endif
@@ -234,8 +271,11 @@ output_clear(struct irc__conn *conn)
 {
 	ssize_t ns;
 
-	if ((ns = send(conn->fd, conn->out, strlen(conn->out), 0)) < 0)
-		return irc__conn_disconnect(conn), -1;
+	while ((ns = send(conn->fd, conn->out, strlen(conn->out), 0)) < 0 && errno != EINTR)
+		continue;
+
+	if (ns < 0 && (errno == EWOULDBLOCK || errno == EAGAIN))
+		ns = 0;
 
 	return ns;
 }
@@ -244,6 +284,9 @@ static int
 output(struct irc__conn *conn)
 {
 	ssize_t ns = 0;
+
+	if (strlen(conn->out) == 0)
+		return 0;
 
 #if defined(IRCCD_WITH_SSL)
 	if (conn->flags & IRC__CONN_SSL)
@@ -263,13 +306,80 @@ output(struct irc__conn *conn)
 	return ns;
 }
 
-static int
-handshake(struct irc__conn *conn)
+static void
+start(struct irc__conn *conn, enum irc__conn_state state)
+{
+	switch ((conn->state = state)) {
+	case IRC__CONN_STATE_CONNECTING:
+		assert(!ev_is_active(&conn->timer_fd));
+		assert(!ev_is_active(&conn->io_fd));
+
+		ev_timer_init(&conn->timer_fd, timer_cb, TIMEOUT_CONNECT, 0.0);
+		ev_timer_start(irc_bot_loop(), &conn->timer_fd);
+
+		/* Connect in progress, wait for writable condition. */
+		ev_io_init(&conn->io_fd, io_cb, conn->fd, EV_WRITE);
+		ev_io_start(irc_bot_loop(), &conn->io_fd);
+		break;
+	case IRC__CONN_STATE_HANDSHAKING:
+		assert(ev_is_active(&conn->timer_fd));
+		assert(ev_is_active(&conn->io_fd));
+
+		/*
+		 * OpenSSL handshake started, wait for conditions that will be
+		 * set in do_handshaking.
+		 */
+		ev_timer_again(irc_bot_loop(), &conn->timer_fd);
+		do_handshaking(conn);
+		break;
+	case IRC__CONN_STATE_READY:
+		assert(ev_is_active(&conn->io_fd));
+
+		ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
+		ev_timer_set(&conn->timer_fd, TIMEOUT_PING, TIMEOUT_PING);
+		ev_timer_start(irc_bot_loop(), &conn->timer_fd);
+
+		/* start with read condition. */
+		set_events(conn, EV_READ);
+
+		/* indicate user of readiness. */
+		conn->on_connect(conn);
+		break;
+	default:
+		break;
+	}
+}
+
+static void
+stop(struct irc__conn *conn)
 {
 #if defined(IRCCD_WITH_SSL)
-	if (conn->flags & IRC__CONN_SSL) {
-		int r;
+	if (conn->ssl)
+		SSL_free(conn->ssl);
+	if (conn->ctx)
+		SSL_CTX_free(conn->ctx);
+	conn->ssl = NULL;
+	conn->ctx = NULL;
+#endif
 
+	ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
+	ev_io_stop(irc_bot_loop(), &conn->io_fd);
+
+	if (conn->fd != -1) {
+		close(conn->fd);
+		conn->fd = -1;
+	}
+
+	conn->state = IRC__CONN_STATE_NONE;
+}
+
+static void
+do_handshaking(struct irc__conn *conn)
+{
+#if defined(IRCCD_WITH_SSL)
+	int r;
+
+	if (conn->flags & IRC__CONN_SSL) {
 		conn->state = IRC__CONN_STATE_HANDSHAKING;
 
 		/*
@@ -286,44 +396,61 @@ handshake(struct irc__conn *conn)
 			SSL_set_connect_state(conn->ssl);
 		}
 
-		/*
-		 * AFAIK, there is no way to detect that we're discussing with
-		 * a non SSL server, as a consequence SSL_get_error will return
-		 * SSL_ERROR_WANT_READ indefinitely. What we do is to detect
-		 * the failure to complete SSL_do_handshake in the amount of
-		 * three seconds before indicating that we've failed to
-		 * connect.
-		 */
-		if ((r = SSL_do_handshake(conn->ssl)) <= 0) {
-			if (difftime(time(NULL), conn->statetime) >= 3)
-				return irc_log_warn("server %s: unable to complete handshake", conn->sv->name), -1;
-
-			irc_log_debug("server %s: handshake incomplete", conn->sv->name);
-
-			return update_ssl_state(conn, r);
-		}
-
-		conn->statetime = time(NULL);
-		conn->state = IRC__CONN_STATE_READY;
-		conn->ssl_cond = IRC__CONN_SSL_ACT_NONE;
-		conn->ssl_step = IRC__CONN_SSL_ACT_NONE;
+		if ((r = SSL_do_handshake(conn->ssl)) <= 0)
+			retry(conn);
 	} else
 #endif
-		conn->state = IRC__CONN_STATE_READY;
-
-	return 0;
+	start(conn, IRC__CONN_STATE_READY);
 }
 
-static int
+static void
+do_ready(struct irc__conn *conn, int revents)
+{
+	int rc = 0;
+
+	if (revents & EV_READ)
+		rc = input(conn);
+	if (rc == 0 && (revents & EV_WRITE))
+		rc = output(conn);
+
+	if (rc < 0) {
+		stop(conn);
+		conn->on_disconnect(conn);
+	}
+}
+
+/*
+ * Check if the connection completed.
+ *
+ * This callback is invoked when connect() has started but not completed
+ * immediately. The condition must be writable.
+ */
+static void
+do_connecting(struct irc__conn *conn)
+{
+	int res, err = -1;
+	socklen_t len = sizeof (int);
+
+	/*
+	 * Determine if the non blocking connect(2) call succeeded, otherwise
+	 * we re-try again a connect to the next endpoint.
+	 */
+	if ((res = getsockopt(conn->fd, SOL_SOCKET, SO_ERROR, &err, &len)) < 0 || err)
+		retry(conn);
+	else
+		start(conn, IRC__CONN_STATE_HANDSHAKING);
+}
+
+/*
+ * Attempt to connect to current conn->aip asynchronously otherwise the socket
+ * event callback will try the next conn->aip value unless we have reached the
+ * limit.
+ */
+static void
 dial(struct irc__conn *conn)
 {
-	/* No more address available. */
-	if (conn->aip == NULL) {
-		irc_log_warn("server %s: could not connect", conn->sv->name);
-		return irc__conn_disconnect(conn), -1;
-	}
-
 	for (; conn->aip; conn->aip = conn->aip->ai_next) {
+		/* Attempt to initialize a socket with the current conn->aip. */
 		if (create(conn) < 0)
 			continue;
 
@@ -331,17 +458,36 @@ dial(struct irc__conn *conn)
 		 * With some luck, the connection completes immediately,
 		 * otherwise we will need to wait until the socket is writable.
 		 */
-		if (connect(conn->fd, conn->aip->ai_addr, conn->aip->ai_addrlen) == 0)
-			return handshake(conn);
+		if (connect(conn->fd, conn->aip->ai_addr, conn->aip->ai_addrlen) == 0) {
+			start(conn, IRC__CONN_STATE_HANDSHAKING);
+			break;
+		}
 
-		/* Connect "succeeds" but isn't complete yet. */
 		if (errno == EINPROGRESS || errno == EAGAIN) {
-			conn->state = IRC__CONN_STATE_CONNECTING;
-			return 0;
+			/* Connect "succeeds" but isn't complete yet. */
+			start(conn, IRC__CONN_STATE_CONNECTING);
+			break;
 		}
 	}
 
-	return -1;
+	/* No more address available. */
+	if (conn->aip == NULL) {
+		errno = EHOSTUNREACH;
+		conn->on_disconnect(conn);
+	}
+}
+
+/*
+ * Attempt connection to the next endpoint.
+ */
+static void
+retry(struct irc__conn *conn)
+{
+	/* Go to next endpoint. */
+	conn->aip = conn->aip->ai_next;
+
+	stop(conn);
+	dial(conn);
 }
 
 static int
@@ -352,84 +498,51 @@ lookup(struct irc__conn *conn)
 		.ai_flags = AI_NUMERICSERV
 	};
 	char service[16];
-	int ret;
+	int rc;
 
 	snprintf(service, sizeof (service), "%hu", conn->port);
 
-	if ((ret = getaddrinfo(conn->hostname, service, &hints, &conn->ai)) != 0) {
-		irc_log_warn("server %s: %s", conn->sv->name, gai_strerror(ret));
-		return -1;
-	}
+	if ((rc = getaddrinfo(conn->hostname, service, &hints, &conn->ai)) != 0) {
+		errno = EHOSTUNREACH;
+		rc = -1;
+	} else
+		conn->aip = conn->ai;
 
-	conn->aip = conn->ai;
-
-	return 0;
+	return rc;
 }
 
-static int
-check_connect(struct irc__conn *conn)
+struct irc__conn *
+irc__conn_new(void)
 {
-	int res, err = -1;
-	socklen_t len = sizeof (int);
+	struct irc__conn *conn;
 
-	/* Determine if the non blocking connect(2) call succeeded. */
-	if ((res = getsockopt(conn->fd, SOL_SOCKET, SO_ERROR, &err, &len)) < 0 || err)
-		return dial(conn);
+	conn = irc_util_calloc(1, sizeof (*conn));
+	conn->fd = -1;
 
-	return handshake(conn);
+	return conn;
 }
 
-#if defined(IRCCD_WITH_SSL)
-
-static inline void
-prepare_ssl(const struct irc__conn *conn, struct pollfd *pfd)
-{
-	switch (conn->ssl_cond) {
-	case IRC__CONN_SSL_ACT_READ:
-		irc_log_debug("server %s: need read condition", conn->sv->name);
-		pfd->events |= POLLIN;
-		break;
-	case IRC__CONN_SSL_ACT_WRITE:
-		irc_log_debug("server %s: need write condition", conn->sv->name);
-		pfd->events |= POLLOUT;
-		break;
-	default:
-		break;
-	}
-}
-
-static inline int
-renegotiate(struct irc__conn *conn)
-{
-	irc_log_debug("server %s: renegociate step=%d", conn->sv->name, conn->ssl_step);
-
-	return conn->ssl_step == IRC__CONN_SSL_ACT_READ
-		? input(conn)
-		: output(conn);
-}
-
-#endif
-
-int
+void
 irc__conn_connect(struct irc__conn *conn)
 {
 	assert(conn);
 
-	conn->statetime = time(NULL);
+	/* Start with no state as getaddrinfo could even fail. */
+	conn->state = IRC__CONN_STATE_NONE;
 
 #if !defined(IRCCD_WITH_SSL)
 	if (conn->flags & IRC_CONN_SSL) {
 		irc_log_warn("server %s: SSL requested but not available", conn->sv->name);
 		errno = EINVAL;
-
 		return -1;
 	}
 #endif
 
+	/* Fetch DNS information. */
 	if (lookup(conn) < 0)
-		return irc__conn_disconnect(conn), -1;
-
-	return dial(conn);
+		conn->on_disconnect(conn);
+	else
+		dial(conn);
 }
 
 void
@@ -437,74 +550,12 @@ irc__conn_disconnect(struct irc__conn *conn)
 {
 	assert(conn);
 
-	cleanup(conn);
-}
+	stop(conn);
 
-void
-irc__conn_prepare(const struct irc__conn *conn, struct pollfd *pfd)
-{
-	assert(conn);
-	assert(pfd);
-
-	pfd->fd = conn->fd;
-
-#if defined(IRCCD_WITH_SSL)
-	if (conn->ssl_cond)
-		prepare_ssl(conn, pfd);
-	else {
-#endif
-		switch (conn->state) {
-		case IRC__CONN_STATE_CONNECTING:
-			pfd->events = POLLOUT;
-			break;
-		case IRC__CONN_STATE_READY:
-			pfd->events = POLLIN;
-
-			if (conn->out[0])
-				pfd->events |= POLLOUT;
-			break;
-		default:
-			break;
-		}
-#if defined(IRCCD_WITH_SSL)
+	if (conn->aip) {
+		freeaddrinfo(conn->aip);
+		conn->aip = NULL;
 	}
-#endif
-}
-
-int
-irc__conn_flush(struct irc__conn *conn, const struct pollfd *pfd)
-{
-	assert(conn);
-	assert(pfd);
-
-	switch (conn->state) {
-	case IRC__CONN_STATE_CONNECTING:
-		return check_connect(conn);
-	case IRC__CONN_STATE_HANDSHAKING:
-		return handshake(conn);
-	case IRC__CONN_STATE_READY:
-		if (pfd->revents & (POLLERR | POLLHUP))
-			return irc__conn_disconnect(conn), -1;
-
-#if defined(IRCCD_WITH_SSL)
-		if (conn->ssl_cond) {
-			if (renegotiate(conn) < 0)
-				return irc__conn_disconnect(conn), -1;
-		} else {
-#endif
-			if (pfd->revents & POLLIN && input(conn) < 0)
-				return irc__conn_disconnect(conn), -1;
-			if (pfd->revents & POLLOUT && output(conn) < 0)
-				return irc__conn_disconnect(conn), -1;
-#if defined(IRCCD_WITH_SSL)
-		}
-#endif
-		break;
-	default:
-		break;
-	}
-
-	return 0;
 }
 
 int
@@ -538,18 +589,26 @@ irc__conn_send(struct irc__conn *conn, const char *data)
 	assert(conn);
 	assert(data);
 
-	if (irc_util_strlcat(conn->out, data, sizeof (conn->out)) >= sizeof (conn->out))
-		return errno = EMSGSIZE, -1;
-	if (irc_util_strlcat(conn->out, "\r\n", sizeof (conn->out)) >= sizeof (conn->out))
-		return errno = EMSGSIZE, -1;
+	if (irc_util_strlcat(conn->out, data, sizeof (conn->out)) >= sizeof (conn->out)) {
+		errno = EMSGSIZE;
+		return -1;
+	}
+	if (irc_util_strlcat(conn->out, "\r\n", sizeof (conn->out)) >= sizeof (conn->out)) {
+		errno = EMSGSIZE;
+		return -1;
+	}
 
 	return 0;
 }
 
 void
-irc__conn_finish(struct irc__conn *conn)
+irc__conn_free(struct irc__conn *conn)
 {
 	assert(conn);
+	assert(conn->fd != -1);
 
-	cleanup(conn);
+	if (conn->aip != NULL)
+		freeaddrinfo(conn->aip);
+
+	free(conn);
 }

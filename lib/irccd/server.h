@@ -30,8 +30,6 @@
 extern "C" {
 #endif
 
-struct pollfd;
-
 struct irc__conn;
 struct irc_channel;
 
@@ -51,6 +49,12 @@ enum irc_server_flags {
 	IRC_SERVER_FLAGS_AUTO_RECO     = (1 << 3),
 	IRC_SERVER_FLAGS_IPV4          = (1 << 4),
 	IRC_SERVER_FLAGS_IPV6          = (1 << 5)
+};
+
+struct irc_server_callbacks {
+	void (*on_connect)(struct irc_server *);
+	void (*on_disconnect)(struct irc_server *);
+	void (*on_event)(struct irc_server *, const struct irc_event *);
 };
 
 struct irc_server_user {
@@ -93,8 +97,8 @@ struct irc_server {
 	struct irc_channel *channels;
 	struct irc_event_whois bufwhois;
 	struct irc__conn *conn;
+	struct irc_server_callbacks cb;
 	size_t refc;
-	time_t lost_tp, last_tp;
 	struct irc_server *next;
 };
 
@@ -114,15 +118,6 @@ irc_server_disconnect(struct irc_server *);
 
 void
 irc_server_reconnect(struct irc_server *);
-
-void
-irc_server_prepare(const struct irc_server *, struct pollfd *);
-
-void
-irc_server_flush(struct irc_server *, const struct pollfd *);
-
-int
-irc_server_poll(struct irc_server *, struct irc_event *);
 
 struct irc_channel *
 irc_server_find(struct irc_server *, const char *);

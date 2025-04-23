@@ -63,8 +63,6 @@ clear_channels(struct irc_server *s, int free)
 static inline void
 clear_server(struct irc_server *s)
 {
-	irc__conn_finish(s->conn);
-
 	free(s->bufwhois.nickname);
 	free(s->bufwhois.username);
 	free(s->bufwhois.realname);
@@ -193,41 +191,46 @@ fail(struct irc_server *s)
 		s->state = IRC_SERVER_STATE_DISCONNECTED;
 
 	/* Time point when we lose signal from the server. */
-	s->lost_tp = time(NULL);
 }
 
 static void
-handle_connect(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_connect(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	(void)msg;
 
 	struct irc_channel *ch;
+	struct irc_event ev = {};
 
 	/* Now join all channels that were requested. */
 	LL_FOREACH(s->channels, ch)
 		irc_server_join(s, ch->name, ch->password);
 
 	s->state = IRC_SERVER_STATE_CONNECTED;
-	ev->type = IRC_EVENT_CONNECT;
+
+	ev.type = IRC_EVENT_CONNECT;
+	ev.server = s;
+	s->cb.on_connect(s);
+	s->cb.on_event(s, &ev);
 
 	irc_log_info("server %s: connection complete", s->name);
 }
 
 static void
-handle_disconnect(struct irc_server *s, struct irc_event *ev)
+handle_disconnect(struct irc_server *s)
 {
-	ev->type = IRC_EVENT_DISCONNECT;
-	ev->server = s;
+	struct irc_event ev = {};
+
+	ev.type = IRC_EVENT_DISCONNECT;
+	ev.server = s;
+	s->cb.on_event(s, &ev);
 
 	fail(s);
 	irc_log_info("server %s: connection lost", s->name);
 }
 
 static void
-handle_support(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_support(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)ev;
-
 	char key[64];
 	char value[64];
 
@@ -277,47 +280,61 @@ handle_support(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg 
 }
 
 static void
-handle_invite(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_invite(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	ev->type = IRC_EVENT_INVITE;
-	ev->invite.origin = irc_util_strdup(msg->prefix);
-	ev->invite.channel = irc_util_strdup(msg->args[1]);
+	struct irc_event ev = {};
+
+	ev.type = IRC_EVENT_INVITE;
+	ev.server = s;
+	ev.invite.origin = irc_util_strdup(msg->prefix);
+	ev.invite.channel = irc_util_strdup(msg->args[1]);
 
 	if (s->flags & IRC_SERVER_FLAGS_JOIN_INVITE) {
-		irc_server_join(s, ev->invite.channel, NULL);
-		irc_log_info("server %s: joining %s on invite", s->name, ev->invite.channel);
+		irc_server_join(s, ev.invite.channel, NULL);
+		irc_log_info("server %s: joining %s on invite", s->name, ev.invite.channel);
 	}
+
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_join(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_join(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	ev->type = IRC_EVENT_JOIN;
-	ev->join.origin = irc_util_strdup(msg->prefix);
-	ev->join.channel = irc_util_strdup(msg->args[0]);
+	struct irc_event ev = {};
 
-	add_channel(s, ev->join.channel, NULL, 1);
+	ev.type = IRC_EVENT_JOIN;
+	ev.server = s;
+	ev.join.origin = irc_util_strdup(msg->prefix);
+	ev.join.channel = irc_util_strdup(msg->args[0]);
 
-	if (is_self(s, ev->join.origin))
-		irc_log_info("server %s: joined channel %s", s->name, ev->join.channel);
+	add_channel(s, ev.join.channel, NULL, 1);
+
+	if (is_self(s, ev.join.origin))
+		irc_log_info("server %s: joined channel %s", s->name, ev.join.channel);
+
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_kick(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_kick(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	ev->type = IRC_EVENT_KICK;
-	ev->kick.origin = irc_util_strdup(msg->prefix);
-	ev->kick.channel = irc_util_strdup(msg->args[0]);
-	ev->kick.target = irc_util_strdup(msg->args[1]);
-	ev->kick.reason = msg->args[2] ? irc_util_strdup(msg->args[2]) : NULL;
+	struct irc_channel *ch;
+	struct irc_event ev = {};
 
-	struct irc_channel *ch = add_channel(s, ev->kick.channel, NULL, 1);
+	ev.type = IRC_EVENT_KICK;
+	ev.server = s;
+	ev.kick.origin = irc_util_strdup(msg->prefix);
+	ev.kick.channel = irc_util_strdup(msg->args[0]);
+	ev.kick.target = irc_util_strdup(msg->args[1]);
+	ev.kick.reason = msg->args[2] ? irc_util_strdup(msg->args[2]) : NULL;
+
+	ch = add_channel(s, ev.kick.channel, NULL, 1);
 
 	/*
 	 * If the bot was kicked itself mark the channel as not joined and
 	 * rejoin it automatically if the option is set.
 	 */
-	if (is_self(s, ev->kick.target)) {
+	if (is_self(s, ev.kick.target)) {
 		ch->joined = 0;
 		irc_channel_clear(ch);
 
@@ -326,40 +343,40 @@ handle_kick(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *ms
 			irc_log_info("server %s: rejoining %s after kick", s->name, ch->name);
 		}
 	} else
-		irc_channel_remove(ch, ev->kick.target);
+		irc_channel_remove(ch, ev.kick.target);
+
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_mode(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_mode(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)s;
-	(void)ev;
-	(void)msg;
-
 	int action = 0, mode;
 	size_t nelem = 0, argindex = 2;
 	struct irc_channel *ch;
 	struct irc_channel_user *u;
+	struct irc_event ev = {};
 
-	ev->type = IRC_EVENT_MODE;
-	ev->mode.origin = irc_util_strdup(msg->prefix);
-	ev->mode.channel = irc_util_strdup(msg->args[0]);
-	ev->mode.mode = irc_util_strdup(msg->args[1]);
+	ev.type = IRC_EVENT_MODE;
+	ev.server = s;
+	ev.mode.origin = irc_util_strdup(msg->prefix);
+	ev.mode.channel = irc_util_strdup(msg->args[0]);
+	ev.mode.mode = irc_util_strdup(msg->args[1]);
 
 	/* Create a NULL-sentineled list of arguments. */
 	for (size_t i = 2; i < IRC_ARGS_MAX && msg->args[i]; ++i) {
-		ev->mode.args = irc_util_reallocarray(ev->mode.args, nelem + 1, sizeof (char *));
-		ev->mode.args[nelem++] = irc_util_strdup(msg->args[i]);
+		ev.mode.args = irc_util_reallocarray(ev.mode.args, nelem + 1, sizeof (char *));
+		ev.mode.args[nelem++] = irc_util_strdup(msg->args[i]);
 	}
 
 	/* Add the NULL sentinel. */
-	ev->mode.args = irc_util_reallocarray(ev->mode.args, nelem + 1, sizeof (char *));
-	ev->mode.args[nelem] = NULL;
+	ev.mode.args = irc_util_reallocarray(ev.mode.args, nelem + 1, sizeof (char *));
+	ev.mode.args[nelem] = NULL;
 
-	if (!(ch = irc_server_find(s, ev->mode.channel)))
-		return;
+	if (!(ch = irc_server_find(s, ev.mode.channel)))
+		goto skip;
 
-	for (const char *p = ev->mode.mode; *p; ++p) {
+	for (const char *p = ev.mode.mode; *p; ++p) {
 		/* Determine if we're adding or removing a mode. */
 		if (*p == '+' || *p == '-') {
 			action = *p;
@@ -394,31 +411,41 @@ handle_mode(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *ms
 		else
 			u->modes &= ~(1 << mode);
 	}
+
+skip:
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_part(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_part(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	struct irc_channel *ch;
+	struct irc_event ev = {};
 
-	ev->type = IRC_EVENT_PART;
-	ev->part.origin = irc_util_strdup(msg->prefix);
-	ev->part.channel = irc_util_strdup(msg->args[0]);
-	ev->part.reason = msg->args[1] ? irc_util_strdup(msg->args[1]) : NULL;
+	ev.type = IRC_EVENT_PART;
+	ev.server = s;
+	ev.part.origin = irc_util_strdup(msg->prefix);
+	ev.part.channel = irc_util_strdup(msg->args[0]);
+	ev.part.reason = msg->args[1] ? irc_util_strdup(msg->args[1]) : NULL;
 
-	ch = add_channel(s, ev->part.channel, NULL, 1);
+	ch = add_channel(s, ev.part.channel, NULL, 1);
 
-	if (is_self(s, ev->part.origin)) {
+	if (is_self(s, ev.part.origin)) {
 		remove_channel(s, ch);
-		irc_log_info("server %s: leaving channel %s", s->name, ev->part.channel);
+		irc_log_info("server %s: leaving channel %s", s->name, ev.part.channel);
 	} else
-		irc_channel_remove(ch, ev->part.origin);
+		irc_channel_remove(ch, ev.part.origin);
+
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_msg(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_msg(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)s;
+	struct irc_server_user user = {};
+	struct irc_event ev = {};
+
+	ev.server = s;
 
 	/*
 	 * Detect CTCP commands which are PRIVMSG with a special boundaries.
@@ -428,8 +455,6 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg
 	 * PRIVMSG jean :\001VERSION\001
 	 */
 	if (is_ctcp(msg->args[1])) {
-		struct irc_server_user user;
-
 		irc_server_split(msg->prefix, &user);
 
 		if (strcmp(msg->args[1], "\x01""CLIENTINFO\x01") == 0)
@@ -450,60 +475,70 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg
 				irc_server_send(s, "NOTICE %s :\x01VERSION %s\x01",
 				    user.nickname, s->ident.ctcpversion);
 		} else if (strncmp(msg->args[1], "\x01""ACTION", 7) == 0) {
-			ev->type = IRC_EVENT_ME;
-			ev->message.origin = irc_util_strdup(msg->prefix);
-			ev->message.channel = irc_util_strdup(msg->args[0]);
-			ev->message.message = irc_util_strdup(ctcp(msg->args[1]));
+			ev.type = IRC_EVENT_ME;
+			ev.message.origin = irc_util_strdup(msg->prefix);
+			ev.message.channel = irc_util_strdup(msg->args[0]);
+			ev.message.message = irc_util_strdup(ctcp(msg->args[1]));
 		}
 	} else {
-		ev->type = IRC_EVENT_MESSAGE;
-		ev->message.origin = irc_util_strdup(msg->prefix);
-		ev->message.channel = irc_util_strdup(msg->args[0]);
-		ev->message.message = irc_util_strdup(msg->args[1]);
+		ev.type = IRC_EVENT_MESSAGE;
+		ev.message.origin = irc_util_strdup(msg->prefix);
+		ev.message.channel = irc_util_strdup(msg->args[0]);
+		ev.message.message = irc_util_strdup(msg->args[1]);
 	}
+
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_nick(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_nick(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	ev->type = IRC_EVENT_NICK;
-	ev->nick.origin = irc_util_strdup(msg->prefix);
-	ev->nick.nickname = irc_util_strdup(msg->args[0]);
+	struct irc_event ev = {};
+
+	ev.type = IRC_EVENT_NICK;
+	ev.server = s;
+	ev.nick.origin = irc_util_strdup(msg->prefix);
+	ev.nick.nickname = irc_util_strdup(msg->args[0]);
 
 	/* Update nickname if it is myself. */
-	if (is_self(s, ev->nick.origin)) {
+	if (is_self(s, ev.nick.origin)) {
 		irc_log_info("server %s: nick change %s -> %s", s->name,
-		    s->ident.nickname, ev->nick.nickname);
-		irc_util_strlcpy(s->ident.nickname, ev->nick.nickname, sizeof (s->ident.nickname));
+		    s->ident.nickname, ev.nick.nickname);
+		irc_util_strlcpy(s->ident.nickname, ev.nick.nickname, sizeof (s->ident.nickname));
 	}
+
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_notice(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_notice(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)s;
+	struct irc_event ev = {};
 
-	ev->type = IRC_EVENT_NOTICE;
-	ev->notice.origin = irc_util_strdup(msg->prefix);
-	ev->notice.channel = irc_util_strdup(msg->args[0]);
-	ev->notice.notice = irc_util_strdup(msg->args[1]);
+	ev.type = IRC_EVENT_NOTICE;
+	ev.server = s;
+	ev.notice.origin = irc_util_strdup(msg->prefix);
+	ev.notice.channel = irc_util_strdup(msg->args[0]);
+	ev.notice.notice = irc_util_strdup(msg->args[1]);
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_topic(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_topic(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)s;
+	struct irc_event ev = {};
 
-	ev->type = IRC_EVENT_TOPIC;
-	ev->topic.origin = irc_util_strdup(msg->prefix);
-	ev->topic.channel = irc_util_strdup(msg->args[0]);
-	ev->topic.topic = irc_util_strdup(msg->args[1]);
+	ev.type = IRC_EVENT_TOPIC;
+	ev.server = s;
+	ev.topic.origin = irc_util_strdup(msg->prefix);
+	ev.topic.channel = irc_util_strdup(msg->args[0]);
+	ev.topic.topic = irc_util_strdup(msg->args[1]);
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_ping(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_ping(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)ev;
 	(void)msg;
 
 	if (msg->args[0])
@@ -511,10 +546,8 @@ handle_ping(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *ms
 }
 
 static void
-handle_names(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_names(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)ev;
-
 	struct irc_channel *ch;
 	char *p, *token;
 	int modes = 0;
@@ -532,20 +565,22 @@ handle_names(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *m
 }
 
 static void
-handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_endofnames(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	FILE *fp;
 	size_t length;
 	const struct irc_channel *ch;
 	const struct irc_channel_user *u;
+	struct irc_event ev = {};
 
-	ev->type = IRC_EVENT_NAMES;
-	ev->names.channel = irc_util_strdup(msg->args[1]);
+	ev.type = IRC_EVENT_NAMES;
+	ev.server = s;
+	ev.names.channel = irc_util_strdup(msg->args[1]);
 
 	/* Construct a string list for every user in the channel. */
-	ch = irc_server_find(s, ev->names.channel);
+	ch = irc_server_find(s, ev.names.channel);
 
-	if (!(fp = open_memstream(&ev->names.names, &length)))
+	if (!(fp = open_memstream(&ev.names.names, &length)))
 		return;
 
 	LL_FOREACH(ch->users, u) {
@@ -560,34 +595,38 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc__conn_m
 	}
 
 	fclose(fp);
+
+	s->cb.on_event(s, &ev);
 }
 
 static void
-handle_nicknameinuse(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_nicknameinuse(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	(void)msg;
-	(void)ev;
 
 	irc_log_warn("server %s: nickname %s is already in use", s->name, s->ident.nickname);
 	fail(s);
 }
 
 static void
-handle_error(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_error(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	ev->type = IRC_EVENT_DISCONNECT;
+	struct irc_event ev = {};
 
 	if (msg->args[0])
 		irc_log_warn("server %s: %s", s->name, msg->args[0]);
+
+	ev.server = s;
+	ev.type = IRC_EVENT_DISCONNECT;
+	s->cb.on_event(s, &ev);
 
 	fail(s);
 }
 
 static void
-handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_whoisuser(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	(void)s;
-	(void)ev;
 	(void)msg;
 
 	s->bufwhois.nickname = irc_util_strdup(msg->args[1]);
@@ -597,10 +636,8 @@ handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc__conn_ms
 }
 
 static void
-handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_whoischannels(struct irc_server *s, struct irc__conn_msg *msg)
 {
-	(void)ev;
-
 	char *token, *p;
 	int modes;
 
@@ -621,19 +658,24 @@ handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct irc__con
 }
 
 static void
-handle_endofwhois(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle_endofwhois(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	(void)msg;
 
-	ev->type = IRC_EVENT_WHOIS;
-	ev->whois = s->bufwhois;
+	struct irc_event ev = {};
 
+	ev.server = s;
+	ev.type = IRC_EVENT_WHOIS;
+	ev.whois = s->bufwhois;
+	s->cb.on_event(s, &ev);
+
+	/* Get rid of buffered whois. */
 	memset(&s->bufwhois, 0, sizeof (s->bufwhois));
 }
 
 static const struct handler {
 	const char *command;
-	void (*handle)(struct irc_server *, struct irc_event *, struct irc__conn_msg *);
+	void (*handle)(struct irc_server *, struct irc__conn_msg *);
 } handlers[] = {
 	/* Must be kept ordered. */
 	{ "001",        handle_connect          },
@@ -671,20 +713,14 @@ find_handler(const char *name)
 }
 
 static void
-handle(struct irc_server *s, struct irc_event *ev, struct irc__conn_msg *msg)
+handle(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	const struct handler *h;
-
-	/* Update last message time to detect non-notified disconnection. */
-	s->last_tp = time(NULL);
 
 	if (!(h = find_handler(msg->cmd)))
 		return;
 
-	memset(ev, 0, sizeof (*ev));
-
-	ev->server = s;
-	h->handle(s, ev, msg);
+	h->handle(s, msg);
 }
 
 static void
@@ -709,6 +745,25 @@ auth(struct irc_server *s)
 	irc_server_send(s, "CAP END");
 }
 
+/*
+ * Callback when network connection was successful but IRC protocol not yet
+ * established.
+ */
+static void conn_on_connect(struct irc__conn *conn)
+{
+	auth(conn->data);
+}
+
+static void conn_on_disconnect(struct irc__conn *conn)
+{
+	handle_disconnect(conn->data);
+}
+
+static void conn_on_msg(struct irc__conn *conn, struct irc__conn_msg *msg)
+{
+	handle(conn->data, msg);
+}
+
 struct irc_server *
 irc_server_new(const char *name,
                const char *nickname,
@@ -729,8 +784,16 @@ irc_server_new(const char *name,
 	s = irc_util_calloc(1, sizeof (*s));
 
 	/* Hide implementation to get rid of OpenSSL headers in public API. */
-	s->conn = irc_util_calloc(1, sizeof (*s->conn));
+	s->conn = irc__conn_new();
 	s->conn->port = port;
+	s->conn->on_connect = conn_on_connect;
+	s->conn->on_disconnect = conn_on_disconnect;
+	s->conn->on_msg = conn_on_msg;
+	s->conn->data = s;
+
+	if (s->flags & IRC_SERVER_FLAGS_SSL)
+		s->conn->flags |= IRC__CONN_SSL;
+
 	irc_util_strlcpy(s->conn->hostname, hostname, sizeof (s->conn->hostname));
 
 	/* Identity. */
@@ -753,22 +816,7 @@ irc_server_connect(struct irc_server *s)
 {
 	assert(s);
 
-	if (s->flags & IRC_SERVER_FLAGS_SSL)
-		s->conn->flags |= IRC__CONN_SSL;
-
-	s->conn->sv = s;
-
-	if (irc__conn_connect(s->conn) < 0)
-		fail(s);
-	else
-		s->state = IRC_SERVER_STATE_CONNECTING;
-
-	/*
-	 * Assume the last time we received a message was now, so that
-	 * irc_server_flush don't think the server is already dead while we
-	 * didn't have any answer from it.
-	 */
-	s->last_tp = time(NULL);
+	irc__conn_connect(s->conn);
 }
 
 void
@@ -777,6 +825,11 @@ irc_server_disconnect(struct irc_server *s)
 	assert(s);
 
 	s->state = IRC_SERVER_STATE_DISCONNECTED;
+
+	if (s->conn) {
+		irc__conn_disconnect(s->conn);
+		s->conn = NULL;
+	}
 
 	clear_channels(s, 0);
 	clear_server(s);
@@ -789,78 +842,6 @@ irc_server_reconnect(struct irc_server *s)
 
 	irc_server_disconnect(s);
 	irc_server_connect(s);
-}
-
-void
-irc_server_prepare(const struct irc_server *s, struct pollfd *pfd)
-{
-	assert(s);
-	assert(pfd);
-
-	irc__conn_prepare(s->conn, pfd);
-}
-
-void
-irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
-{
-	assert(s);
-	assert(pfd);
-
-	switch (s->state) {
-	case IRC_SERVER_STATE_WAITING:
-		if (difftime(time(NULL), s->lost_tp) >= DELAY)
-			irc_server_connect(s);
-		break;
-	case IRC_SERVER_STATE_CONNECTED:
-		assert(pfd->fd == s->conn->fd);
-
-		if (difftime(time(NULL), s->last_tp) >= TIMEOUT) {
-			irc_log_warn("server %s: no message in more than %u seconds", s->name, TIMEOUT);
-			fail(s);
-		} else if (irc__conn_flush(s->conn, pfd) < 0) {
-			irc_log_warn("server %s: %s", s->name, strerror(errno));
-			fail(s);
-		}
-		break;
-	case IRC_SERVER_STATE_CONNECTING:
-		assert(pfd->fd == s->conn->fd);
-
-		/*
-		 * Now the conn object is ready which means the server has
-		 * to authenticate.
-		 */
-		auth(s);
-		break;
-	default:
-		break;
-	}
-}
-
-int
-irc_server_poll(struct irc_server *s, struct irc_event *ev)
-{
-	assert(s);
-	assert(ev);
-
-	struct irc__conn_msg msg = {0};
-
-	/*
-	 * When the server gets disconnected, the state changes to
-	 * IRC_SERVER_STATE_DISCONNECTED which notifies the caller with the
-	 * appropriate event. Then to avoid returning this same event each time
-	 * this function is called again, we immediately change the state to
-	 * something else.
-	 */
-	if (s->state == IRC_SERVER_STATE_DISCONNECTED) {
-		handle_disconnect(s, ev);
-		s->state = IRC_SERVER_STATE_NONE;
-		return 1;
-	}
-
-	if (irc__conn_poll(s->conn, &msg))
-		return handle(s, ev, &msg), 1;
-
-	return 0;
 }
 
 struct irc_channel *

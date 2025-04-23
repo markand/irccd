@@ -25,7 +25,7 @@
 #       include <openssl/ssl.h>
 #endif
 
-#include <time.h>
+#include <ev.h>
 
 #include "limits.h"
 
@@ -34,9 +34,11 @@ extern "C" {
 #endif
 
 struct addrinfo;
-struct pollfd;
 
 struct irc_server;
+
+struct irc__conn;
+struct irc__conn_msg;
 
 enum irc__conn_state {
 	IRC__CONN_STATE_NONE,           /* Nothing, default. */
@@ -49,34 +51,35 @@ enum irc__conn_flags {
 	IRC__CONN_SSL = (1 << 0)
 };
 
-#if defined(IRCCD_WITH_SSL)
-
-enum irc__conn_ssl_act {
-	IRC__CONN_SSL_ACT_NONE,
-	IRC__CONN_SSL_ACT_READ,
-	IRC__CONN_SSL_ACT_WRITE,
-};
-
-#endif
-
 struct irc__conn {
 	char hostname[IRC_HOST_LEN];
 	unsigned short port;
-	int fd;
-	struct addrinfo *ai;
+	enum irc__conn_flags flags;
+
+	/* user callbacks */
+	void (*on_connect)(struct irc__conn *);
+	void (*on_disconnect)(struct irc__conn *);
+	void (*on_msg)(struct irc__conn *, struct irc__conn_msg *);
+	void *data;
+
+	/* private fields */
+	enum irc__conn_state state;
+
+	/* Endpoint nameinfo. */
 	struct addrinfo *aip;
+	struct addrinfo *ai;
+
 	char in[IRC_BUF_LEN];
 	char out[IRC_BUF_LEN];
-	enum irc__conn_state state;
-	enum irc__conn_flags flags;
-	struct irc_server *sv;
-	time_t statetime;
+
+	/* socket, its watcher and connection timer */
+	int fd;
+	struct ev_io io_fd;
+	struct ev_timer timer_fd;
 
 #if defined(IRCCD_WITH_SSL)
 	SSL_CTX *ctx;
 	SSL *ssl;
-	enum irc__conn_ssl_act ssl_cond;
-	enum irc__conn_ssl_act ssl_step;
 #endif
 };
 
@@ -87,26 +90,23 @@ struct irc__conn_msg {
 	char buf[IRC_MESSAGE_LEN];
 };
 
-int
+struct irc__conn *
+irc__conn_new(void);
+
+void
 irc__conn_connect(struct irc__conn *);
 
 void
 irc__conn_disconnect(struct irc__conn *);
 
-void
-irc__conn_prepare(const struct irc__conn *, struct pollfd *);
-
 int
-irc__conn_flush(struct irc__conn *, const struct pollfd *);
+irc__conn_send(struct irc__conn *, const char *);
 
 int
 irc__conn_poll(struct irc__conn *, struct irc__conn_msg *);
 
-int
-irc__conn_send(struct irc__conn *, const char *);
-
 void
-irc__conn_finish(struct irc__conn *);
+irc__conn_free(struct irc__conn *);
 
 #if defined(__cplusplus)
 }

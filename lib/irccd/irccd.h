@@ -49,6 +49,9 @@ extern struct irc {
 void
 irc_bot_init(void);
 
+struct ev_loop *
+irc_bot_loop(void);
+
 void
 irc_bot_server_add(struct irc_server *);
 

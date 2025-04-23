@@ -30,6 +30,8 @@
 
 #include <utlist.h>
 
+#include <ev.h>
+
 #include "config.h"
 #include "event.h"
 #include "irccd.h"
@@ -52,6 +54,7 @@ struct pollable {
 
 struct irc irc = {0};
 
+static struct ev_loop *loop;
 static struct sigaction sa;
 static struct defer *queue;
 static int pipes[2];
@@ -286,6 +289,13 @@ irc_bot_init(void)
 		irc_util_die("pipe: %s\n", strerror(errno));
 
 	self = pthread_self();
+	loop = ev_default_loop(0);
+}
+
+struct ev_loop *
+irc_bot_loop(void)
+{
+	return loop;
 }
 
 void
@@ -613,7 +623,6 @@ irc_bot_prepare(struct pollfd *fds)
 {
 	assert(fds);
 
-	struct irc_server *s;
 	struct pollable *pb;
 	int frecv = 0, fsend = 0;
 
@@ -621,8 +630,10 @@ irc_bot_prepare(struct pollfd *fds)
 	fds->events = POLLIN;
 	fds++;
 
+#if 0
 	LL_FOREACH(irc.servers, s)
 		irc_server_prepare(s, fds++);
+#endif
 	LL_FOREACH(pollables, pb) {
 		pb->iface->want(&frecv, &fsend, pb->iface->data);
 		fds->fd = pb->iface->fd(pb->iface->data);
@@ -635,7 +646,6 @@ irc_bot_flush(const struct pollfd *fds)
 {
 	assert(fds);
 
-	struct irc_server *s;
 	struct defer *d, *dtmp;
 	struct pollable *pb, *pbnext;
 	size_t pbsz = pollablesz;
@@ -650,8 +660,10 @@ irc_bot_flush(const struct pollfd *fds)
 
 	queue = NULL;
 
+#if 0
 	LL_FOREACH(irc.servers, s)
 		irc_server_flush(s, fds++);
+#endif
 
 	/*
 	 * We must iterate using the number of pollables because their sync
@@ -670,6 +682,8 @@ irc_bot_flush(const struct pollfd *fds)
 int
 irc_bot_dequeue(struct irc_event *ev)
 {
+	(void)ev;
+#if 0
 	struct irc_server *s;
 
 	memset(ev, 0, sizeof (*ev));
@@ -681,6 +695,7 @@ irc_bot_dequeue(struct irc_event *ev)
 		}
 	}
 
+#endif
 	return 0;
 }
 

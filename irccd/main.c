@@ -295,9 +295,51 @@ usage(void)
 	exit(1);
 }
 
+#include <irccd/server.h>
+#include <irccd/conn.h>
+
+static void
+on_connect(struct irc__conn *conn, int rc)
+{
+	(void)conn;
+
+	printf("connect status: %d\n", rc);
+}
+
+static void
+on_disconnect(struct irc__conn *conn)
+{
+	(void)conn;
+
+	printf("disconnect status\n");
+}
+
+static void
+on_msg(struct irc__conn *conn, const struct irc__conn_msg *msg)
+{
+	printf("msg\n");
+}
+
 int
 main(int argc, char **argv)
 {
+	struct irc_server *s;
+	struct irc__conn conn = {};
+
+	irc_bot_init();
+
+	s = irc_server_new("local", "dd", "dd", "dd", "127.0.0.1", 6667);
+	conn.sv = s;
+	conn.callbacks.on_connect = on_connect;
+	conn.callbacks.on_disconnect = on_disconnect;
+	conn.callbacks.on_msg = on_msg;
+	conn.port = 80;
+	irc_util_strlcpy(conn.hostname, "127.0.0.1", sizeof (conn.hostname));
+	irc__conn_connect(&conn);
+
+	ev_run(irc_bot_loop(), 0);
+
+#if 0
 	int ch, verbose = 0;
 
 	while ((ch = getopt(argc, argv, "c:v")) != -1) {
@@ -331,4 +373,5 @@ main(int argc, char **argv)
 
 	loop();
 	finish();
+#endif
 }

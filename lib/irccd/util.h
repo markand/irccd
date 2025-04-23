@@ -25,6 +25,9 @@
 extern "C" {
 #endif
 
+#define IRC_CONTAINER_OF(Ptr, Type, Member) \
+        ((Type *)((char *)(1 ? (Ptr) : &((Type *)0)->Member) - offsetof(Type, Member)))
+
 #define IRC_UTIL_SIZE(x) (sizeof (x) / sizeof (x[0]))
 
 /* Suitable convenient typedef for bsearch/qsort. */

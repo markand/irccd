@@ -43,10 +43,11 @@ project(irccd
 
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED On)
 set(CMAKE_C_EXTENSIONS On)
 set(CMAKE_POSITION_INDEPENDENT_CODE On)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic ${CMAKE_C_FLAGS}")
@@ -71,6 +72,9 @@ set(IRCCD_WITH_PKGCONFIGDIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
 
 # Check presence of POSIX m library
 find_library(M_LIBRARY m libm)
+
+# The libev library.
+find_package(Ev REQUIRED)
 
 include(cmake/IrccdDefinePlugin.cmake)
 
