@@ -51,7 +51,7 @@ clear_channels(struct irc_server *s, int free)
 
 	LL_FOREACH_SAFE(s->channels, c, tmp) {
 		if (free)
-			irc_channel_finish(c);
+			irc_channel_free(c);
 		else
 			irc_channel_clear(c);
 	}
@@ -80,27 +80,16 @@ is_self(const struct irc_server *s, const char *nick)
 }
 
 static struct irc_channel *
-add_channel(struct irc_server *s, const char *name, const char *password, int joined)
+add_channel(struct irc_server *s, const char *name, const char *password, enum irc_channel_flags flags)
 {
 	struct irc_channel *ch;
 
-	if ((ch = irc_server_find(s, name))) {
-		ch->joined = joined;
-		return ch;
+	if ((ch = irc_server_find(s, name)))
+		ch->flags |= flags;
+	else {
+		ch = irc_channel_new(name, password, flags);
+		LL_PREPEND(s->channels, ch);
 	}
-
-	ch = irc_util_calloc(1, sizeof (*ch));
-	ch->joined = joined;
-	irc_util_strlcpy(ch->name, name, sizeof (ch->name));
-
-	/* Convert to lowercase */
-	for (char *c = ch->name; *c; ++c)
-		*c = tolower(*c);
-
-	if (password)
-		irc_util_strlcpy(ch->password, password, sizeof (ch->password));
-
-	LL_PREPEND(s->channels, ch);
 
 	return ch;
 }
@@ -109,7 +98,7 @@ static void
 remove_channel(struct irc_server *s, struct irc_channel *ch)
 {
 	LL_DELETE(s->channels, ch);
-	irc_channel_finish(ch);
+	irc_channel_free(ch);
 }
 
 static int
@@ -335,7 +324,7 @@ handle_kick(struct irc_server *s, struct irc__conn_msg *msg)
 	 * rejoin it automatically if the option is set.
 	 */
 	if (is_self(s, ev.kick.target)) {
-		ch->joined = 0;
+		ch->flags &= ~(IRC_CHANNEL_FLAGS_JOINED);
 		irc_channel_clear(ch);
 
 		if (s->flags & IRC_SERVER_FLAGS_AUTO_REJOIN) {
@@ -353,8 +342,8 @@ handle_mode(struct irc_server *s, struct irc__conn_msg *msg)
 {
 	int action = 0, mode;
 	size_t nelem = 0, argindex = 2;
+	const struct irc_channel_user *u;
 	struct irc_channel *ch;
-	struct irc_channel_user *u;
 	struct irc_event ev = {};
 
 	ev.type = IRC_EVENT_MODE;
@@ -407,9 +396,9 @@ handle_mode(struct irc_server *s, struct irc__conn_msg *msg)
 		++argindex;
 
 		if (action == '+')
-			u->modes |= (1 << mode);
+			irc_channel_set(ch, u->nickname, u->modes |  (1 << mode));
 		else
-			u->modes &= ~(1 << mode);
+			irc_channel_set(ch, u->nickname, u->modes & ~(1 << mode));
 	}
 
 skip:
@@ -428,7 +417,7 @@ handle_part(struct irc_server *s, struct irc__conn_msg *msg)
 	ev.part.channel = irc_util_strdup(msg->args[0]);
 	ev.part.reason = msg->args[1] ? irc_util_strdup(msg->args[1]) : NULL;
 
-	ch = add_channel(s, ev.part.channel, NULL, 1);
+	ch = add_channel(s, ev.part.channel, NULL, IRC_CHANNEL_FLAGS_JOINED);
 
 	if (is_self(s, ev.part.origin)) {
 		remove_channel(s, ch);
@@ -552,7 +541,7 @@ handle_names(struct irc_server *s, struct irc__conn_msg *msg)
 	char *p, *token;
 	int modes = 0;
 
-	ch = add_channel(s, msg->args[2], NULL, 1);
+	ch = add_channel(s, msg->args[2], NULL, IRC_CHANNEL_FLAGS_JOINED);
 
 	/* Track existing nicknames into the given channel. */
 	for (p = msg->args[3]; (token = strtok_r(p, " ", &p)); ) {
@@ -905,9 +894,9 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 	 * and wait for connection.
 	 */
 	if (!(ch = irc_server_find(s, name)))
-		ch = add_channel(s, name, pass, 0);
+		ch = add_channel(s, name, pass, IRC_CHANNEL_FLAGS_NONE);
 
-	if (!ch->joined && s->state == IRC_SERVER_STATE_CONNECTED) {
+	if (!(ch->flags & IRC_CHANNEL_FLAGS_JOINED) && s->state == IRC_SERVER_STATE_CONNECTED) {
 		if (pass)
 			ret = irc_server_send(s, "JOIN %s %s", name, pass);
 		else

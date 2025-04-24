@@ -231,7 +231,7 @@ Server_prototype_info(duk_context *ctx)
 		duk_push_object(ctx);
 		duk_push_string(ctx, c->name);
 		duk_put_prop_string(ctx, -2, "name");
-		duk_push_boolean(ctx, c->joined);
+		duk_push_boolean(ctx, c->flags & IRC_CHANNEL_FLAGS_JOINED);
 		duk_put_prop_string(ctx, -2, "joined");
 		duk_push_array(ctx);
 

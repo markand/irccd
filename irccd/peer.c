@@ -788,7 +788,7 @@ cmd_server_info(struct peer *p, char *line)
 			if (user && (user->modes & 1 << i))
 				fputc(s->params.prefixes[i].symbol, fp);
 
-		if (c->joined)
+		if (c->flags & IRC_CHANNEL_FLAGS_JOINED)
 			fprintf(fp, "%s", c->name);
 		else
 			fprintf(fp, "(%s)", c->name);

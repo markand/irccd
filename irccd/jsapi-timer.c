@@ -163,7 +163,7 @@ Timer_constructor(duk_context *ctx)
 	type = duk_require_int(ctx, 0);
 	duration = duk_require_uint(ctx, 1);
 
-	if (type < 0 || type >= STIMER_TYPE_LAST)
+	if (type >= STIMER_TYPE_LAST)
 		return duk_error(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
 	if (!duk_is_callable(ctx, 2))
 		return duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
