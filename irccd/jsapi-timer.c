@@ -17,204 +17,109 @@
  */
 
 #include <assert.h>
-#include <pthread.h>
-#include <stdatomic.h>
-#include <time.h>
-#include <errno.h>
 
+#include <ev.h>
 #include <duktape.h>
 
 #include <irccd/irccd.h>
 #include <irccd/log.h>
 #include <irccd/util.h>
 
-#include "jsapi-system.h"
+#include "jsapi-plugin.h"
 
 #define SIGNATURE       DUK_HIDDEN_SYMBOL("Irccd.Timer")
-#define TABLE           DUK_HIDDEN_SYMBOL("Irccd.Timer.callbacks")
+#define PROP_CALLBACK   DUK_HIDDEN_SYMBOL("Irccd.Timer.callback")
 
-enum timer_type {
-	TIMER_REPEAT,
-	TIMER_ONESHOT,
-	TIMER_NUM
+enum stimer_type {
+	STIMER_TYPE_REPEAT,
+	STIMER_TYPE_ONESHOT,
+	STIMER_TYPE_LAST
 };
 
-enum timer_status {
-	TIMER_INACTIVE,
-	TIMER_ACTIVE,
-	TIMER_MUST_STOP,
-	TIMER_MUST_KILL
-};
-
-struct timer {
-	enum timer_type type;
-	unsigned long duration;
-	pthread_t thr;
-	pthread_mutex_t mtx;
-	pthread_cond_t cv;
-	duk_context *ctx;
-	atomic_int status;
+struct stimer {
+	duk_context *ctx;       /* parent duktape context */
+	void *addr;             /* reference to the Javascript timer object */
+	struct ev_timer timer;  /* and the timer itself */
 };
 
 static void
-timer_start(struct timer *);
-
-static void
-timer_clear(struct timer *tm)
+stimer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
 {
-	tm->status = TIMER_INACTIVE;
+	(void)loop;
+	(void)revents;
 
-	pthread_join(tm->thr, NULL);
-	pthread_cond_destroy(&tm->cv);
-	pthread_mutex_destroy(&tm->mtx);
+	const struct irc_plugin *plg;
+	struct stimer *st;
+
+	st = IRC_UTIL_CONTAINER_OF(self, struct stimer, timer);
+	plg = jsapi_plugin_self(st->ctx);
+
+	duk_push_heapptr(st->ctx, st->addr);
+	duk_push_string(st->ctx, PROP_CALLBACK);
+
+	if (duk_pcall_prop(st->ctx, -2, 0) != DUK_EXEC_SUCCESS)
+		irc_log_warn("plugin %s: %s", plg->name, duk_to_string(st->ctx, -1));
+
+	duk_pop_n(st->ctx, 2);
 }
 
-static void
-timer_call(struct timer *tm)
+static inline void
+stimer_init(struct stimer *st, enum stimer_type type, unsigned int duration)
 {
-	/* Get the function. */
-	duk_push_global_stash(tm->ctx);
-	duk_get_prop_string(tm->ctx, -1, TABLE);
-	duk_remove(tm->ctx, -2);
-	duk_push_sprintf(tm->ctx, "%p", tm);
-	duk_get_prop(tm->ctx, -2);
-	duk_remove(tm->ctx, -2);
+	ev_tstamp after, repeat;
 
-	if (duk_pcall(tm->ctx, 0))
-		irc_log_warn("plugin: %s", duk_to_string(tm->ctx, -1));
+	after  = duration / 1000.0;
+	repeat = type == STIMER_TYPE_REPEAT ? after : 0.0;
 
-	duk_pop(tm->ctx);
+	ev_timer_init(&st->timer, stimer_cb, after, repeat);
 }
 
-static void
-timer_destroy(struct timer *tm)
+static inline void
+stimer_start(struct stimer *st)
 {
-	if (tm->status == TIMER_MUST_STOP)
-		timer_clear(tm);
-	if (tm->status == TIMER_MUST_KILL)
-		free(tm);
+	ev_timer_start(irc_bot_loop(), &st->timer);
 }
 
-static void
-timer_expired(void *data)
+static inline void
+stimer_restart(struct stimer *st)
 {
-	struct timer *tm = data;
-
-	/* Only call if I wasn't aborted (race condition) */
-	if (tm->status == TIMER_ACTIVE) {
-		timer_clear(tm);
-		timer_call(tm);
-
-		/* Start again. */
-		if (tm->type == TIMER_REPEAT)
-			timer_start(tm);
-	} else
-		timer_destroy(tm);
+	ev_timer_again(irc_bot_loop(), &st->timer);
 }
 
-static void
-timer_aborted(void *data)
+static inline void
+stimer_stop(struct stimer *st)
 {
-	timer_destroy(data);
+	ev_timer_stop(irc_bot_loop(), &st->timer);
 }
 
-static void *
-timer_routine(void *data)
+static struct stimer *
+stimer_self(duk_context *ctx)
 {
-	struct timer *tm = data;
-	struct timespec ts = {0};
-	int rc = 0;
-
-	/* Prepare maximum time to wait. */
-	timespec_get(&ts, TIME_UTC);
-
-	ts.tv_sec  += tm->duration / 1000;
-	ts.tv_nsec += (tm->duration % 1000) * 1000000;
-
-	/* Readjust to avoid EINVAL. */
-	ts.tv_sec  += ts.tv_nsec / 1000000000;
-	ts.tv_nsec %= 1000000000;
-
-	if (pthread_mutex_lock(&tm->mtx) != 0)
-		tm->status = TIMER_MUST_STOP;
-
-	/* Wait at most time unless I'm getting kill. */
-	while (tm->status == TIMER_ACTIVE && rc == 0)
-		rc = pthread_cond_timedwait(&tm->cv, &tm->mtx, &ts);
-
-	/*
-	 * When the thread ends, there are several possibilities:
-	 *
-	 * 1. It has completed without being aborted.
-	 * 2. It has been stopped by the user.
-	 * 3. The plugin is shutting down.
-	 */
-	if (rc == ETIMEDOUT && tm->status == TIMER_ACTIVE)
-		irc_bot_post(timer_expired, tm);
-	else
-		irc_bot_post(timer_aborted, tm);
-
-	return NULL;
-}
-
-static void
-timer_start(struct timer *tm)
-{
-	if (tm->status != TIMER_INACTIVE)
-		return;
-
-	tm->status = TIMER_ACTIVE;
-
-	if (pthread_mutex_init(&tm->mtx, NULL) != 0)
-		goto mutex_err;
-	if (pthread_cond_init(&tm->cv, NULL) != 0)
-		goto cond_err;
-	if (pthread_create(&tm->thr, NULL, timer_routine, tm) != 0)
-		goto thread_err;
-
-	return;
-
-thread_err:
-	pthread_cond_destroy(&tm->cv);
-
-cond_err:
-	pthread_mutex_destroy(&tm->mtx);
-
-mutex_err:
-	tm->status = TIMER_INACTIVE;
-	jsapi_system_raise(tm->ctx);
-}
-
-static void
-timer_stop(struct timer *tm, enum timer_status st)
-{
-	if (tm->status == TIMER_INACTIVE)
-		return;
-
-	tm->status = st;
-	pthread_cond_signal(&tm->cv);
-}
-
-static struct timer *
-self(duk_context *ctx)
-{
-	struct timer *tm;
+	struct stimer *st;
 
 	duk_push_this(ctx);
 	duk_get_prop_string(ctx, -1, SIGNATURE);
-	tm = duk_to_pointer(ctx, -1);
+	st = duk_to_pointer(ctx, -1);
 	duk_pop_2(ctx);
 
-	if (!tm)
+	if (!st)
 		(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Timer object");
 
-	return tm;
+	return st;
+}
+
+static int
+Timer_prototype_restart(duk_context *ctx)
+{
+	stimer_restart(stimer_self(ctx));
+
+	return 0;
 }
 
 static int
 Timer_prototype_start(duk_context *ctx)
 {
-	timer_start(self(ctx));
+	stimer_start(stimer_self(ctx));
 
 	return 0;
 }
@@ -222,7 +127,7 @@ Timer_prototype_start(duk_context *ctx)
 static int
 Timer_prototype_stop(duk_context *ctx)
 {
-	timer_stop(self(ctx), TIMER_MUST_STOP);
+	stimer_stop(stimer_self(ctx));
 
 	return 0;
 }
@@ -230,28 +135,18 @@ Timer_prototype_stop(duk_context *ctx)
 static int
 Timer_destructor(duk_context *ctx)
 {
-	struct timer *tm;
+	struct stimer *st;
 
 	/* Remove timer property. */
 	duk_get_prop_string(ctx, 0, SIGNATURE);
-	tm = duk_to_pointer(ctx, -1);
+	st = duk_to_pointer(ctx, -1);
 	duk_pop(ctx);
 	duk_del_prop_string(ctx, -2, SIGNATURE);
 
-	/* Remove callback from timer table. */
-	duk_push_global_stash(tm->ctx);
-	duk_get_prop_string(tm->ctx, -1, TABLE);
-	duk_remove(tm->ctx, -2);
-	duk_push_sprintf(tm->ctx, "%p", tm);
-	duk_del_prop(tm->ctx, -2);
-	duk_pop(tm->ctx);
-
-	/*
-	 * Do not delete the timer itself here because the thread is
-	 * referencing it. Stop it and let it kill itself from the main thread.
-	 */
-	if (tm)
-		timer_stop(tm, TIMER_MUST_KILL);
+	if (st) {
+		stimer_stop(st);
+		free(st);
+	}
 
 	return 0;
 }
@@ -259,50 +154,53 @@ Timer_destructor(duk_context *ctx)
 static int
 Timer_constructor(duk_context *ctx)
 {
-	struct timer *ptr, tm = {
-		.ctx = ctx,
-	};
+	struct stimer *st;
+	unsigned int type, duration;
 
 	if (!duk_is_constructor_call(ctx))
 		return 0;
 
-	tm.type = duk_require_int(ctx, 0);
-	tm.duration = duk_require_uint(ctx, 1);
+	type = duk_require_int(ctx, 0);
+	duration = duk_require_uint(ctx, 1);
 
-	if (tm.type < 0 || tm.type >= TIMER_NUM)
+	if (type < 0 || type >= STIMER_TYPE_LAST)
 		return duk_error(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
 	if (!duk_is_callable(ctx, 2))
 		return duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
+	st = irc_util_calloc(1, sizeof (*st));
+	st->ctx = ctx;
+	stimer_init(st, type, duration);
+
 	/* Create this. */
 	duk_push_this(ctx);
-	duk_push_pointer(ctx, (ptr = irc_util_memdup(&tm, sizeof (tm))));
+	duk_push_pointer(ctx, st);
 	duk_put_prop_string(ctx, -2, SIGNATURE);
 	duk_push_c_function(ctx, Timer_destructor, 1);
 	duk_set_finalizer(ctx, -2);
-	duk_pop(ctx);
 
-	/* Store the function into the global table */
-	duk_push_global_stash(ctx);
-	duk_get_prop_string(ctx, -1, TABLE);
-	duk_remove(ctx, -2);
-	duk_push_sprintf(ctx, "%p", ptr);
+	/* Reference this object itself into the timer to retrieve it later on. */
+	st->addr = duk_get_heapptr(ctx, -1);
+
+	/* Duplicate the callback internally as this.callback property. */
 	duk_dup(ctx, 2);
-	duk_put_prop(ctx, -3);
+	duk_put_prop_string(ctx, -2, PROP_CALLBACK);
+
 	duk_pop(ctx);
 
 	return 0;
 }
 
 static const duk_function_list_entry methods[] = {
-	{ "start",      Timer_prototype_start,  0               },
-	{ "stop",       Timer_prototype_stop,   0               },
-	{ NULL,         NULL,                   0               }
+	{ "restart",    Timer_prototype_restart, 0               },
+	{ "start",      Timer_prototype_start,   0               },
+	{ "stop",       Timer_prototype_stop,    0               },
+	{ NULL,         NULL,                    0               }
 };
 
 static const duk_number_list_entry constants[] = {
-	{ "Single",     TIMER_ONESHOT                           },
-	{ "Repeat",     TIMER_REPEAT                            },
+	{ "Single",     STIMER_TYPE_ONESHOT                     },
+	{ "Repeat",     STIMER_TYPE_REPEAT                      },
 	{ NULL,         0                                       }
 };
 
@@ -318,9 +216,5 @@ jsapi_timer_load(duk_context *ctx)
 	duk_put_function_list(ctx, -1, methods);
 	duk_put_prop_string(ctx, -2, "prototype");
 	duk_put_prop_string(ctx, -2, "Timer");
-	duk_pop(ctx);
-	duk_push_global_stash(ctx);
-	duk_push_object(ctx);
-	duk_put_prop_string(ctx, -2, TABLE);
 	duk_pop(ctx);
 }
