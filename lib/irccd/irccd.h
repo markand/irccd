@@ -30,14 +30,6 @@
 extern "C" {
 #endif
 
-struct irc_pollable {
-	void *data;
-	int (*fd)(void *);
-	void (*want)(int *, int *, void *);
-	int (*sync)(int, int, void *);
-	void (*finish)(void *);
-};
-
 extern struct irc {
 	struct irc_server *servers;
 	struct irc_plugin *plugins;
@@ -47,7 +39,7 @@ extern struct irc {
 } irc;
 
 void
-irc_bot_init(void);
+irc_bot_init(struct ev_loop *loop);
 
 struct ev_loop *
 irc_bot_loop(void);
@@ -112,23 +104,14 @@ irc_bot_hook_remove(const char *);
 void
 irc_bot_hook_clear(void);
 
-size_t
-irc_bot_poll_size(void);
-
 void
-irc_bot_prepare(struct pollfd *);
-
-void
-irc_bot_flush(const struct pollfd *);
+irc_bot_dispatch(const struct irc_event *);
 
 int
 irc_bot_dequeue(struct irc_event *);
 
 void
 irc_bot_post(void (*)(void *), void *);
-
-void
-irc_bot_pollable_add(struct irc_pollable *);
 
 void
 irc_bot_finish(void);

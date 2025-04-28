@@ -88,6 +88,7 @@ endif ()
 
 add_subdirectory(extern/libutlist)
 
+add_subdirectory(cmake)
 add_subdirectory(lib)
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)

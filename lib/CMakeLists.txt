@@ -41,14 +41,8 @@ set(
 )
 
 set(
-	PRIVHEADERS
-	${libirccd_SOURCE_DIR}/irccd/conn.h
-)
-
-set(
 	SOURCES
 	${libirccd_SOURCE_DIR}/irccd/channel.c
-	${libirccd_SOURCE_DIR}/irccd/conn.c
 	${libirccd_SOURCE_DIR}/irccd/event.c
 	${libirccd_SOURCE_DIR}/irccd/hook.c
 	${libirccd_SOURCE_DIR}/irccd/irccd.c

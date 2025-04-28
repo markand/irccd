@@ -17,13 +17,13 @@
  */
 
 #include <errno.h>
-#include <poll.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdnoreturn.h>
 #include <string.h>
 #include <unistd.h>
+
+#include <ev.h>
 
 #include <utlist.h>
 
@@ -36,7 +36,6 @@
 #include <irccd/util.h>
 
 #include "dl-plugin.h"
-
 #include "peer.h"
 #include "transport.h"
 
@@ -44,13 +43,9 @@
 #       include "js-plugin.h"
 #endif
 
-struct pollables {
-	struct pollfd *fds;
-	size_t fdsz;
-	size_t botsz;
-	size_t localsz;
-};
-
+static struct ev_loop *loop;
+static struct ev_signal sig_int;
+static struct ev_signal sig_term;
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
 static struct peer *peers;
 static int running = 1;
@@ -70,19 +65,7 @@ broadcast(const struct irc_event *ev)
 
 	LL_FOREACH(peers, p)
 		if (p->is_watching)
-			peer_send(p, buf);
-}
-
-static inline size_t
-poll_count(void)
-{
-	struct peer *p;
-	size_t i = 1;
-
-	LL_FOREACH(peers, p)
-		++i;
-
-	return i;
+			peer_push(p, "%s", buf);
 }
 
 static void
@@ -167,66 +150,31 @@ run(int argc, char **argv)
 }
 
 static void
-stop(int signum)
+sig_cb(struct ev_loop *loop, struct ev_signal *self, int revents)
 {
-	irc_log_info("irccd: stopping on signal %d", signum);
-	running = 0;
+	(void)loop;
+	(void)revents;
+
+	irc_log_info("irccd: stopping on signal %d", self->signum);
+	irc_bot_finish();
 }
 
 static void
 init(void)
 {
-	struct sigaction sig;
+	loop = ev_default_loop(0);
 
-	irc_bot_init();
+	irc_bot_init(loop);
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
 
 #if defined(IRCCD_WITH_JS)
 	irc_bot_plugin_loader_add(js_plugin_loader_new());
 #endif
 
-	sigemptyset(&sig.sa_mask);
-	sig.sa_handler = stop;
-	sig.sa_flags = SA_RESTART;
-
-	if (sigaction(SIGINT, &sig, NULL) < 0 || sigaction(SIGTERM, &sig, NULL) < 0)
-		irc_util_die("sigaction: %s\n", strerror(errno));
-}
-
-static void
-prepare(struct pollables *pb)
-{
-	struct peer *p;
-	struct pollfd *fd = pb->fds + pb->botsz;
-
-	irc_bot_prepare(pb->fds);
-	transport_prepare(fd++);
-
-	LL_FOREACH(peers, p)
-		peer_prepare(p, fd++);
-}
-
-static void
-flush(const struct pollables *pb)
-{
-	struct peer *peer, *tmp;
-	struct pollfd *fd = pb->fds + pb->botsz + 1;
-
-	irc_bot_flush(pb->fds);
-
-	LL_FOREACH_SAFE(peers, peer, tmp) {
-		if (peer_flush(peer, fd++) < 0) {
-			LL_DELETE(peers, peer);
-			peer_finish(peer);
-		}
-	}
-
-	/*
-	 * Add a new client only now because we would iterate over a list
-	 * of pollfd that is smaller than the client list.
-	 */
-	if ((peer = transport_flush(pb->fds + pb->botsz)))
-		LL_PREPEND(peers, peer);
+	ev_signal_init(&sig_int, sig_cb, SIGINT);
+	ev_signal_init(&sig_term, sig_cb, SIGTERM);
+	ev_signal_start(loop, &sig_int);
+	ev_signal_start(loop, &sig_term);
 }
 
 static inline void
@@ -235,57 +183,19 @@ load(void)
 	config_open(config);
 }
 
-static struct pollables
-pollables(void)
-{
-	struct pollables pb = {0};
-
-	pb.botsz = irc_bot_poll_size();
-	pb.localsz = poll_count();
-	pb.fdsz = pb.botsz + pb.localsz;
-	pb.fds = irc_util_calloc(pb.fdsz, sizeof (*pb.fds));
-
-	prepare(&pb);
-
-	return pb;
-}
-
-static void
-loop(void)
-{
-	struct pollables pb;
-	struct irc_event ev;
-
-	while (running) {
-		pb = pollables();
-
-		if (poll(pb.fds, pb.fdsz, 1000) < 0 && errno != EINTR)
-			irc_util_die("poll: %s\n", strerror(errno));
-
-		flush(&pb);
-
-		while (irc_bot_dequeue(&ev)) {
-			broadcast(&ev);
-			irc_event_finish(&ev);
-		}
-
-		free(pb.fds);
-	}
-}
-
 static inline void
 finish(void)
 {
 	struct peer *peer, *tmp;
 
 	LL_FOREACH_SAFE(peers, peer, tmp)
-		peer_finish(peer);
+		peer_free(peer);
 
 	transport_finish();
 	irc_bot_finish();
 }
 
-noreturn static void
+_Noreturn static void
 usage(void)
 {
 	fprintf(stderr, "usage: irccd [-v] [-c config]\n");
@@ -295,51 +205,9 @@ usage(void)
 	exit(1);
 }
 
-#include <irccd/server.h>
-#include <irccd/conn.h>
-
-static void
-on_connect(struct irc__conn *conn, int rc)
-{
-	(void)conn;
-
-	printf("connect status: %d\n", rc);
-}
-
-static void
-on_disconnect(struct irc__conn *conn)
-{
-	(void)conn;
-
-	printf("disconnect status\n");
-}
-
-static void
-on_msg(struct irc__conn *conn, const struct irc__conn_msg *msg)
-{
-	printf("msg\n");
-}
-
 int
 main(int argc, char **argv)
 {
-	struct irc_server *s;
-	struct irc__conn conn = {};
-
-	irc_bot_init();
-
-	s = irc_server_new("local", "dd", "dd", "dd", "127.0.0.1", 6667);
-	conn.sv = s;
-	conn.callbacks.on_connect = on_connect;
-	conn.callbacks.on_disconnect = on_disconnect;
-	conn.callbacks.on_msg = on_msg;
-	conn.port = 80;
-	irc_util_strlcpy(conn.hostname, "127.0.0.1", sizeof (conn.hostname));
-	irc__conn_connect(&conn);
-
-	ev_run(irc_bot_loop(), 0);
-
-#if 0
 	int ch, verbose = 0;
 
 	while ((ch = getopt(argc, argv, "c:v")) != -1) {
@@ -371,7 +239,6 @@ main(int argc, char **argv)
 	if (verbose)
 		irc_log_set_verbose(1);
 
-	loop();
+	ev_loop(loop, 0);
 	finish();
-#endif
 }

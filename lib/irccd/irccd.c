@@ -16,13 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/wait.h>
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <poll.h>
 #include <pthread.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -47,21 +44,16 @@ struct defer {
 	struct defer *next;
 };
 
-struct pollable {
-	struct irc_pollable *iface;
-	struct pollable *next;
+struct irc irc = {};
+
+static struct {
+	struct ev_loop *loop;
+	struct defer *queue;
+	pthread_t self;
+	pthread_mutex_t mtx;
+} priv = {
+	.mtx = PTHREAD_MUTEX_INITIALIZER
 };
-
-struct irc irc = {0};
-
-static struct ev_loop *loop;
-static struct sigaction sa;
-static struct defer *queue;
-static int pipes[2];
-static pthread_t self;
-static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-static struct pollable *pollables;
-static size_t pollablesz;
 
 static int
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
@@ -210,29 +202,6 @@ open_plugin(struct irc_plugin_loader *ldr, const char *name, const char *path)
 	return irc_plugin_loader_open(ldr, name, path);
 }
 
-static void
-handle_sigchld(int signum, siginfo_t *sinfo, void *unused)
-{
-	(void)signum;
-	(void)unused;
-
-	int status;
-
-	if (sinfo->si_code != CLD_EXITED)
-		return;
-
-	if (waitpid(sinfo->si_pid, &status, 0) < 0) {
-		irc_log_warn("irccd: %s", strerror(errno));
-		return;
-	}
-
-	if (WIFEXITED(status))
-		irc_log_debug("irccd: hook %d terminated correctly", sinfo->si_pid);
-	else
-		irc_log_debug("irccd: hook process %d terminated abnormally: %d",
-		    sinfo->si_pid, WEXITSTATUS(status));
-}
-
 static inline int
 is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 {
@@ -253,49 +222,21 @@ is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 	return 0;
 }
 
-static void
-pipe_flush(const struct pollfd *fd)
-{
-	int dummy;
-
-	if (fd->fd != pipes[0] || !(fd->revents & POLLIN))
-		return;
-	if (read(pipes[0], &dummy, sizeof (int)) != sizeof (int))
-		irc_util_die("read: %s\n", strerror(errno));
-}
-
-static inline void
-delpollable(struct pollable *pb)
-{
-	if (pb->iface->finish)
-		pb->iface->finish(pb->iface->data);
-
-	LL_DELETE(pollables, pb);
-	pollablesz--;
-}
-
 void
-irc_bot_init(void)
+irc_bot_init(struct ev_loop *loop)
 {
+	assert(loop);
+
 	irc_log_to_console();
 
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_SIGINFO;
-	sa.sa_sigaction = handle_sigchld;
-
-	if (sigaction(SIGCHLD, &sa, NULL) < 0)
-		irc_util_die("sigaction: %s\n", strerror(errno));
-	if (pipe(pipes) < 0)
-		irc_util_die("pipe: %s\n", strerror(errno));
-
-	self = pthread_self();
-	loop = ev_default_loop(0);
+	priv.loop = loop;
+	priv.self = pthread_self();
 }
 
 struct ev_loop *
 irc_bot_loop(void)
 {
-	return loop;
+	return priv.loop;
 }
 
 void
@@ -363,7 +304,7 @@ irc_bot_plugin_add(struct irc_plugin *p)
 
 	if (irc_plugin_load(p) == 0) {
 		LL_PREPEND(irc.plugins, p);
-		irc_log_info("irccd: add new plugin: %s", p->name, p->description);
+		irc_log_info("irccd: add new plugin: %s (%s)", p->name, p->description);
 		irc_log_info("irccd: %s: version %s, from %s (%s license)", p->name,
 		    p->version, p->author, p->license);
 	} else
@@ -591,7 +532,7 @@ irc_bot_hook_remove(const char *name)
 
 	if ((h = irc_bot_hook_get(name))) {
 		LL_DELETE(irc.hooks, h);
-		irc_hook_finish(h);
+		irc_hook_free(h);
 	}
 }
 
@@ -601,107 +542,17 @@ irc_bot_hook_clear(void)
 	struct irc_hook *h, *tmp;
 
 	LL_FOREACH_SAFE(irc.hooks, h, tmp)
-		irc_hook_finish(h);
+		irc_hook_free(h);
 
 	irc.hooks = NULL;
-}
-
-size_t
-irc_bot_poll_size(void)
-{
-	size_t i = 1 + pollablesz;
-	struct irc_server *s;
-
-	LL_FOREACH(irc.servers, s)
-		++i;
-
-	return i;
-}
-
-void
-irc_bot_prepare(struct pollfd *fds)
-{
-	assert(fds);
-
-	struct pollable *pb;
-	int frecv = 0, fsend = 0;
-
-	fds->fd = pipes[0];
-	fds->events = POLLIN;
-	fds++;
-
-#if 0
-	LL_FOREACH(irc.servers, s)
-		irc_server_prepare(s, fds++);
-#endif
-	LL_FOREACH(pollables, pb) {
-		pb->iface->want(&frecv, &fsend, pb->iface->data);
-		fds->fd = pb->iface->fd(pb->iface->data);
-		fds++->events |= (frecv ? POLLIN : 0) | (fsend ? POLLOUT : 0);
-	}
-}
-
-void
-irc_bot_flush(const struct pollfd *fds)
-{
-	assert(fds);
-
-	struct defer *d, *dtmp;
-	struct pollable *pb, *pbnext;
-	size_t pbsz = pollablesz;
-	int frecv, fsend;
-
-	pipe_flush(fds++);
-
-	LL_FOREACH_SAFE(queue, d, dtmp) {
-		d->exec(d->data);
-		free(d);
-	}
-
-	queue = NULL;
-
-#if 0
-	LL_FOREACH(irc.servers, s)
-		irc_server_flush(s, fds++);
-#endif
-
-	/*
-	 * We must iterate using the number of pollables because their sync
-	 * function may modify the list.
-	 */
-	for (pb = pollables; pbsz--; pb = pbnext) {
-		pbnext = pb->next;
-		frecv = fds->revents & POLLIN;
-		fsend = fds++->revents & POLLOUT;
-
-		if (pb->iface->sync(frecv, fsend, pb->iface->data) < 0)
-			delpollable(pb);
-	}
-}
-
-int
-irc_bot_dequeue(struct irc_event *ev)
-{
-	(void)ev;
-#if 0
-	struct irc_server *s;
-
-	memset(ev, 0, sizeof (*ev));
-
-	LL_FOREACH(irc.servers, s) {
-		if (irc_server_poll(s, ev)) {
-			invoke(ev);
-			return 1;
-		}
-	}
-
-#endif
-	return 0;
 }
 
 void
 irc_bot_post(void (*exec)(void *), void *data)
 {
+	(void)exec;
+	(void)data;
+#if 0
 	struct defer *d;
 	int dummy = 1;
 
@@ -721,26 +572,13 @@ irc_bot_post(void (*exec)(void *), void *data)
 
 	if (pthread_mutex_unlock(&mtx) < 0)
 		irc_util_die("pthread_mutex_unlock: %s\n", strerror(errno));
-}
-
-void
-irc_bot_pollable_add(struct irc_pollable *iface)
-{
-	assert(iface);
-	assert(iface->fd && iface->want && iface->sync);
-
-	struct pollable *pb;
-
-	pb = irc_util_calloc(1, sizeof (*pb));
-	pb->iface = iface;
-
-	LL_APPEND(pollables, pb);
-	pollablesz++;
+#endif
 }
 
 void
 irc_bot_finish(void)
 {
+#if 0
 	struct irc_plugin_loader *ld, *ldtmp;
 	struct defer *d, *dtmp;
 	struct pollable *pb, *pbtmp;
@@ -774,4 +612,5 @@ irc_bot_finish(void)
 	irc_bot_rule_clear();
 
 	pthread_mutex_destroy(&mtx);
+#endif
 }

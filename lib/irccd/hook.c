@@ -24,8 +24,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <utlist.h>
+
 #include "event.h"
 #include "hook.h"
+#include "irccd.h"
 #include "log.h"
 #include "server.h"
 #include "util.h"
@@ -128,6 +131,43 @@ make_args(const struct irc_hook *h, const struct irc_event *ev)
 	return ret;
 }
 
+static void
+child_cb(struct ev_loop *loop, struct ev_child *self, int revents)
+{
+	(void)revents;
+
+	struct irc_hook_child *child;
+	struct irc_hook *parent;
+
+	child = IRC_CONTAINER_OF(self, struct irc_hook_child, child);
+	parent = child->parent;
+
+	if (WIFEXITED(self->rstatus))
+		irc_log_debug("hook %s: exited with code %d", parent->name, WEXITSTATUS(self->rstatus));
+	else if (WIFSIGNALED(self->rstatus))
+		irc_log_debug("hook %s: terminated on signal  %d", parent->name, WTERMSIG(self->rstatus));
+
+	ev_child_stop(loop, self);
+
+	LL_DELETE(child->parent->children, child);
+	free(child);
+}
+
+static void
+append(struct irc_hook *h, pid_t pid)
+{
+	struct irc_hook_child *child;
+
+	child = irc_util_calloc(1, sizeof (*child));
+	child->pid = pid;
+	child->parent = h;
+
+	ev_child_init(&child->child, child_cb, child->pid, 0);
+	ev_child_start(irc_bot_loop(), &child->child);
+
+	LL_APPEND(h->children, child);
+}
+
 struct irc_hook *
 irc_hook_new(const char *name, const char *path)
 {
@@ -137,8 +177,8 @@ irc_hook_new(const char *name, const char *path)
 	struct irc_hook *h;
 
 	h = irc_util_malloc(sizeof (*h));
-	irc_util_strlcpy(h->name, name, sizeof (h->name));
-	irc_util_strlcpy(h->path, path, sizeof (h->path));
+	h->name = irc_util_strdup(name);
+	h->path = irc_util_strdup(path);
 
 	return h;
 }
@@ -150,12 +190,12 @@ irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 	assert(ev);
 
 	char **args;
-	pid_t child;
+	pid_t pid;
 
 	if (!(args = make_args(h, ev)))
 		return;
 
-	switch ((child = fork())) {
+	switch ((pid = fork())) {
 	case -1:
 		irc_log_warn("hook %s: %s", h->name, strerror(errno));
 		break;
@@ -165,7 +205,11 @@ irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 		exit(1);
 		break;
 	default:
-		/* We wait for signal handler using SIGCHLD. */
+		/*
+		 * Append a hook child handle and wait for it to terminate
+		 * asynchronously.
+		 */
+		append(h, pid);
 		break;
 	}
 
@@ -173,9 +217,11 @@ irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 }
 
 void
-irc_hook_finish(struct irc_hook *h)
+irc_hook_free(struct irc_hook *h)
 {
 	assert(h);
+
+	// TODO: destroy all children.
 
 	free(h);
 }

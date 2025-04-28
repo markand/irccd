@@ -19,7 +19,9 @@
 #ifndef IRCCD_HOOK_H
 #define IRCCD_HOOK_H
 
-#include <limits.h>
+#include <sys/types.h>
+
+#include <ev.h>
 
 #include "limits.h"
 
@@ -29,20 +31,28 @@ extern "C" {
 
 struct irc_event;
 
+struct irc_hook_child {
+	pid_t pid;
+	struct ev_child child;
+	struct irc_hook *parent;
+	struct irc_hook_child *next;
+};
+
 struct irc_hook {
-	char name[IRC_ID_LEN];
-	char path[PATH_MAX];
+	char *name;
+	char *path;
 	struct irc_hook *next;
+	struct irc_hook_child *children;
 };
 
 struct irc_hook *
-irc_hook_new(const char *, const char *);
+irc_hook_new(const char *name, const char *path);
 
 void
-irc_hook_invoke(struct irc_hook *, const struct irc_event *);
+irc_hook_invoke(struct irc_hook *hook, const struct irc_event *ev);
 
 void
-irc_hook_finish(struct irc_hook *);
+irc_hook_free(struct irc_hook *hook);
 
 #if defined(__cplusplus)
 }

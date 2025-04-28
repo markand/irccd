@@ -19,31 +19,41 @@
 #ifndef IRCCD_PEER_H
 #define IRCCD_PEER_H
 
+#include <stddef.h>
+
+#include <ev.h>
+
+#include <irccd/attrs.h>
 #include <irccd/limits.h>
 
-struct pollfd;
+struct peer;
+
+typedef void (*peer_close_cb)(struct peer *);
 
 struct peer {
 	int fd;
+	struct ev_io io_fd;
+
 	int is_watching;
+
+	peer_close_cb on_close;
+
 	char in[IRC_BUF_LEN];
+	size_t insz;
 	char out[IRC_BUF_LEN];
+	size_t outsz;
+
 	struct peer *next;
 };
 
 struct peer *
 peer_new(int);
 
+IRCCD_ATTR_PRINTF(2, 3)
 int
-peer_send(struct peer *, const char *, ...);
+peer_push(struct peer *, const char *, ...);
 
 void
-peer_prepare(struct peer *, struct pollfd *);
-
-int
-peer_flush(struct peer *, const struct pollfd *);
-
-void
-peer_finish(struct peer *);
+peer_free(struct peer *);
 
 #endif /* !IRCCD_PEER_H */

@@ -40,6 +40,9 @@ void *
 irc_util_malloc(size_t);
 
 void *
+irc_util_free(void *ptr);
+
+void *
 irc_util_calloc(size_t, size_t);
 
 void *
@@ -56,6 +59,9 @@ irc_util_strdup(const char *);
 
 char *
 irc_util_strndup(const char *, size_t);
+
+char *
+irc_util_strdupfree(char *ptr, const char *);
 
 char *
 irc_util_basename(const char *);

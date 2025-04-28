@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <poll.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,7 +74,7 @@ require_server(struct peer *p, const char *id)
 	struct irc_server *s;
 
 	if (!(s = irc_bot_server_get(id))) {
-		peer_send(p, "server %s not found", id);
+		peer_push(p, "server %s not found", id);
 		return NULL;
 	}
 
@@ -88,7 +87,7 @@ require_plugin(struct peer *p, const char *id)
 	struct irc_plugin *plg;
 
 	if (!(plg = irc_bot_plugin_get(id))) {
-		peer_send(p, "plugin %s not found", id);
+		peer_push(p, "plugin %s not found", id);
 		return NULL;
 	}
 
@@ -98,7 +97,7 @@ require_plugin(struct peer *p, const char *id)
 static inline int
 ok(struct peer *p)
 {
-	peer_send(p, "OK");
+	peer_push(p, "OK");
 
 	return 0;
 }
@@ -114,7 +113,7 @@ error(struct peer *p, const char *fmt, ...)
 	va_end(ap);
 
 	if (buf[0])
-		peer_send(p, "ERROR %s", buf);
+		peer_push(p, "ERROR %s", buf);
 
 	return 0;
 }
@@ -164,7 +163,7 @@ plugin_list_set(struct peer *p,
 	}
 
 	fclose(fp);
-	peer_send(p, out);
+	peer_push(p, "%s", out);
 
 	return 0;
 }
@@ -226,7 +225,7 @@ cmd_hook_list(struct peer *p, char *line)
 	}
 
 	fclose(fp);
-	peer_send(p, out);
+	peer_push(p, "%s", out);
 
 	return 0;
 }
@@ -271,7 +270,7 @@ cmd_plugin_info(struct peer *p, char *line)
 	if (!(plg = require_plugin(p, args[0])))
 		return 0;
 
-	peer_send(p, "OK %s\n%s\n%s\n%s\n%s", plg->name, plg->description,
+	peer_push(p, "OK %s\n%s\n%s\n%s\n%s", plg->name, plg->description,
 	    plg->version, plg->license, plg->author);
 
 	return 0;
@@ -289,7 +288,7 @@ cmd_plugin_load(struct peer *p, char *line)
 	if (parse(line, args, 1) != 1)
 		return EINVAL;
 	if (!(plg = irc_bot_plugin_find(args[0], NULL)))
-		peer_send(p, "could not load plugin: %s", strerror(errno));
+		peer_push(p, "could not load plugin: %s", strerror(errno));
 	else {
 		/* TODO: report error if fails to open. */
 		irc_bot_plugin_add(plg);
@@ -333,7 +332,7 @@ cmd_plugin_list(struct peer *p, char *line)
 	}
 
 	fclose(fp);
-	peer_send(p, out);
+	peer_push(p, "%s", out);
 
 	return 0;
 }
@@ -349,7 +348,7 @@ cmd_plugin_reload(struct peer *p, char *line)
 
 	if (parse(line, args, 1) == 1) {
 		if (!(plg = irc_bot_plugin_get(args[0])))
-			return peer_send(p, "could not reload plugin: %s", strerror(ENOENT)), 0;
+			return peer_push(p, "could not reload plugin: %s", strerror(ENOENT)), 0;
 
 		irc_plugin_reload(plg);
 	} else
@@ -583,7 +582,7 @@ cmd_rule_list(struct peer *p, char *line)
 	}
 
 	fclose(fp);
-	peer_send(p, "%s", out);
+	peer_push(p, "%s", out);
 
 	return 0;
 }
@@ -798,7 +797,7 @@ cmd_server_info(struct peer *p, char *line)
 	}
 
 	fclose(fp);
-	peer_send(p, out);
+	peer_push(p, "%s", out);
 
 	return 0;
 }
@@ -885,7 +884,7 @@ cmd_server_list(struct peer *p, char *line)
 	}
 
 	fclose(fp);
-	peer_send(p, out);
+	peer_push(p, "%s", out);
 
 	return 0;
 }
@@ -1021,9 +1020,9 @@ invoke(struct peer *p, char *line)
 	int er;
 
 	if (!c)
-		peer_send(p, "command not found");
+		peer_push(p, "command not found");
 	else if ((er = c->call(p, line)) != 0)
-		peer_send(p, "%s", strerror(er));
+		peer_push(p, "%s", strerror(er));
 }
 
 static void
@@ -1032,7 +1031,7 @@ dispatch(struct peer *p)
 	char *pos;
 	size_t length;
 
-	while ((pos = strstr(p->in, "\n"))) {
+	while ((pos = memchr(p->in, '\n', p->insz))) {
 		/* Turn end of the string at delimiter. */
 		*pos = 0;
 		length = pos - p->in;
@@ -1041,24 +1040,30 @@ dispatch(struct peer *p)
 			invoke(p, p->in);
 
 		memmove(p->in, pos + 1, sizeof (p->in) - (length + 1));
+		p->insz -= length;
 	}
 }
 
 static int
 input(struct peer *p)
 {
-	char buf[BUFSIZ + 1];
 	ssize_t nr;
+	size_t cap;
 
-	if ((nr = recv(p->fd, buf, BUFSIZ, 0)) <= 0) {
-		irc_log_info("transport: client disconnect");
+	cap = sizeof (p->in) - p->insz;
+
+	if (cap == 0) {
+		irc_log_warn("transport: peer input full");
 		return -1;
 	}
 
-	buf[nr] = '\0';
+	while ((nr = recv(p->fd, &p->in[p->insz], cap, MSG_NOSIGNAL)) < 0 && errno == EINTR)
+		continue;
 
-	if (irc_util_strlcat(p->in, buf, sizeof (p->in)) >= sizeof (p->in)) {
-		errno = EMSGSIZE;
+	if (nr < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
+		return -1;
+	if (nr == 0) {
+		irc_log_info("transport: client disconnect");
 		return -1;
 	}
 
@@ -1071,17 +1076,41 @@ static int
 output(struct peer *p)
 {
 	ssize_t ns;
-	size_t len = strlen(p->out);
 
-	if ((ns = send(p->fd, p->out, len, 0)) < 0)
+	while ((ns = send(p->fd, p->out, p->outsz, MSG_NOSIGNAL)) < 0 && errno == EINTR)
+		continue;
+
+	if (ns < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
 		return -1;
 
-	if ((size_t)ns >= len)
+	if ((size_t)ns >= p->outsz) {
 		memset(p->out, 0, sizeof (p->out));
-	else
-		memmove(p->out, p->out + ns, sizeof (p->out) - ns);
+		p->outsz = 0;
+	} else {
+		memmove(p->out, &p->out[ns], sizeof (p->out) - ns);
+		p->outsz -= ns;
+	}
 
 	return 0;
+}
+
+static void
+io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
+{
+	struct peer *peer;
+	int rc = 0;
+
+	peer = IRC_CONTAINER_OF(self, struct peer, io_fd);
+
+	if (revents & EV_READ)
+		rc = input(peer);
+	if (rc == 0 && (revents & EV_WRITE))
+		rc = output(peer);
+
+	if (rc < 0) {
+		ev_io_stop(loop, &peer->io_fd);
+		peer->on_close(peer);
+	}
 }
 
 struct peer *
@@ -1092,70 +1121,55 @@ peer_new(int fd)
 	p = irc_util_calloc(1, sizeof (*p));
 	p->fd = fd;
 
+	ev_io_init(&p->io_fd, io_cb, fd, EV_READ);
+	ev_io_start(irc_bot_loop(), &p->io_fd);
+
 	return p;
 }
 
 int
-peer_send(struct peer *p, const char *fmt, ...)
+peer_push(struct peer *p, const char *fmt, ...)
 {
 	assert(p);
 	assert(fmt);
 
-	char buf[IRC_BUF_LEN];
+	char buf[IRC_BUF_LEN] = {};
 	va_list ap;
-	size_t len, avail, required;
+	size_t len;
 
 	va_start(ap, fmt);
-	required = vsnprintf(buf, sizeof (buf), fmt, ap);
+	vsnprintf(buf, sizeof (buf) - 1, fmt, ap);
 	va_end(ap);
 
-	len = strlen(p->out);
-	avail = sizeof (p->out) - len;
+	len = strlen(buf);
 
-	/* Don't forget \n. */
-	if (required + 1 >= avail)
+	/* We add a '\n' to the end of the message. */
+	if (len + 1 > sizeof (p->out) - p->outsz)
 		return -1;
 
-	irc_util_strlcat(p->out, buf, sizeof (p->out));
-	irc_util_strlcat(p->out, "\n", sizeof (p->out));
+	/* Replace NUL terminator by \n' */
+	buf[len++] = '\n';
+	memcpy(&p->out[p->outsz], buf, len);
+	p->outsz += len;
+
+	ev_io_stop(irc_bot_loop(), &p->io_fd);
+	ev_io_modify(&p->io_fd, EV_READ | EV_WRITE);
+	ev_io_start(irc_bot_loop(), &p->io_fd);
 
 	return 0;
 }
 
 void
-peer_prepare(struct peer *p, struct pollfd *fd)
-{
-	assert(p);
-	assert(fd);
-
-	fd->fd = p->fd;;
-	fd->events = POLLIN;
-
-	if (p->out[0])
-		fd->events |= POLLOUT;
-}
-
-int
-peer_flush(struct peer *p, const struct pollfd *fd)
-{
-	assert(p);
-	assert(fd);
-
-	if (fd->fd != p->fd)
-		return -1;
-	if (fd->revents & POLLIN && input(p) < 0)
-		return -1;
-	if (fd->revents & POLLOUT && output(p) < 0)
-		return -1;
-
-	return 0;
-}
-
-void
-peer_finish(struct peer *p)
+peer_free(struct peer *p)
 {
 	assert(p);
 
-	close(p->fd);
+	ev_io_stop(irc_bot_loop(), &p->io_fd);
+
+	if (p->fd != -1) {
+		close(p->fd);
+		p->fd = -1;
+	}
+
 	free(p);
 }

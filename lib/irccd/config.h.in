@@ -33,4 +33,6 @@
 #cmakedefine IRCCD_WITH_SSL
 #cmakedefine IRCCD_WITH_HTTP
 
+#cmakedefine IRCCD_SYS_HAS_ATTRIBUTE_FORMAT_PRINTF
+
 #endif /* !IRCCD_CONFIG_H */

@@ -181,24 +181,6 @@ set_events(struct irc__conn *conn, int flags)
 static inline int
 set_events_ssl(struct irc__conn *conn, int ret)
 {
-	int num, flags = 0;
-
-	switch ((num = SSL_get_error(conn->ssl, ret))) {
-	case SSL_ERROR_WANT_READ:
-		flags |= EV_READ;
-		break;
-	case SSL_ERROR_WANT_WRITE:
-		flags |= EV_WRITE;
-		break;
-	case SSL_ERROR_SSL:
-		return -1;
-	default:
-		break;
-	}
-
-	set_events(conn, flags);
-
-	return 0;
 }
 
 static inline ssize_t
@@ -350,74 +332,28 @@ start(struct irc__conn *conn, enum irc__conn_state state)
 	}
 }
 
-static void
-stop(struct irc__conn *conn)
+static int
+dequeue(struct irc__conn *conn, struct irc__conn_msg *msg)
 {
-#if defined(IRCCD_WITH_SSL)
-	if (conn->ssl)
-		SSL_free(conn->ssl);
-	if (conn->ctx)
-		SSL_CTX_free(conn->ctx);
-	conn->ssl = NULL;
-	conn->ctx = NULL;
-#endif
+	char *pos;
+	size_t length;
 
-	ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
-	ev_io_stop(irc_bot_loop(), &conn->io_fd);
+	if (!(pos = strstr(conn->in, "\r\n")))
+		return 0;
 
-	if (conn->fd != -1) {
-		close(conn->fd);
-		conn->fd = -1;
-	}
+	/* Turn end of the string at delimiter. */
+	*pos = 0;
+	length = pos - conn->in;
 
-	conn->state = IRC__CONN_STATE_NONE;
+	if (length > 0)
+		parse(msg, conn->in);
+
+	/* (Re)move the first message received. */
+	memmove(conn->in, pos + 2, sizeof (conn->in) - (length + 2));
+
+	return 1;
 }
 
-static void
-do_handshaking(struct irc__conn *conn)
-{
-#if defined(IRCCD_WITH_SSL)
-	int r;
-
-	if (conn->flags & IRC__CONN_SSL) {
-		conn->state = IRC__CONN_STATE_HANDSHAKING;
-
-		/*
-		 * This function is called several time until it completes so we
-		 * must keep the same context/ssl stuff once it has been
-		 * created.
-		 */
-		if (!conn->ctx)
-			conn->ctx = SSL_CTX_new(TLS_method());
-		if (!conn->ssl) {
-			conn->ssl = SSL_new(conn->ctx);
-
-			SSL_set_fd(conn->ssl, conn->fd);
-			SSL_set_connect_state(conn->ssl);
-		}
-
-		if ((r = SSL_do_handshake(conn->ssl)) <= 0)
-			retry(conn);
-	} else
-#endif
-	start(conn, IRC__CONN_STATE_READY);
-}
-
-static void
-do_ready(struct irc__conn *conn, int revents)
-{
-	int rc = 0;
-
-	if (revents & EV_READ)
-		rc = input(conn);
-	if (rc == 0 && (revents & EV_WRITE))
-		rc = output(conn);
-
-	if (rc < 0) {
-		stop(conn);
-		conn->on_disconnect(conn);
-	}
-}
 
 /*
  * Check if the connection completed.
@@ -475,19 +411,6 @@ dial(struct irc__conn *conn)
 		errno = EHOSTUNREACH;
 		conn->on_disconnect(conn);
 	}
-}
-
-/*
- * Attempt connection to the next endpoint.
- */
-static void
-retry(struct irc__conn *conn)
-{
-	/* Go to next endpoint. */
-	conn->aip = conn->aip->ai_next;
-
-	stop(conn);
-	dial(conn);
 }
 
 static int
@@ -559,32 +482,7 @@ irc__conn_disconnect(struct irc__conn *conn)
 }
 
 int
-irc__conn_poll(struct irc__conn *conn, struct irc__conn_msg *msg)
-{
-	assert(conn);
-	assert(msg);
-
-	char *pos;
-	size_t length;
-
-	if (!(pos = strstr(conn->in, "\r\n")))
-		return 0;
-
-	/* Turn end of the string at delimiter. */
-	*pos = 0;
-	length = pos - conn->in;
-
-	if (length > 0)
-		parse(msg, conn->in);
-
-	/* (Re)move the first message received. */
-	memmove(conn->in, pos + 2, sizeof (conn->in) - (length + 2));
-
-	return 1;
-}
-
-int
-irc__conn_send(struct irc__conn *conn, const char *data)
+irc__conn_push(struct irc__conn *conn, const char *data)
 {
 	assert(conn);
 	assert(data);
@@ -597,6 +495,9 @@ irc__conn_send(struct irc__conn *conn, const char *data)
 		errno = EMSGSIZE;
 		return -1;
 	}
+
+	if (conn->out[0])
+		set_events(conn, EV_READ | EV_WRITE);
 
 	return 0;
 }

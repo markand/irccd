@@ -100,10 +100,7 @@ void
 irc__conn_disconnect(struct irc__conn *);
 
 int
-irc__conn_send(struct irc__conn *, const char *);
-
-int
-irc__conn_poll(struct irc__conn *, struct irc__conn_msg *);
+irc__conn_push(struct irc__conn *, const char *);
 
 void
 irc__conn_free(struct irc__conn *);

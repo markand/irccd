@@ -1,5 +1,5 @@
 /*
- * log.h -- loggers
+ * attrs.h -- compiler attributes
  *
  * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
@@ -16,50 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_LOG_H
-#define IRCCD_LOG_H
+#ifndef IRCCD_ATTRS_H
+#define IRCCD_ATTRS_H
 
-#include "attrs.h"
+#include "config.h"
 
-#if defined(__cplusplus)
-extern "C" {
+#if defined(IRCCD_SYS_HAS_ATTRIBUTE_FORMAT_PRINTF)
+#       define IRCCD_ATTR_PRINTF(x, y) __attribute__ ((format(printf, x, y)))
+#else
+#       define IRCCD_ATTR_PRINTF(x, y)
 #endif
 
-void
-irc_log_to_syslog(void);
-
-void
-irc_log_to_console(void);
-
-void
-irc_log_to_file(const char *);
-
-void
-irc_log_to_null(void);
-
-void
-irc_log_set_verbose(int);
-
-void
-irc_log_set_template(const char *);
-
-IRCCD_ATTR_PRINTF(1, 2)
-void
-irc_log_info(const char *, ...);
-
-IRCCD_ATTR_PRINTF(1, 2)
-void
-irc_log_warn(const char *, ...);
-
-IRCCD_ATTR_PRINTF(1, 2)
-void
-irc_log_debug(const char *, ...);
-
-void
-irc_log_finish(void);
-
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* !IRCCD_LOG_H */
+#endif /* !IRCCD_ATTRS_H */

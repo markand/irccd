@@ -24,22 +24,51 @@
 
 #include "channel.h"
 #include "event.h"
-#include "limits.h"
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
+#define IRC_SERVER_DEFAULT_PORT 6667
+#define IRC_SERVER_DEFAULT_PREFIX "!"
+#define IRC_SERVER_DEFAULT_CTCP_VERSION "IRC Client Daemon"
+
 struct irc__conn;
 struct irc_channel;
 
+/**
+ * \brief Current IRC server state.
+ */
 enum irc_server_state {
-	IRC_SERVER_STATE_NONE,
+	/**
+	 * Socket closed, no connection.
+	 */
 	IRC_SERVER_STATE_DISCONNECTED,
+
+	/**
+	 * Raw TCP socket connection in progress.
+	 */
 	IRC_SERVER_STATE_CONNECTING,
-	IRC_SERVER_STATE_CONNECTED,
-	IRC_SERVER_STATE_WAITING,
-	IRC_SERVER_STATE_NUM
+
+	/**
+	 * SSL connection is handshaking.
+	 */
+	IRC_SERVER_STATE_HANDSHAKING,
+
+	/**
+	 * IRC server protocol exchange and authentication.
+	 */
+	IRC_SERVER_STATE_IDENTIFYING,
+
+	/**
+	 * Connection complete and running.
+	 */
+	IRC_SERVER_STATE_RUNNING,
+
+	/**
+	 * Unused sentinel value.
+	 */
+	IRC_SERVER_STATE_LAST
 };
 
 enum irc_server_flags {
@@ -51,64 +80,242 @@ enum irc_server_flags {
 	IRC_SERVER_FLAGS_IPV6          = (1 << 5)
 };
 
-struct irc_server_callbacks {
-	void (*on_connect)(struct irc_server *);
-	void (*on_disconnect)(struct irc_server *);
-	void (*on_event)(struct irc_server *, const struct irc_event *);
-};
-
 struct irc_server_user {
-	char nickname[IRC_NICKNAME_LEN];
-	char username[IRC_USERNAME_LEN];
-	char host[IRC_HOST_LEN];
+	char *nickname;
+	char *username;
+	char *host;
 };
 
-struct irc_server_ident {
-	char nickname[IRC_NICKNAME_LEN];
-	char username[IRC_USERNAME_LEN];
-	char realname[IRC_REALNAME_LEN];
-	char password[IRC_PASSWORD_LEN];
-	char ctcpversion[IRC_CTCP_LEN];
-	char ctcpsource[IRC_CTCP_LEN];
+struct irc_server_umode {
+	char mode;              /* Mode (e.g. ov). */
+	char symbol;            /* Symbol used (e.g. @+). */
 };
 
-struct irc_server_params {
-	char chantypes[IRC_CHANTYPES_LEN];
-	char charset[IRC_CHARSET_LEN];
-	char casemapping[IRC_CASEMAPPING_LEN];
-	unsigned int chanlen;
-	unsigned int nicklen;
-	unsigned int topiclen;
-	unsigned int awaylen;
-	unsigned int kicklen;
-	struct {
-		char mode;              /* Mode (e.g. ov). */
-		char symbol;            /* Symbol used (e.g. @+). */
-	} prefixes[IRC_USERMODES_LEN];
-};
-
+/**
+ * \brief IRC server connection
+ *
+ * This large structure holds the connection to the IRC server and all of its
+ * information including joined channels and such.
+ *
+ * All fields are visible to the user for convenience but should only be edited
+ * through the appropriate `irc_server_set_*` functions.
+ */
 struct irc_server {
-	char name[IRC_ID_LEN];
-	char prefix[IRC_PREFIX_LEN];
-	struct irc_server_ident ident;
-	struct irc_server_params params;
-	enum irc_server_state state;
+	/**
+	 * (read-only)
+	 *
+	 * Server name.
+	 */
+	char *name;
+
+	/**
+	 * (read-only)
+	 *
+	 * IRC hostname.
+	 */
+	char *hostname;
+
+	/**
+	 * (read-only)
+	 *
+	 * IRC server port number.
+	 */
+	unsigned int port;
+
+
+	/**
+	 * (read-only, optional)
+	 *
+	 * Prefix command character to invoke plugins.
+	 */
+	char *prefix;
+
+	/**
+	 * (read-only)
+	 *
+	 * IRC nickname to use.
+	 */
+	char *nickname;
+
+	/**
+	 * (read-only)
+	 *
+	 * IRC username to use.
+	 */
+	char *username;
+
+	/**
+	 * (read-only)
+	 *
+	 * IRC real name to use.
+	 */
+	char *realname;
+
+	/**
+	 * (read-only, optional)
+	 *
+	 * Password for connecting to the IRC server.
+	 */
+	char *password;
+
+	/**
+	 * (read-only, optional)
+	 *
+	 * CTCP response to VERSION.
+	 */
+	char *ctcp_version;
+
+	/**
+	 * (read-only, optional)
+	 *
+	 * CTCP response to SOURCE.
+	 */
+	char *ctcp_source;
+
+	/**
+	 * (read-only)
+	 *
+	 * Server flags.
+	 */
 	enum irc_server_flags flags;
+
+	/**
+	 * (read-only)
+	 *
+	 * Current server state.
+	 */
+	enum irc_server_state state;
+
+	/**
+	 * (read-only)
+	 *
+	 * List of channels to join or joined.
+	 */
 	struct irc_channel *channels;
+
+	/**
+	 * (read-only, optional)
+	 *
+	 * Channel types prefixes.
+	 *
+	 * This string contains every characters that are allowed in the
+	 * beginning of a channel name (e.g. `#~`).
+	 */
+	char *chantypes;
+
+	/**
+	 * (read-only, optional)
+	 *
+	 * Charset that the server expects.
+	 */
+	char *charset;
+
+	/**
+	 * (read-only, optional)
+	 *
+	 */
+	char *casemapping;
+
+	/**
+	 * (read-only)
+	 *
+	 * Maximum length for a channel.
+	 */
+	unsigned int channel_max;
+
+	/**
+	 * (read-only)
+	 *
+	 * Maximum length for a nickname.
+	 */
+	unsigned int nickname_max;
+
+	/**
+	 * (read-only)
+	 *
+	 * Maximum length for a topic.
+	 */
+	unsigned int topic_max;
+
+	/**
+	 * (read-only)
+	 *
+	 * Maximum length for an away message.
+	 */
+	unsigned int away_max;
+
+	/**
+	 * (read-only)
+	 *
+	 * Maximum length for a kick reason message.
+	 */
+	unsigned int kick_max;
+
+	struct irc_server_umode *prefixes;
+	size_t prefixesz;
+
+	/**
+	 * \cond IRC_PRIVATE
+	 */
+
+	/**
+	 * (private)
+	 *
+	 * Private connection handle.
+	 */
+	void *conn;
+
+	/**
+	 * (private)
+	 *
+	 * Whois being constructed.
+	 */
 	struct irc_event_whois bufwhois;
-	struct irc__conn *conn;
-	struct irc_server_callbacks cb;
+
+	/**
+	 * (private)
+	 *
+	 * Reference count.
+	 */
 	size_t refc;
+
+	/**
+	 * (private)
+	 *
+	 * Next server in the linked list.
+	 */
 	struct irc_server *next;
+
+	/**
+	 * \endcond IRC_PRIVATE
+	 */
 };
 
 struct irc_server *
-irc_server_new(const char *,
-               const char *,
-               const char *,
-               const char *,
-               const char *,
-               unsigned int);
+irc_server_new(const char *name);
+
+void
+irc_server_set_ident(struct irc_server *s,
+                     const char *nickname,
+                     const char *username,
+                     const char *realname);
+
+void
+irc_server_set_params(struct irc_server *s,
+                      const char *hostname,
+                      unsigned int port,
+                      enum irc_server_flags flags);
+
+void
+irc_server_set_ctcp(struct irc_server *s,
+                    const char *version,
+                    const char *source);
+
+void
+irc_server_set_prefix(struct irc_server *s, const char *prefix);
+
+void
+irc_server_set_password(struct irc_server *s, const char *password);
 
 void
 irc_server_connect(struct irc_server *);

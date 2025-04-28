@@ -133,7 +133,7 @@ transport_flush(const struct pollfd *pfd)
 	peer = peer_new(newfd);
 
 	irc_log_info("transport: new client connected");
-	peer_send(peer, "IRCCD %d.%d.%d", IRCCD_VERSION_MAJOR,
+	peer_push(peer, "IRCCD %d.%d.%d", IRCCD_VERSION_MAJOR,
 	    IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH);
 
 	return peer;
