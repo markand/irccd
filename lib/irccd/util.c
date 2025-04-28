@@ -83,6 +83,14 @@ irc_util_memdup(const void *ptr, size_t size)
 	return memcpy(irc_util_malloc(size), ptr, size);
 }
 
+void *
+irc_util_free(void *ptr)
+{
+	free(ptr);
+
+	return NULL;
+}
+
 char *
 irc_util_strdup(const char *src)
 {
@@ -105,6 +113,19 @@ irc_util_strndup(const char *src, size_t n)
 		irc_util_die("strndup: %s\n", strerror(errno));
 
 	return ret;
+}
+
+char *
+irc_util_strdupfree(char *ptr, const char *value)
+{
+	free(ptr);
+
+	if (value)
+		ptr = irc_util_strdup(value);
+	else
+		ptr = NULL;
+
+	return ptr;
 }
 
 char *

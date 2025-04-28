@@ -533,8 +533,9 @@ server
 		if (!$4->realname)
 			irc_util_die("missing server realname\n");
 
-		s = irc_server_new($2, $4->nickname, $4->username, $4->realname,
-			$4->hostname, $4->port);
+		s = irc_server_new($2);
+		irc_server_set_ident(s, $4->nickname, $4->username, $4->realname);
+		irc_server_set_params(s, $4->hostname, $4->port, $4->flags);
 
 		if ($4->channels) {
 			LL_FOREACH($4->channels, str) {
@@ -549,15 +550,15 @@ server
 		}
 
 		if ($4->prefix)
-			irc_util_strlcpy(s->prefix, $4->prefix, sizeof (s->prefix));
+			irc_server_set_prefix(s, $4->prefix);
 		if ($4->password)
-			irc_util_strlcpy(s->ident.password, $4->password, sizeof (s->ident.password));
-		if ($4->ctcpversion)
-			irc_util_strlcpy(s->ident.ctcpversion, $4->ctcpversion, sizeof (s->ident.ctcpversion));
-		if ($4->ctcpsource)
-			irc_util_strlcpy(s->ident.ctcpsource, $4->ctcpsource, sizeof (s->ident.ctcpsource));
+			irc_server_set_password(s, $4->password);
 
-		s->flags = $4->flags;
+		if ($4->ctcpversion)
+			irc_server_set_ctcp(s, $4->ctcpversion, NULL);
+		if ($4->ctcpsource)
+			irc_server_set_ctcp(s, NULL, $4->ctcpsource);
+
 		irc_bot_server_add(s);
 
 		free($2);

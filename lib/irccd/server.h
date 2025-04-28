@@ -33,7 +33,6 @@ extern "C" {
 #define IRC_SERVER_DEFAULT_PREFIX "!"
 #define IRC_SERVER_DEFAULT_CTCP_VERSION "IRC Client Daemon"
 
-struct irc__conn;
 struct irc_channel;
 
 /**
@@ -72,12 +71,12 @@ enum irc_server_state {
 };
 
 enum irc_server_flags {
-	IRC_SERVER_FLAGS_SSL           = (1 << 0),
-	IRC_SERVER_FLAGS_AUTO_REJOIN   = (1 << 1),
-	IRC_SERVER_FLAGS_JOIN_INVITE   = (1 << 2),
-	IRC_SERVER_FLAGS_AUTO_RECO     = (1 << 3),
-	IRC_SERVER_FLAGS_IPV4          = (1 << 4),
-	IRC_SERVER_FLAGS_IPV6          = (1 << 5)
+	IRC_SERVER_FLAGS_SSL            = (1 << 0),
+	IRC_SERVER_FLAGS_AUTO_REJOIN    = (1 << 1),
+	IRC_SERVER_FLAGS_JOIN_INVITE    = (1 << 2),
+	IRC_SERVER_FLAGS_AUTO_RECONNECT = (1 << 3),
+	IRC_SERVER_FLAGS_NO_IPV4        = (1 << 4),
+	IRC_SERVER_FLAGS_NO_IPV6        = (1 << 5)
 };
 
 struct irc_server_user {

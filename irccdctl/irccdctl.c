@@ -646,9 +646,9 @@ cmd_rule_move(int argc, char **argv)
 	long long from, to;
 
 	if (irc_util_stoi(argv[0], &from) < 0)
-		irc_util_die("abort: %s: %s\n", argv[0], errno);
+		irc_util_die("abort: %s: %s\n", argv[0], strerror(errno));
 	if (irc_util_stoi(argv[1], &to) < 0)
-		irc_util_die("abort: %s: %s\n", argv[1], errno);
+		irc_util_die("abort: %s: %s\n", argv[1], strerror(errno));
 
 	req("RULE-MOVE %lld %lld", from, to);
 	ok();

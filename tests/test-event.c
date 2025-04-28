@@ -31,7 +31,9 @@ basics_parse_simple(void)
 	};
 	struct irc__conn_msg msg = {0};
 
+#if 0
 	irc__conn_poll(&conn, &msg);
+#endif
 
 	GREATEST_ASSERT_STR_EQ("malikania.fr", msg.prefix);
 	GREATEST_ASSERT_STR_EQ("332", msg.cmd);

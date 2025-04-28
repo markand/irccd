@@ -18,7 +18,6 @@
 
 #include <sys/socket.h>
 #include <assert.h>
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
@@ -47,216 +46,609 @@
 #include "server.h"
 #include "util.h"
 
-#define CONN_RECONNECT_DELAY    30.0    /* Seconds to wait before reconnecting. */
-#define CONN_TIMEOUT            1800.0  /* Seconds before marking a server as dead. */
+#define RECONNECT_DELAY 30.0    /* Seconds to wait before reconnecting. */
+#define CONNECT_TIMEOUT 1800.0  /* Seconds before marking a server as dead. */
+
+#if 0
+enum conn_err {
+	/*
+	 * No error.
+	 */
+	CONN_ERR_OK,
+
+	/*
+	 * The connect() call failed, conn->errval contains errno value.
+	 */
+	CONN_ERR_CONNECT,
+
+	/*
+	 * The recv() call failed, conn->errval contains errno value.
+	 */
+	CONN_ERR_RECV,
+
+	/*
+	 * The send() call failed, conn->errval contains errno value.
+	 */
+	CONN_ERR_SEND,
+
+	/*
+	 * The getaddrinfo() call failed, conn->errval contains its return code.
+	 */
+	CONN_ERR_GETADDRINFO,
+
+	/*
+	 * A SSL function failed, conn->errval contains its return code.
+	 */
+	CONN_ERR_SSL,
+
+	/*
+	 * An other logic error happened, conn->errval contains a errno status.
+	 */
+	CONN_ERR_GENERIC
+};
+#endif
+
+/*
+ * Current connection state.
+ */
+enum conn_state {
+	/*
+	 * Connection state closed, conn->fd = -1.
+	 */
+	CONN_STATE_CLOSED,
+
+	/*
+	 * Connection is in progress.
+	 */
+	CONN_STATE_CONNECTING,
+
+	/*
+	 * (SSL only)
+	 *
+	 * SSL handshaking is in progress.
+	 */
+	CONN_STATE_HANDSHAKING,
+
+	/*
+	 * Connection is ready for I/O.
+	 */
+	CONN_STATE_READY
+};
+
+/*
+ * Reason why conn notified the server through conn->async_ev.
+ */
+enum conn_async {
+	/* Unused default value. */
+	CONN_ASYNC_NONE,
+
+	/*
+	 * Connection became ready, the server will perform the initial IRC
+	 * protocol identification and authentication.
+	 */
+	CONN_ASYNC_READY,
+
+	/*
+	 * Some data arrived in the incoming buffer and conn->insz is greater
+	 * than zero.
+	 *
+	 * Server will dequeue the buffer with conn_dequeue.
+	 */
+	CONN_ASYNC_INCOMING
+
+	/*
+	 * Error happened in the connection.
+	 */
+	CONN_ASYNC_ERROR,
+};
 
 struct conn {
-	struct irc_server *parent;
+	/* Link to the parent server. */
+	const struct irc_server *parent;
 
-	struct addrinfo *aip;
+	/* Current connection state. */
+	enum conn_state state;
+
+	/*
+	 * Pointer to current endpoint to try and pointer to the original
+	 * list.
+	 */
 	struct addrinfo *ai;
+	struct addrinfo *ai_list;
 
+	/*
+	 * Input & output buffer and their respective sizes, not NUL
+	 * terminated.
+	 */
 	char in[IRC_BUF_LEN];
 	size_t insz;
 	char out[IRC_BUF_LEN];
 	size_t outsz;
 
+	/* Socket, its watcher and a connect/ping timer */
 	int fd;
 	struct ev_io io_fd;
 	struct ev_timer timer_fd;
 
+	/* Connection to server notification */
+	struct ev_async async_ev;
+	enum conn_async async_reason;
+
+	/* OpenSSL boring stuff. */
 #if defined(IRCCD_WITH_SSL)
 	SSL_CTX *ctx;
 	SSL *ssl;
 #endif
+
+	/* Transport callbacks */
+	ssize_t (*recv)(struct conn *, void *, size_t);
+	ssize_t (*send)(struct conn *, const void *, size_t);
+	int     (*want)(struct conn *);
 };
 
-struct conn_msg {
+struct msg {
 	char *prefix;
 	char *cmd;
 	char *args[IRC_ARGS_MAX];
-	char buf[IRC_MESSAGE_LEN];
+	char buf[IRC_MESSAGE_LEN + 1];
 };
 
-static struct conn * conn_new(struct irc_server *);
-static void          conn_reconnect(struct conn *);
-static void          conn_connect_next(struct conn *);
-static void          conn_switch(struct conn *, enum irc_server_state);
-static void          conn_timer_cb(struct ev_loop *, struct ev_timer *, int);
-static void          conn_io_connecting(struct conn *, int);
-static void          conn_io_handshaking(struct conn *conn, int);
-static void          conn_io_running(struct conn *, int);
-static void          conn_io_cb(struct ev_loop *, struct ev_io *, int);
-static void          conn_close(struct conn *);
-static int           conn_socket(struct conn *);
-static void          conn_connect(struct conn *);
-static void          conn_connect_next(struct conn *);
-static void          conn_identify(struct conn *);
-static int           conn_dequeue(struct conn *, struct conn_msg *);
-static void          conn_watch(struct conn *, int);
-static ssize_t       conn_clear_recv(struct conn *, char *, size_t);
-static ssize_t       conn_clear_send(struct conn *);
-static int           conn_recv(struct conn *);
-static int           conn_send(struct conn *);
-static int           conn_lookup(struct conn *);
-static int           conn_push(struct conn *, const char *);
-static void          conn_free(struct conn *);
+/*
+ * With the given amount of callbacks and functions required to parse and
+ * exchange with the IRC server, add prototypes of very function.
+ */
 
-#if defined(IRCCD_WITH_SSL)
-static void          conn_tls_handshake(struct conn *);
-static int           conn_tls_want(const struct conn *, int);
-static ssize_t       conn_tls_recv(struct conn *, char *, size_t);
-static ssize_t       conn_tls_send(struct conn *);
+/* channels */
+
+#if 0
+static struct irc_channel * channels_add(struct irc_server *,
+                                         const char *,
+                                         const char *,
+                                         enum irc_channel_flags);
+static void                 channels_clear(struct irc_server *);
+static void                 channels_free(struct irc_server *);
+static void                 channels_remove(struct irc_server *,
+                                            struct irc_channel *);
 #endif
 
+/* server */
+static void server_clear(struct irc_server *);
+static void server_connect(struct irc_server *);
+static void server_disconnect(struct irc_server *);
+static void server_free(struct irc_server *);
+static void server_identify(struct irc_server *);
+static void server_switch(struct irc_server *, enum irc_server_state);
+static int  server_is_self_nickname(const struct irc_server *, const char *);
+static int  server_find_mode(struct irc_server *, int);
+
+/* message parsing */
+static int  msg_parse(struct msg *, const char *, size_t);
+static void msg_scan(char **, char **);
+
+/* private connection functions */
+static void          conn__io_cb(struct ev_loop *, struct ev_io *, int);
+static void          conn__io_connecting(struct conn *, int);
+static void          conn__io_handshaking(struct conn *, int);
+static void          conn__io_ready(struct conn *, int);
+static int           conn__lookup(struct conn *);
+static int           conn__recv(struct conn *);
+static int           conn__send(struct conn *);
+static int           conn__socket(struct conn *);
+static void          conn__timer_cb(struct ev_loop *, struct ev_timer *, int);
+static void          conn__watch(struct conn *, int);
+
+/* private connection transport with SSL */
+
+#if defined(IRCCD_WITH_SSL)
+static int           conn__tls_handshake(struct conn *);
+static ssize_t       conn__tls_recv(struct conn *, void *, size_t);
+static ssize_t       conn__tls_send(struct conn *, const void *, size_t);
+static int           conn__tls_want(struct conn *);
+#endif
+
+/* connection transport without SSL */
+
+static ssize_t       conn__plain_recv(struct conn *, void *, size_t);
+static ssize_t       conn__plain_send(struct conn *, const void *, size_t);
+static int           conn__plain_want(struct conn *);
+
+/* public connection functions */
+static struct conn * conn_new(struct irc_server *);
+static void          conn_close(struct conn *);
+static int           conn_dequeue(struct conn *, struct msg *);
+static int           conn_push(struct conn *, const char *, size_t);
+static void          conn_free(struct conn *);
+
+/* handlers */
+
+static void handle_connect(struct irc_server *, struct msg *);
+static void handle_disconnect(struct irc_server *);
+static void handle_support(struct irc_server *, struct msg *);
+static void handle_invite(struct irc_server *, struct msg *);
+static void handle_join(struct irc_server *, struct msg *);
+static void handle_kick(struct irc_server *, struct msg *);
+static void handle_mode(struct irc_server *, struct msg *);
+static void handle_part(struct irc_server *, struct msg *);
+static void handle_msg(struct irc_server *, struct msg *);
+static void handle_nick(struct irc_server *, struct msg *);
+static void handle_notice(struct irc_server *, struct msg *);
+static void handle_topic(struct irc_server *, struct msg *);
+static void handle_ping(struct irc_server *, struct msg *);
+static void handle_names(struct irc_server *, struct msg *);
+static void handle_endofnames(struct irc_server *, struct msg *);
+static void handle_nicknameinuse(struct irc_server *, struct msg *);
+static void handle_error(struct irc_server *, struct msg *);
+static void handle_whoisuser(struct irc_server *, struct msg *);
+static void handle_whoischannels(struct irc_server *, struct msg *);
+static void handle_endofwhois(struct irc_server *, struct msg *);
+
+static int              handler_cmp(const void *, const void *);
+static struct handler * handler_find(const char *);
+static void             handler(struct irc_server *, struct msg *);
+
+/* {{{ message parsing */
+
+static void
+msg_scan(char **line, char **str)
+{
+	char *p = strchr(*line, ' ');
+
+	if (p)
+		*p = '\0';
+
+	*str = *line;
+	*line = p ? p + 1 : strchr(*line, '\0');
+}
+
+static int
+msg_parse(struct msg *msg, const char *line, size_t linesz)
+{
+	char *ptr = msg->buf;
+	size_t a;
+
+	memset(msg, 0, sizeof (*msg));
+	memcpy(msg->buf, line, linesz);
+
+	/*
+	 * IRC message is defined as following:
+	 *
+	 * [:prefix] command arg1 arg2 [:last-argument]
+	 */
+	if (*ptr == ':')
+		msg_scan((++ptr, &ptr), &msg->prefix);     /* prefix */
+
+	msg_scan(&ptr, &msg->cmd);                         /* command */
+
+	/* And finally arguments. */
+	for (a = 0; *ptr && a < IRC_UTIL_SIZE(msg->args); ++a) {
+		if (*ptr == ':') {
+			msg->args[a] = ptr + 1;
+			ptr = strchr(ptr, '\0');
+		} else
+			msg_scan(&ptr, &msg->args[a]);
+	}
+
+	if (a >= IRC_UTIL_SIZE(msg->args)) {
+		errno = EMSGSIZE;
+		return -1;
+	}
+	if (msg->cmd == NULL) {
+		errno = EBADMSG;
+		return -1;
+	}
+
+	return 0;
+}
+static inline int
+msg_is_ctcp(const char *line)
+{
+	size_t length;
+
+	if (!line)
+		return 0;
+	if ((length = strlen(line)) < 2)
+		return 0;
+
+	return line[0] == 0x1 && line[length - 1] == 0x1;
+}
+
+static char *
+msg_ctcp(char *line)
+{
+	/* Skip first \x01. */
+	if (*line == '\x01')
+		line++;
+
+	/* Remove last \001. */
+	line[strcspn(line, "\x01")] = '\0';
+
+	if (strncmp(line, "ACTION ", 7) == 0)
+		line += 7;
+
+	return line;
+}
+
+/* }}} */
+
+static struct irc_channel *
+server_channels_add(struct irc_server *s,
+                    const char *name,
+                    const char *password,
+                    enum irc_channel_flags flags)
+{
+	struct irc_channel *ch;
+
+	if ((ch = irc_server_find(s, name)))
+		ch->flags |= flags;
+	else {
+		ch = irc_channel_new(name, password, flags);
+		LL_PREPEND(s->channels, ch);
+	}
+
+	return ch;
+}
+
 /*
- * Allocate a new IRC server connection.
+ * Clear the server channels, meaning the joining state get's reset and nickname
+ * list emptied.
  */
+static inline void
+server_channels_clear(struct irc_server *s)
+{
+	struct irc_channel *c;
+
+	LL_FOREACH(s->channels, c)
+		irc_channel_clear(c);
+}
+
+/*
+ * Free all channels and clear the linked list.
+ */
+static inline void
+server_channels_free(struct irc_server *s)
+{
+	struct irc_channel *c, *tmp;
+
+	LL_FOREACH_SAFE(s->channels, c, tmp)
+		irc_channel_free(c);
+
+	s->channels = NULL;
+}
+
+/*
+ * Remove the channel from the server.
+ *
+ * Explicitly allow ch to be NULL for convenience.
+ */
+static inline void
+server_channels_remove(struct irc_server *s, struct irc_channel *ch)
+{
+	if (ch) {
+		LL_DELETE(s->channels, ch);
+		irc_channel_free(ch);
+	}
+}
+
+/* }}} */
+
+/* {{{ connection abstraction */
+
 static struct conn *
-conn_new(struct irc_server *s)
+conn_new(struct irc_server *parent)
 {
 	struct conn *conn;
 
 	conn = irc_util_calloc(1, sizeof (*conn));
-	conn->parent = s;
+	conn->parent = parent;
 	conn->fd = -1;
+
+	if (parent->flags & IRC_SERVER_FLAGS_SSL) {
+#if defined(IRCCD_WITH_SSL)
+		conn->recv = conn__tls_recv;
+		conn->send = conn__tls_send;
+		conn->want = conn__tls_want;
+#else
+		abort();
+#endif
+	}
+
+	ev_init(&conn->io_fd, conn__io_cb);
+	ev_init(&conn->timer_fd, conn__timer_cb);
 
 	return conn;
 }
 
-/*
- * Start the timer again to reconnect in few seconds if the server flags has
- * auto-reconnect option.
- */
-static void
-conn_reconnect(struct conn *conn)
+static ssize_t
+conn__plain_recv(struct conn *conn, void *buf, size_t bufsz)
 {
-	struct irc_server *s = conn->parent;
+	ssize_t nr;
 
-	s->state = IRC_SERVER_STATE_DISCONNECTED;
+	while ((nr = recv(conn->fd, buf, bufsz, MSG_NOSIGNAL)) < 0 && errno == EINTR)
+		continue;
 
-	if (s->flags & IRC_SERVER_FLAGS_AUTO_RECO) {
-		irc_log_info("server %s: retrying in %d seconds", s->name, (int)CONN_RECONNECT_DELAY);
-		ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
-		ev_timer_set(&conn->timer_fd, CONN_RECONNECT_DELAY, 0.0);
-		ev_timer_start(irc_bot_loop(), &conn->timer_fd);
-	}
-}
-
-/*
- * Change the connection to the next IRC server status.
- */
-static void
-conn_switch(struct conn *conn, enum irc_server_state state)
-{
-	struct irc_server *s = conn->parent;
-
-	s->state = state;
-
-	switch (s->state) {
-	case IRC_SERVER_STATE_CONNECTING:
-		irc_log_debug("server %s: connection in progress", s->name);
-
-		assert(!ev_is_active(&conn->timer_fd));
-		assert(!ev_is_active(&conn->io_fd));
-
-		ev_timer_init(&conn->timer_fd, conn_timer_cb, CONN_TIMEOUT, 0.0);
-		ev_timer_start(irc_bot_loop(), &conn->timer_fd);
-
-		/* Connect in progress, wait for writable condition. */
-		ev_io_init(&conn->io_fd, conn_io_cb, conn->fd, EV_WRITE);
-		ev_io_start(irc_bot_loop(), &conn->io_fd);
-		break;
-	case IRC_SERVER_STATE_HANDSHAKING:
-#if defined(IRCCD_WITH_SSL)
-		irc_log_debug("server %s: SSL handshaking in progress", s->name);
-
-		assert(ev_is_active(&conn->timer_fd));
-		assert(ev_is_active(&conn->io_fd));
-
-		assert(!conn->ctx);
-		assert(!conn->ssl);
-
+	if (nr < 0) {
 		/*
-		 * OpenSSL handshake started, wait for conditions that will be
-		 * set in do_handshaking.
+		 * Called with no events, we allow it and simply return no data
+		 * for now.
 		 */
-		conn->ctx = SSL_CTX_new(TLS_method());
-		conn->ssl = SSL_new(conn->ctx);
-
-		SSL_set_fd(conn->ssl, conn->fd);
-		SSL_set_connect_state(conn->ssl);
-
-		/* Start a initial handshake. */
-		conn_tls_handshake(conn);
-
-		/* Restart the timer. */
-		ev_timer_again(irc_bot_loop(), &conn->timer_fd);
-#else
-		/* This state must never be used if SSL was disabled. */
-		irc_util_die("server %s: handshake in non-SSL build");
-#endif
-		break;
-	case IRC_SERVER_STATE_IDENTIFYING:
-		irc_log_debug("server %s: connection complete, identifying", s->name);
-		conn_identify(conn);
-		break;
-	case IRC_SERVER_STATE_RUNNING:
-		assert(ev_is_active(&conn->io_fd));
-
-		ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
-		ev_timer_set(&conn->timer_fd, CONN_TIMEOUT, CONN_TIMEOUT);
-		ev_timer_start(irc_bot_loop(), &conn->timer_fd);
-
-		/* start with read condition. */
-		conn_watch(conn, EV_READ);
-
-		/* indicate user of readiness. */
-		// TODO: dispatch connect.
-		break;
-	default:
-		break;
+		if (errno == EWOULDBLOCK || errno == EAGAIN)
+			nr = 0;
+		else {
+			conn->errtype = CONN_ERR_RECV;
+			conn->errval  = errno;
+		}
+	} else if (nr == 0) {
+		conn->errtype = CONN_ERR_RECV;
+		conn->errval  = ECONNRESET;
+		nr = -1;
 	}
+
+	return nr;
 }
 
+static ssize_t
+conn__plain_send(struct conn *conn, const void *buf, size_t bufsz)
+{
+	ssize_t ns;
+
+	while ((ns = send(conn->fd, buf, bufsz, MSG_NOSIGNAL)) < 0 && errno != EINTR)
+		continue;
+
+	/*
+	 * Similar to conn_plain_recv, accept a call with not able to send for
+	 * now.
+	 */
+	if (ns < 0) {
+		if (errno == EWOULDBLOCK || errno == EAGAIN)
+			ns = 0;
+		else {
+			conn->errtype = CONN_ERR_SEND;
+			conn->errval  = errno;
+		}
+	}
+
+	return ns;
+}
+
+static int
+conn__recv(struct conn *conn)
+{
+	ssize_t nr;
+	size_t limit;
+
+	limit = sizeof (conn->in) - conn->insz;
+
+	if ((nr = conn->recv(conn, &conn->in[conn->insz], limit)) > 0)
+		conn->insz += nr;
+
+	return nr;
+}
+
+/*
+ * Attempt to send the output buffer from the connection. This function should
+ * usually not be called if the output buffer is empty.
+ */
+static int
+conn__send(struct conn *conn)
+{
+	ssize_t ns;
+
+	if (conn->outsz == 0)
+		return 0;
+
+	ns = conn->send(conn, conn->out, conn->outsz);
+
+	if (ns > 0) {
+		if ((size_t)ns >= conn->outsz) {
+			memset(conn->out, 0, sizeof (conn->out));
+			conn->outsz = 0;
+		} else {
+			memmove(conn->out, conn->out + ns, sizeof (conn->out) - ns);
+			conn->outsz -= ns;
+		}
+	}
+
+	return ns;
+}
+
+static int
+conn__lookup(struct conn *conn)
+{
+	struct addrinfo hints = {};
+	char service[16] = {};
+	int rc;
+
+	/* Prevent use of IPv4/IPv6 if only one is specified. */
+	if (conn->parent->flags & IRC_SERVER_FLAGS_NO_IPV4)
+		hints.ai_family = AF_INET6;
+	else if (conn->parent->flags & IRC_SERVER_FLAGS_NO_IPV6)
+		hints.ai_family = AF_INET;
+	else
+		hints.ai_family = AF_UNSPEC;
+
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags    = AI_NUMERICSERV;
+
+	snprintf(service, sizeof (service), "%hu", conn->parent->port);
+
+	if ((rc = getaddrinfo(conn->parent->hostname, service, &hints, &conn->ai)) != 0) {
+		conn->state   = CONN_STATE_ERROR;
+		conn->errtype = CONN_ERR_GETADDRINFO;
+		conn->errval  = rc;
+		ev_async_send(irc_bot_loop(), &conn->async_ev);
+	} else
+		conn->aip = conn->ai;
+
+	return rc;
+}
+
+static int
+conn_push(struct conn *conn, const char *data, size_t datasz)
+{
+	assert(conn);
+	assert(data);
+
+	if (datasz + 2 >= sizeof (conn->out) - conn->outsz)
+		return -1;
+
+	memcpy(&conn->out[conn->outsz], data, datasz);
+	conn->outsz += datasz;
+	memcpy(&conn->out[conn->outsz], "\r\n", 2);
+	conn->outsz += 2;
+
+	/* Update watcher condition. */
+	conn__watch(conn, EV_READ | EV_WRITE);
+
+	return 0;
+}
+
+static inline void
+conn_free(struct conn *conn)
+{
+	if (!conn)
+		return;
+
+	conn_close(conn);
+	free(conn);
+}
+
+static int
+conn_dequeue(struct conn *conn, struct msg *msg)
+{
+	char *pos;
+	size_t length;
+
+	if (!(pos = memmem(conn->in, conn->insz, "\r\n", 2)))
+		return 0;
+
+	length = pos - conn->in;
+
+	if (length > 0 && length < IRC_MESSAGE_LEN)
+		msg_parse(msg, conn->in, length);
+
+	/* (Re)move the first message received. */
+	memmove(conn->in, pos + 2, sizeof (conn->in) - (length + 2));
+	conn->insz -= length + 2;
+
+	return 1;
+}
 /*
  * Callback on connection timer expiry.
  */
 static void
 conn_timer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
 {
+	(void)loop;
 	(void)revents;
 
-	struct conn *conn;
-	struct irc_server *s;
+	struct conn *conn = IRC_UTIL_CONTAINER_OF(self, struct conn, timer_fd);
 
-	conn = IRC_CONTAINER_OF(self, struct conn, timer_fd);
-	s = conn->parent;
+	conn->state   = CONN_STATE_ERROR;
+	conn->errtype = CONN_ERR_GENERIC;
+	conn->errval  = ETIMEDOUT;
 
-	ev_timer_stop(loop, self);
-
-	switch (s->state) {
-	case IRC_SERVER_STATE_CONNECTING:
-		irc_log_warn("server %s: timeout while connecting", s->name);
-		conn_connect_next(conn);
-		break;
-#if defined(IRCCD_WITH_SSL)
-	case IRC_SERVER_STATE_HANDSHAKING:
-		irc_log_warn("server %s: timeout while performing SSL handshake", s->name);
-		conn_connect_next(conn);
-		break;
-#endif
-	case IRC_SERVER_STATE_IDENTIFYING:
-		irc_log_warn("server %s: timeout while identifying", s->name);
-		conn_reconnect(conn);
-		break;
-	case IRC_SERVER_STATE_RUNNING:
-		irc_log_warn("server %s: ping timeout from IRC server", s->name);
-		conn_reconnect(conn);
-		break;
-	default:
-		break;
-	}
+	conn->async_reason = CONN_ASYNC_STATE;
+	ev_async_send(loop, &conn->async_ev);
 }
 
 /*
@@ -267,81 +659,146 @@ conn_timer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
  * only.
  */
 static void
-conn_io_connecting(struct conn *conn, int revents)
+conn__io_connecting(struct conn *conn, int revents)
 {
 	assert(revents & EV_WRITE);
 
-	int res, err = -1;
+	int rc = 0, err = 0;
 	socklen_t len = sizeof (int);
 
 	/*
 	 * Determine if the non blocking connect(2) call succeeded, otherwise
 	 * we re-try again a connect to the next endpoint.
 	 */
-	if ((res = getsockopt(conn->fd, SOL_SOCKET, SO_ERROR, &err, &len)) < 0 || err)
-		conn_connect_next(conn);
-	else
-		conn_switch(conn, IRC_SERVER_STATE_HANDSHAKING);
+	if ((rc = getsockopt(conn->fd, SOL_SOCKET, SO_ERROR, &err, &len)) < 0 || err) {
+		conn->errtype      = CONN_ERR_CONNECT;
+		conn->errval       = err;
+		conn->state        = CONN_STATE_ERROR;
+		conn->async_reason = CONN_ASYNC_STATE;
+		ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
+		ev_async_send(irc_bot_loop(), &conn->async_ev);
+	} else {
+		ev_timer_again(irc_bot_loop(), &conn->timer_fd);
+
+		if (conn->parent->flags & IRC_SERVER_FLAGS_SSL) {
+#if defined(IRCCD_WITH_SSL)
+			/*
+			 * Connection is successful but still not ready if SSL
+			 * is required.
+			 *
+			 * Create a fake watcher event so that conn__io_cb get's
+			 * called again with our normal state machine.
+			 */
+			conn->state = CONN_STATE_HANDSHAKING;
+
+			conn->ctx = SSL_CTX_new(TLS_method());
+			conn->ssl = SSL_new(conn->ctx);
+
+			SSL_set_fd(conn->ssl, conn->fd);
+			SSL_set_connect_state(conn->ssl);
+
+			ev_feed_event(irc_bot_loop(), &conn->io_fd, EV_READ | EV_WRITE);
+#else
+			/* SSL requested on a non-SSL build. */
+			abort();
+#endif
+		} else {
+			/*
+			 * Connection is ready, notify the server so it can
+			 * start its IRC authentication logic.
+			 */
+			conn->state = CONN_STATE_READY;
+			conn->async_reason = CONN_ASYNC_STATE;
+			ev_async_send(irc_bot_loop(), &conn->async_ev);
+		}
+	}
 }
 
 /*
  * Check if the SSL connection has completed successfully.
  */
 static void
-conn_io_handshaking(struct conn *conn, int revents)
+conn__io_handshaking(struct conn *conn, int revents)
 {
+	(void)conn;
 	(void)revents;
 
-	conn_tls_handshake(conn);
+#if defined(IRCCD_WITH_SSL)
+	switch (conn__tls_handshake(conn)) {
+	case 0:
+		/*
+		 * Handshake still in progress, update the watcher flags if
+		 * needed.
+		 */
+		conn__watch(conn, conn->want(conn));
+		break;
+	case -1:
+		/*
+		 * Unrecoverable error, notify server that the SSL handshake has
+		 * failed.
+		 */
+		conn->state        = CONN_STATE_ERROR;
+		conn->async_reason = CONN_ASYNC_STATE;
+		break;
+	default:
+		/* Handshake completed, notify server for readiness. */
+		conn->state        = CONN_STATE_READY;
+		conn->async_reason = CONN_ASYNC_STATE;
+		ev_async_send(irc_bot_loop(), &conn->async_ev);
+		break;
+	}
+#else
+	return 0;
+#endif
 }
 
 static void
-conn_io_running(struct conn *conn, int revents)
+conn__io_ready(struct conn *conn, int revents)
 {
 	int rc = 0;
-	struct conn_msg msg;
 
 	if (revents & EV_READ)
-		rc = conn_recv(conn);
+		rc = conn__recv(conn);
 	if (rc == 0 && (revents & EV_WRITE))
-		rc = conn_send(conn);
+		rc = conn__send(conn);
 
+	/*
+	 * On error, conn__recv or conn__send updates the conn error status
+	 * otherwise check that the incoming buffer has changed to notify the
+	 * server of incoming data.
+	 */
 	if (rc < 0) {
-		conn_close(conn);
-	} else
-		while (conn_dequeue(conn, &msg)) {
-			conn_handle(conn, &msg);
+		conn->state        = CONN_STATE_ERROR;
+		conn->async_reason = CONN_ASYNC_STATE;
+		ev_async_send(irc_bot_loop(), &conn->async_ev);
+	} else {
+		/* Update condition if buffers are modified */
+		conn__watch(conn, conn->want(conn));
+
+		if (conn->insz > 0) {
+			conn->async_reason = CONN_ASYNC_MESSAGE;
+			ev_async_send(irc_bot_loop(), &conn->async_ev);
 		}
+	}
 }
 
 /*
  * Callback on socket events.
  */
 static void
-conn_io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
+conn__io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
 {
 	(void)loop;
 
-	struct conn *conn;
-	struct irc_server *s;
+	static void (*const io[])(struct conn *, int) = {
+		[CONN_STATE_CONNECTING]  = conn__io_connecting,
+		[CONN_STATE_HANDSHAKING] = conn__io_handshaking,
+		[CONN_STATE_READY]       = conn__io_ready
+	};
 
-	conn = IRC_CONTAINER_OF(self, struct conn, io_fd);
-	s = conn->parent;
+	struct conn *conn = IRC_CONTAINER_OF(self, struct conn, io_fd);
 
-	switch (s->state) {
-	case IRC_SERVER_STATE_CONNECTING:
-		conn_io_connecting(conn, revents);
-		break;
-	case IRC_SERVER_STATE_HANDSHAKING:
-		conn_io_handshaking(conn, revents);
-		break;
-	case IRC_SERVER_STATE_IDENTIFYING:
-	case IRC_SERVER_STATE_RUNNING:
-		conn_io_running(conn, revents);
-		break;
-	default:
-		break;
-	}
+	io[conn->state](conn, revents);
 }
 
 /**
@@ -350,11 +807,28 @@ conn_io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
 static void
 conn_close(struct conn *conn)
 {
-	struct irc_server *s = conn->parent;
+	conn->errtype = CONN_ERR_OK;
+	conn->errval = 0;
 
-	memset(conn->in, 0, sizeof (conn->in));
+	if (conn->ai)
+		freeaddrinfo(conn->ai);
+
+	conn->ai  = NULL;
+	conn->aip = NULL;
+
+	memset(conn->in,  0, sizeof (conn->in));
 	memset(conn->out, 0, sizeof (conn->out));
-	conn->insz = conn->outsz = 0;
+	conn->insz  = 0;
+	conn->outsz = 0;
+
+	if (conn->fd != -1) {
+		close(conn->fd);
+		conn->fd = -1;
+	}
+
+	ev_io_stop(irc_bot_loop(), &conn->io_fd);
+	ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
+	ev_async_stop(irc_bot_loop(), &conn->async_ev);
 
 #if defined(IRCCD_WITH_SSL)
 	if (conn->ssl)
@@ -365,20 +839,13 @@ conn_close(struct conn *conn)
 	conn->ssl = NULL;
 	conn->ctx = NULL;
 #endif
-
-	ev_io_stop(irc_bot_loop(), &conn->io_fd);
-	ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
-
-	if (conn->fd != -1) {
-		close(conn->fd);
-		conn->fd = -1;
-	}
-
-	s->state = IRC_SERVER_STATE_DISCONNECTED;
 }
 
+/*
+ * Create the conn->fd socket with the current addrinfo pointer value.
+ */
 static int
-conn_socket(struct conn *conn)
+conn__socket(struct conn *conn)
 {
 	struct addrinfo *ai = conn->aip;
 	int cflags = 0;
@@ -394,172 +861,10 @@ conn_socket(struct conn *conn)
 }
 
 /*
- * Attempt to connect to current conn->aip asynchronously otherwise the socket
- * event callback will try the next conn->aip value unless we have reached the
- * limit.
- */
-static void
-conn_connect(struct conn *conn)
-{
-	struct irc_server *s = conn->parent;
-
-	for (; conn->aip; conn->aip = conn->aip->ai_next) {
-		/* Attempt to initialize a socket with the current conn->aip. */
-		if (conn_socket(conn) < 0)
-			continue;
-
-		/*
-		 * With some luck, the connection completes immediately,
-		 * otherwise we will need to wait until the socket is writable.
-		 */
-		if (connect(conn->fd, conn->aip->ai_addr, conn->aip->ai_addrlen) == 0) {
-			conn_switch(conn, IRC_SERVER_STATE_HANDSHAKING);
-			return;
-		}
-
-		if (errno == EINPROGRESS || errno == EAGAIN) {
-			/* Connect "succeeds" but isn't complete yet. */
-			conn_switch(conn, IRC_SERVER_STATE_CONNECTING);
-			return;
-		}
-
-		irc_log_warn("server %s: connect: %s", s->name, strerror(errno));
-	}
-
-	/* No more address available. */
-	if (conn->aip == NULL) {
-		// TODO: dispatch error
-	}
-}
-
-/*
- * Attempt connection to the next endpoint if any otherwise close the
- * connection and attempt a reconnect if enabled.
- */
-static void
-conn_connect_next(struct conn *conn)
-{
-	/* Go to next endpoint. */
-	conn->aip = conn->aip->ai_next;
-
-	conn_close(conn);
-	conn_connect(conn);
-}
-
-/*
- * Function called to continue a SSL handshake. Usually called from the
- * socket event handler multiple times until it completes successfully.
- */
-static void
-conn_tls_handshake(struct conn *conn)
-{
-	struct irc_server *s;
-	int rc, flags;
-
-	s = conn->parent;
-	rc = SSL_do_handshake(conn->ssl);
-
-	switch (rc) {
-	case 1:
-		irc_log_debug("server %s: handshake complete", s->name);
-		conn_switch(conn, IRC_SERVER_STATE_IDENTIFYING);
-		break;
-	case 0:
-		irc_log_debug("server %s: handshake in progress", s->name);
-
-		if ((flags = conn_tls_want(conn, rc)) < 0)
-			conn_connect_next(conn);
-		else
-			conn_watch(conn, flags);
-		break;
-	default:
-		irc_log_warn("server %s: handshake failed: %d", s->name, rc);
-		conn_connect_next(conn);
-		break;
-	}
-}
-
-/*
- * Start protocol exchange with the IRC server.
- */
-static void
-conn_identify(struct conn *conn)
-{
-	struct irc_server *s = conn->parent;
-
-	/*
-	 * Use multi-prefix extension to keep track of all combined "modes" in
-	 * a channel.
-	 *
-	 * https://ircv3.net/specs/extensions/multi-prefix-3.1.html
-	 */
-	irc_server_send(s, "CAP REQ :multi-prefix");
-
-	if (s->password)
-		irc_server_send(s, "PASS %s", s->password);
-
-	irc_server_send(s, "NICK %s", s->nickname);
-	irc_server_send(s, "USER %s %s %s :%s", s->username, s->username, s->username, s->realname);
-	irc_server_send(s, "CAP END");
-}
-
-static void
-conn_scan(char **line, char **str)
-{
-	char *p = strchr(*line, ' ');
-
-	if (p)
-		*p = '\0';
-
-	*str = *line;
-	*line = p ? p + 1 : strchr(*line, '\0');
-}
-
-static int
-conn_parse(struct conn_msg *msg, const char *line)
-{
-	char *ptr = msg->buf;
-	size_t a;
-
-	memset(msg, 0, sizeof (*msg));
-	irc_util_strlcpy(msg->buf, line, sizeof (msg->buf));
-
-	/*
-	 * IRC message is defined as following:
-	 *
-	 * [:prefix] command arg1 arg2 [:last-argument]
-	 */
-	if (*ptr == ':')
-		conn_scan((++ptr, &ptr), &msg->prefix);     /* prefix */
-
-	conn_scan(&ptr, &msg->cmd);                         /* command */
-
-	/* And finally arguments. */
-	for (a = 0; *ptr && a < IRC_UTIL_SIZE(msg->args); ++a) {
-		if (*ptr == ':') {
-			msg->args[a] = ptr + 1;
-			ptr = strchr(ptr, '\0');
-		} else
-			conn_scan(&ptr, &msg->args[a]);
-	}
-
-	if (a >= IRC_UTIL_SIZE(msg->args)) {
-		errno = EMSGSIZE;
-		return -1;
-	}
-	if (msg->cmd == NULL) {
-		errno = EBADMSG;
-		return -1;
-	}
-
-	return 0;
-}
-
-/*
  * Change the connection watcher flags.
  */
 static void
-conn_watch(struct conn *conn, int flags)
+conn__watch(struct conn *conn, int flags)
 {
 	assert(ev_is_active(&conn->io_fd));
 
@@ -576,11 +881,11 @@ conn_watch(struct conn *conn, int flags)
  * Indicate what the SSL connection wants.
  */
 static int
-conn_tls_want(const struct conn *conn, int rc)
+conn__tls_want(struct conn *conn)
 {
 	int reason, flags = 0;
 
-	switch ((reason = SSL_get_error(conn->ssl, rc))) {
+	switch ((reason = SSL_get_error(conn->ssl, 0))) {
 	case SSL_ERROR_WANT_READ:
 		flags |= EV_READ;
 		break;
@@ -596,355 +901,56 @@ conn_tls_want(const struct conn *conn, int rc)
 }
 
 static ssize_t
-conn_tls_recv(struct conn *conn, char *dst, size_t dstsz)
+conn__tls_recv(struct conn *conn, void *buf, size_t bufsz)
 {
-	int nr, flags;
+	size_t nr = 0;
 
-	nr = SSL_read(conn->ssl, dst, dstsz);
+	/*
+	 * Returns 0 or 1 only, re-use conn__tls_want to inspect the
+	 * SSL_get_error return value. Caller will automatically call it again
+	 * if needed.
+	 */
+	if (SSL_read_ex(conn->ssl, buf, bufsz, &nr) == 0)
+		return (ssize_t)conn__tls_want(conn);
 
-	if (nr < 0) {
-		if ((flags = conn_tls_want(conn, nr)) < 0)
-			return -1;
-
-		conn_watch(conn, flags);
-	}
-
-	return nr;
+	return (ssize_t)nr;
 }
-
-#endif
 
 static ssize_t
-conn_clear_recv(struct conn *conn, char *buf, size_t bufsz)
+conn__tls_send(struct conn *conn, const void *buf, size_t bufsz)
 {
-	ssize_t nr;
+	size_t ns = 0;
 
-	while ((nr = recv(conn->fd, buf, bufsz, 0)) < 0 && errno == EINTR)
-		continue;
+	/* See conn__tls_recv also. */
+	if (SSL_write_ex(conn->ssl, buf, bufsz, &ns) == 0 && conn__tls_want(conn) < 0)
+		ns = -1;
 
-	if (nr < 0) {
-		if (errno == EWOULDBLOCK || errno == EAGAIN)
-			nr = 0;
-	} else if (nr == 0) {
-		errno = ECONNRESET;
-		nr = -1;
-	}
-
-	return nr;
+	return (ssize_t)ns;
 }
 
-#if defined(IRCCD_WITH_SSL)
-
-static ssize_t
-conn_tls_send(struct conn *conn)
-{
-	int ns, flags;
-
-	ns = SSL_write(conn->ssl, conn->out, strlen(conn->out));
-
-	if (ns < 0) {
-		if ((flags = conn_tls_want(conn, ns)) < 0)
-			return -1;
-
-		conn_watch(conn, flags);
-	}
-
-	return ns;
-}
-
-#endif
-
-static ssize_t
-conn_clear_send(struct conn *conn)
-{
-	ssize_t ns;
-
-	while ((ns = send(conn->fd, conn->out, strlen(conn->out), 0)) < 0 && errno != EINTR)
-		continue;
-
-	if (ns < 0 && (errno == EWOULDBLOCK || errno == EAGAIN))
-		ns = 0;
-
-	return ns;
-}
-
+/*
+ * Function called to continue a SSL handshake. Usually called from the socket
+ * event handler multiple times until it completes successfully.
+ */
 static int
-conn_recv(struct conn *conn)
+conn__tls_handshake(struct conn *conn)
 {
-	size_t len = strlen(conn->in);
-	size_t cap = sizeof (conn->in) - len - 1;
-	ssize_t nr = 0;
-
-#if defined(IRCCD_WITH_SSL)
-	if (conn->parent->flags & IRC_SERVER_FLAGS_SSL)
-		nr = conn_tls_recv(conn, conn->in + len, cap);
-	else
-#endif
-		nr = conn_clear_recv(conn, conn->in + len, cap);
-
-	if (nr > 0)
-		conn->in[len + nr] = '\0';
-
-	return nr;
-}
-
-static int
-conn_send(struct conn *conn)
-{
-	ssize_t ns = 0;
-
-	if (strlen(conn->out) == 0)
-		return 0;
-
-#if defined(IRCCD_WITH_SSL)
-	if (conn->parent->flags & IRC_SERVER_FLAGS_SSL)
-		ns = conn_tls_send(conn);
-	else
-#endif
-		ns = conn_clear_send(conn);
-
-	if (ns > 0) {
-		/* Optimize if everything was sent. */
-		if ((size_t)ns >= sizeof (conn->out) - 1)
-			conn->out[0] = '\0';
-		else
-			memmove(conn->out, conn->out + ns, sizeof (conn->out) - ns);
-	}
-
-	return ns;
-}
-
-static int
-conn_lookup(struct conn *conn)
-{
-	struct addrinfo hints = {
-		.ai_socktype = SOCK_STREAM,
-		.ai_flags = AI_NUMERICSERV
-	};
-	char service[16];
 	int rc;
 
-	snprintf(service, sizeof (service), "%hu", conn->parent->port);
-
-	if ((rc = getaddrinfo(conn->parent->hostname, service, &hints, &conn->ai)) != 0) {
-		irc_log_warn("server %s: getaddrinfo: %s", conn->parent->name, gai_strerror(rc));
+	if ((rc = SSL_do_handshake(conn->ssl)) < 0 && conn__tls_want(conn) < 0)
 		rc = -1;
-	} else
-		conn->aip = conn->ai;
 
 	return rc;
 }
 
-static int
-conn_push(struct conn *conn, const char *data)
-{
-	assert(conn);
-	assert(data);
-
-	if (irc_util_strlcat(conn->out, data, sizeof (conn->out)) >= sizeof (conn->out)) {
-		errno = EMSGSIZE;
-		return -1;
-	}
-	if (irc_util_strlcat(conn->out, "\r\n", sizeof (conn->out)) >= sizeof (conn->out)) {
-		errno = EMSGSIZE;
-		return -1;
-	}
-
-	if (conn->out[0])
-		conn_watch(conn, EV_READ | EV_WRITE);
-
-	return 0;
-}
-
-static void
-conn_free(struct conn *conn)
-{
-	assert(conn);
-	assert(conn->fd != -1);
-
-	if (conn->aip != NULL)
-		freeaddrinfo(conn->aip);
-
-	free(conn);
-}
-
-static int
-conn_dequeue(struct conn *conn, struct conn_msg *msg)
-{
-	char *pos;
-	size_t length;
-
-	if (!(pos = strstr(conn->in, "\r\n")))
-		return 0;
-
-	/* Turn end of the string at delimiter. */
-	*pos = 0;
-	length = pos - conn->in;
-
-	if (length > 0)
-		conn_parse(msg, conn->in);
-
-	/* (Re)move the first message received. */
-	memmove(conn->in, pos + 2, sizeof (conn->in) - (length + 2));
-
-	return 1;
-}
-
-static inline void
-clear_channels(struct irc_server *s, int free)
-{
-	struct irc_channel *c, *tmp;
-
-	LL_FOREACH_SAFE(s->channels, c, tmp) {
-		if (free)
-			irc_channel_free(c);
-		else
-			irc_channel_clear(c);
-	}
-
-	if (free)
-		s->channels = NULL;
-}
-
-static inline void
-clear_server(struct irc_server *s)
-{
-	s->chantypes   = irc_util_free(s->chantypes);
-	s->charset     = irc_util_free(s->charset);
-	s->casemapping = irc_util_free(s->casemapping);
-
-	s->channel_max  = 0;
-	s->nickname_max = 0;
-	s->topic_max    = 0;
-	s->away_max     = 0;
-	s->kick_max     = 0;
-
-	s->prefixes  = irc_util_free(s->prefixes);
-	s->prefixesz = 0;
-
-	s->bufwhois.nickname = irc_util_free(s->bufwhois.nickname);
-	s->bufwhois.username = irc_util_free(s->bufwhois.username);
-	s->bufwhois.realname = irc_util_free(s->bufwhois.realname);
-	s->bufwhois.hostname = irc_util_free(s->bufwhois.hostname);
-	s->bufwhois.channels = irc_util_free(s->bufwhois.channels);
-}
-
-static inline int
-is_self(const struct irc_server *s, const char *nick)
-{
-	return strncasecmp(s->nickname, nick, strlen(s->nickname)) == 0;
-}
-
-static struct irc_channel *
-add_channel(struct irc_server *s, const char *name, const char *password, enum irc_channel_flags flags)
-{
-	struct irc_channel *ch;
-
-	if ((ch = irc_server_find(s, name)))
-		ch->flags |= flags;
-	else {
-		ch = irc_channel_new(name, password, flags);
-		LL_PREPEND(s->channels, ch);
-	}
-
-	return ch;
-}
-
-static void
-remove_channel(struct irc_server *s, struct irc_channel *ch)
-{
-	LL_DELETE(s->channels, ch);
-	irc_channel_free(ch);
-}
-
-static int
-is_ctcp(const char *line)
-{
-	size_t length;
-
-	if (!line)
-		return 0;
-	if ((length = strlen(line)) < 2)
-		return 0;
-
-	return line[0] == 0x1 && line[length - 1] == 0x1;
-}
-
-static char *
-ctcp(char *line)
-{
-	/* Skip first \x01. */
-	if (*line == '\x01')
-		line++;
-
-	/* Remove last \001. */
-	line[strcspn(line, "\x01")] = '\0';
-
-	if (strncmp(line, "ACTION ", 7) == 0)
-		line += 7;
-
-	return line;
-}
-
-static inline int
-find_mode(struct irc_server *s, int mode)
-{
-	for (size_t i = 0; i < s->prefixesz; ++i)
-		if (s->prefixes[i].mode == mode)
-			return i;
-
-	return 0;
-}
-
-static void
-read_support_prefix(struct irc_server *s, const char *value)
-{
-	(void)s;
-	(void)value;
-#if 0
-	char modes[IRC_UTIL_SIZE(s->prefixes) + 1] = {0};
-	char tokens[IRC_UTIL_SIZE(s->prefixes) + 1] = {0};
-	char fmt[32] = {0};
-
-	snprintf(fmt, sizeof (fmt), "(%%%zu[^)])%%%zus",
-	    sizeof (modes) - 1, sizeof (tokens) - 1);
-
-	if (sscanf(value, fmt, modes, tokens) == 2) {
-		char *pm = modes;
-		char *sm = tokens;
-
-		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes) && *pm && *sm; ++i) {
-			s->params.prefixes[i].mode = *pm++;
-			s->params.prefixes[i].symbol = *sm++;
-		}
-	}
 #endif
-}
+
+/* }}} */
+
+/* {{{ IRC server handlers */
 
 static void
-read_support_chantypes(struct irc_server *s, const char *value)
-{
-	s->chantypes = irc_util_strdupfree(s->chantypes, value);
-}
-
-static void
-fail(struct irc_server *s)
-{
-	struct conn *conn = s->conn;
-
-	clear_channels(s, 0);
-	clear_server(s);
-
-	if (s->flags & IRC_SERVER_FLAGS_AUTO_RECO) {
-		irc_log_info("server %s: waiting %u seconds before reconnecting",
-		    s->name, (unsigned int)CONN_RECONNECT_DELAY);
-		ev_timer_again(irc_bot_loop(), &conn->timer_fd);
-	} else
-		s->state = IRC_SERVER_STATE_DISCONNECTED;
-}
-
-static void
-handle_connect(struct irc_server *s, struct conn_msg *msg)
+handle_connect(struct irc_server *s, struct msg *msg)
 {
 	(void)msg;
 
@@ -972,13 +978,45 @@ handle_disconnect(struct irc_server *s)
 	ev.type = IRC_EVENT_DISCONNECT;
 	ev.server = s;
 
-	fail(s);
 	irc_log_info("server %s: connection lost", s->name);
 	irc_bot_dispatch(&ev);
 }
 
 static void
-handle_support(struct irc_server *s, struct conn_msg *msg)
+read_support_prefix(struct irc_server *s, const char *value)
+{
+	(void)s;
+	(void)value;
+
+	printf("prefix: %s\n", value);
+#if 0
+	char modes[IRC_UTIL_SIZE(s->prefixes) + 1] = {0};
+	char tokens[IRC_UTIL_SIZE(s->prefixes) + 1] = {0};
+	char fmt[32] = {0};
+
+	snprintf(fmt, sizeof (fmt), "(%%%zu[^)])%%%zus",
+	    sizeof (modes) - 1, sizeof (tokens) - 1);
+
+	if (sscanf(value, fmt, modes, tokens) == 2) {
+		char *pm = modes;
+		char *sm = tokens;
+
+		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes) && *pm && *sm; ++i) {
+			s->params.prefixes[i].mode = *pm++;
+			s->params.prefixes[i].symbol = *sm++;
+		}
+	}
+#endif
+}
+
+static void
+read_support_chantypes(struct irc_server *s, const char *value)
+{
+	s->chantypes = irc_util_strdupfree(s->chantypes, value);
+}
+
+static void
+handle_support(struct irc_server *s, struct msg *msg)
 {
 	char key[64];
 	char value[64];
@@ -1029,7 +1067,7 @@ handle_support(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_invite(struct irc_server *s, struct conn_msg *msg)
+handle_invite(struct irc_server *s, struct msg *msg)
 {
 	struct irc_event ev = {};
 
@@ -1047,7 +1085,7 @@ handle_invite(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_join(struct irc_server *s, struct conn_msg *msg)
+handle_join(struct irc_server *s, struct msg *msg)
 {
 	struct irc_event ev = {};
 
@@ -1056,16 +1094,16 @@ handle_join(struct irc_server *s, struct conn_msg *msg)
 	ev.join.origin = irc_util_strdup(msg->prefix);
 	ev.join.channel = irc_util_strdup(msg->args[0]);
 
-	add_channel(s, ev.join.channel, NULL, 1);
+	channels_add(s, ev.join.channel, NULL, IRC_CHANNEL_FLAGS_JOINED);
 
-	if (is_self(s, ev.join.origin))
+	if (server_is_self_nickname(s, ev.join.origin))
 		irc_log_info("server %s: joined channel %s", s->name, ev.join.channel);
 
 	irc_bot_dispatch(&ev);
 }
 
 static void
-handle_kick(struct irc_server *s, struct conn_msg *msg)
+handle_kick(struct irc_server *s, struct msg *msg)
 {
 	struct irc_channel *ch;
 	struct irc_event ev = {};
@@ -1077,19 +1115,20 @@ handle_kick(struct irc_server *s, struct conn_msg *msg)
 	ev.kick.target = irc_util_strdup(msg->args[1]);
 	ev.kick.reason = msg->args[2] ? irc_util_strdup(msg->args[2]) : NULL;
 
-	ch = add_channel(s, ev.kick.channel, NULL, 1);
+	ch = channels_add(s, ev.kick.channel, NULL, 1);
 
 	/*
 	 * If the bot was kicked itself mark the channel as not joined and
 	 * rejoin it automatically if the option is set.
 	 */
-	if (is_self(s, ev.kick.target)) {
-		ch->flags &= ~(IRC_CHANNEL_FLAGS_JOINED);
+	if (server_is_self_nickname(s, ev.kick.target)) {
+		ch->flags &= IRC_CHANNEL_FLAGS_JOINED;
 		irc_channel_clear(ch);
 
 		if (s->flags & IRC_SERVER_FLAGS_AUTO_REJOIN) {
 			irc_server_join(s, ch->name, ch->password);
-			irc_log_info("server %s: rejoining %s after kick", s->name, ch->name);
+			irc_log_info("server %s: auto-rejoining %s after kick",
+			    s->name, ch->name);
 		}
 	} else
 		irc_channel_remove(ch, ev.kick.target);
@@ -1098,11 +1137,14 @@ handle_kick(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_mode(struct irc_server *s, struct conn_msg *msg)
+handle_mode(struct irc_server *s, struct msg *msg)
 {
+	(void)s;
+	(void)msg;
+#if 0
+	const struct irc_channel_user *u;
 	int action = 0, mode;
 	size_t nelem = 0, argindex = 2;
-	const struct irc_channel_user *u;
 	struct irc_channel *ch;
 	struct irc_event ev = {};
 
@@ -1144,7 +1186,7 @@ handle_mode(struct irc_server *s, struct conn_msg *msg)
 		}
 
 		/* Find which mode this symbol is (e.g. o=@). */
-		if ((mode = find_mode(s, *p)) == 0) {
+		if ((mode = server_find_mode(s, *p)) == 0) {
 			++argindex;
 			continue;
 		}
@@ -1156,17 +1198,19 @@ handle_mode(struct irc_server *s, struct conn_msg *msg)
 		++argindex;
 
 		if (action == '+')
-			irc_channel_set(ch, u->nickname, u->modes |  (1 << mode));
+			irc_channel_set(ch, const char *nickname, int modes)
+			u->modes |= (1 << mode);
 		else
-			irc_channel_set(ch, u->nickname, u->modes & ~(1 << mode));
+			u->modes &= ~(1 << mode);
 	}
 
 skip:
 	irc_bot_dispatch(&ev);
+#endif
 }
 
 static void
-handle_part(struct irc_server *s, struct conn_msg *msg)
+handle_part(struct irc_server *s, struct msg *msg)
 {
 	struct irc_channel *ch;
 	struct irc_event ev = {};
@@ -1177,10 +1221,10 @@ handle_part(struct irc_server *s, struct conn_msg *msg)
 	ev.part.channel = irc_util_strdup(msg->args[0]);
 	ev.part.reason = msg->args[1] ? irc_util_strdup(msg->args[1]) : NULL;
 
-	ch = add_channel(s, ev.part.channel, NULL, IRC_CHANNEL_FLAGS_JOINED);
+	ch = irc_server_find(s, ev.part.channel);
 
-	if (is_self(s, ev.part.origin)) {
-		remove_channel(s, ch);
+	if (server_is_self_nickname(s, ev.part.origin)) {
+		channels_remove(s, ch);
 		irc_log_info("server %s: leaving channel %s", s->name, ev.part.channel);
 	} else
 		irc_channel_remove(ch, ev.part.origin);
@@ -1189,7 +1233,7 @@ handle_part(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_msg(struct irc_server *s, struct conn_msg *msg)
+handle_msg(struct irc_server *s, struct msg *msg)
 {
 	struct irc_server_user user = {};
 	struct irc_event ev = {};
@@ -1203,7 +1247,7 @@ handle_msg(struct irc_server *s, struct conn_msg *msg)
 	 * PRIVMSG jean :\001ACTION I'm eating\001
 	 * PRIVMSG jean :\001VERSION\001
 	 */
-	if (is_ctcp(msg->args[1])) {
+	if (msg_is_ctcp(msg->args[1])) {
 		irc_server_split(msg->prefix, &user);
 
 		if (strcmp(msg->args[1], "\x01""CLIENTINFO\x01") == 0)
@@ -1227,7 +1271,7 @@ handle_msg(struct irc_server *s, struct conn_msg *msg)
 			ev.type = IRC_EVENT_ME;
 			ev.message.origin = irc_util_strdup(msg->prefix);
 			ev.message.channel = irc_util_strdup(msg->args[0]);
-			ev.message.message = irc_util_strdup(ctcp(msg->args[1]));
+			ev.message.message = irc_util_strdup(msg_ctcp(msg->args[1]));
 		}
 	} else {
 		ev.type = IRC_EVENT_MESSAGE;
@@ -1240,7 +1284,7 @@ handle_msg(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_nick(struct irc_server *s, struct conn_msg *msg)
+handle_nick(struct irc_server *s, struct msg *msg)
 {
 	struct irc_event ev = {};
 
@@ -1250,7 +1294,7 @@ handle_nick(struct irc_server *s, struct conn_msg *msg)
 	ev.nick.nickname = irc_util_strdup(msg->args[0]);
 
 	/* Update nickname if it is myself. */
-	if (is_self(s, ev.nick.origin)) {
+	if (server_is_self_nickname(s, ev.nick.origin)) {
 		irc_log_info("server %s: nick change %s -> %s", s->name,
 		    s->nickname, ev.nick.nickname);
 		s->nickname = irc_util_strdupfree(s->nickname, ev.nick.nickname);
@@ -1260,7 +1304,7 @@ handle_nick(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_notice(struct irc_server *s, struct conn_msg *msg)
+handle_notice(struct irc_server *s, struct msg *msg)
 {
 	struct irc_event ev = {};
 
@@ -1274,7 +1318,7 @@ handle_notice(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_topic(struct irc_server *s, struct conn_msg *msg)
+handle_topic(struct irc_server *s, struct msg *msg)
 {
 	struct irc_event ev = {};
 
@@ -1288,7 +1332,7 @@ handle_topic(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_ping(struct irc_server *s, struct conn_msg *msg)
+handle_ping(struct irc_server *s, struct msg *msg)
 {
 	(void)msg;
 
@@ -1297,13 +1341,13 @@ handle_ping(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_names(struct irc_server *s, struct conn_msg *msg)
+handle_names(struct irc_server *s, struct msg *msg)
 {
 	struct irc_channel *ch;
 	char *p, *token;
 	int modes = 0;
 
-	ch = add_channel(s, msg->args[2], NULL, IRC_CHANNEL_FLAGS_JOINED);
+	ch = channels_add(s, msg->args[2], NULL, 1);
 
 	/* Track existing nicknames into the given channel. */
 	for (p = msg->args[3]; (token = strtok_r(p, " ", &p)); ) {
@@ -1316,7 +1360,7 @@ handle_names(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_endofnames(struct irc_server *s, struct conn_msg *msg)
+handle_endofnames(struct irc_server *s, struct msg *msg)
 {
 	FILE *fp;
 	size_t length;
@@ -1351,16 +1395,16 @@ handle_endofnames(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_nicknameinuse(struct irc_server *s, struct conn_msg *msg)
+handle_nicknameinuse(struct irc_server *s, struct msg *msg)
 {
 	(void)msg;
 
 	irc_log_warn("server %s: nickname %s is already in use", s->name, s->nickname);
-	fail(s);
+	server_disconnect(s);
 }
 
 static void
-handle_error(struct irc_server *s, struct conn_msg *msg)
+handle_error(struct irc_server *s, struct msg *msg)
 {
 	struct irc_event ev = {};
 
@@ -1370,12 +1414,12 @@ handle_error(struct irc_server *s, struct conn_msg *msg)
 	ev.server = s;
 	ev.type = IRC_EVENT_DISCONNECT;
 
-	fail(s);
+	server_disconnect(s);
 	irc_bot_dispatch(&ev);
 }
 
 static void
-handle_whoisuser(struct irc_server *s, struct conn_msg *msg)
+handle_whoisuser(struct irc_server *s, struct msg *msg)
 {
 	(void)s;
 
@@ -1386,7 +1430,7 @@ handle_whoisuser(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_whoischannels(struct irc_server *s, struct conn_msg *msg)
+handle_whoischannels(struct irc_server *s, struct msg *msg)
 {
 	char *token, *p;
 	int modes;
@@ -1408,7 +1452,7 @@ handle_whoischannels(struct irc_server *s, struct conn_msg *msg)
 }
 
 static void
-handle_endofwhois(struct irc_server *s, struct conn_msg *msg)
+handle_endofwhois(struct irc_server *s, struct msg *msg)
 {
 	(void)msg;
 
@@ -1426,7 +1470,7 @@ handle_endofwhois(struct irc_server *s, struct conn_msg *msg)
 
 static const struct handler {
 	const char *command;
-	void (*handle)(struct irc_server *, struct conn_msg *);
+	void (*handle)(struct irc_server *, struct msg *);
 } handlers[] = {
 	/* Must be kept ordered. */
 	{ "001",        handle_connect          },
@@ -1451,28 +1495,216 @@ static const struct handler {
 };
 
 static int
-cmp_handler(const char *name, const struct handler *handler)
+handler_cmp(const void *name, const void *data)
 {
+	const struct handler *handler = data;
+
 	return strcmp(name, handler->command);
 }
 
 static inline struct handler *
-find_handler(const char *name)
+handler_find(const char *name)
 {
-	return bsearch(name, handlers, IRC_UTIL_SIZE(handlers), sizeof (struct handler),
-	    (irc_cmp)(cmp_handler));
+	return bsearch(name, handlers, IRC_UTIL_SIZE(handlers),
+	    sizeof (struct handler), handler_cmp);
 }
 
 static void
-handle(struct irc_server *s, struct conn_msg *msg)
+handler(struct irc_server *s, struct msg *msg)
 {
 	const struct handler *h;
 
-	if (!(h = find_handler(msg->cmd)))
-		return;
-
-	h->handle(s, msg);
+	if ((h = handler_find(msg->cmd)))
+		h->handle(s, msg);
 }
+
+/* }}} */
+
+/* {{{ server private routines */
+
+static inline int
+server_find_mode(struct irc_server *s, int mode)
+{
+	for (size_t i = 0; i < s->prefixesz; ++i)
+		if (s->prefixes[i].mode == mode)
+			return i;
+
+	return 0;
+}
+
+static inline int
+server_is_self_nickname(const struct irc_server *s, const char *nick)
+{
+	return strncasecmp(s->nickname, nick, strlen(s->nickname)) == 0;
+}
+
+static void
+server_clear(struct irc_server *s)
+{
+	s->chantypes   = irc_util_free(s->chantypes);
+	s->charset     = irc_util_free(s->charset);
+	s->casemapping = irc_util_free(s->casemapping);
+
+	s->channel_max  = 0;
+	s->nickname_max = 0;
+	s->topic_max    = 0;
+	s->away_max     = 0;
+	s->kick_max     = 0;
+
+	s->prefixes  = irc_util_free(s->prefixes);
+	s->prefixesz = 0;
+
+	s->bufwhois.nickname = irc_util_free(s->bufwhois.nickname);
+	s->bufwhois.username = irc_util_free(s->bufwhois.username);
+	s->bufwhois.realname = irc_util_free(s->bufwhois.realname);
+	s->bufwhois.hostname = irc_util_free(s->bufwhois.hostname);
+	s->bufwhois.channels = irc_util_free(s->bufwhois.channels);
+}
+
+/*
+ * Disconnect the server, cleanup its resource and reconnect later.
+ *
+ * This function is called at any time but it does not generate a plugin event
+ * unless the current state was running meaning that we were successfully
+ * connected to a IRC server before getting closed.
+ */
+static void
+server_disconnect(struct irc_server *s)
+{
+	conn_close(s->conn);
+	channels_clear(s);
+	server_clear(s);
+
+	if (s->state == IRC_SERVER_STATE_RUNNING)
+		handle_disconnect(s);
+
+	s->state = IRC_SERVER_STATE_DISCONNECTED;
+
+	if (s->flags & IRC_SERVER_FLAGS_AUTO_RECONNECT) {
+		irc_log_info("server %s: retrying in %d seconds",
+		    s->name, (int)RECONNECT_DELAY);
+
+		ev_timer_stop(irc_bot_loop(), &conn->timer_fd);
+		ev_timer_set(&conn->timer_fd, RECONNECT_DELAY, 0.0);
+		ev_timer_start(irc_bot_loop(), &conn->timer_fd);
+	}
+}
+
+static void server_free(struct irc_server *s)
+{
+	conn_free(s);
+	channels_free(s);
+	free(s);
+}
+
+static void
+conn_connect(struct conn *conn)
+{
+	/*
+	 * If this pointer is NULL, it means we have not ever tried to connect
+	 * to any server yet. Start with an initial DNS lookup.
+	 */
+	if (!conn->ai_list)
+		conn__resolve(conn);
+
+
+
+
+
+
+#if 0
+	for (; conn->aip; conn->aip = conn->aip->ai_next) {
+		/* Attempt to initialize a socket with the current conn->aip. */
+		if (conn_socket(s) < 0)
+			continue;
+
+		/*
+		 * With some luck, the connection completes immediately,
+		 * otherwise we will need to wait until the socket is writable.
+		 */
+		if (connect(conn->fd, conn->aip->ai_addr, conn->aip->ai_addrlen) == 0) {
+			server_switch(s, IRC_SERVER_STATE_HANDSHAKING);
+			return;
+		}
+
+		if (errno == EINPROGRESS || errno == EAGAIN) {
+			/* Connect "succeeds" but isn't complete yet. */
+			server_switch(s, IRC_SERVER_STATE_CONNECTING);
+			return;
+		}
+
+		irc_log_warn("server %s: connect: %s", s->name, strerror(errno));
+	}
+
+	/* No more address available. */
+	if (conn->aip == NULL) {
+		// TODO: dispatch error
+	}
+#endif
+}
+
+/*
+ * Start protocol exchange with the IRC server.
+ */
+static void
+server_identify(struct irc_server *s)
+{
+	/*
+	 * Use multi-prefix extension to keep track of all combined "modes" in
+	 * a channel.
+	 *
+	 * https://ircv3.net/specs/extensions/multi-prefix-3.1.html
+	 */
+	irc_server_send(s, "CAP REQ :multi-prefix");
+
+	if (s->password)
+		irc_server_send(s, "PASS %s", s->password);
+
+	irc_server_send(s, "NICK %s", s->nickname);
+	irc_server_send(s, "USER %s %s %s :%s", s->username, s->username, s->username, s->realname);
+	irc_server_send(s, "CAP END");
+}
+
+static void
+server_dequeue(struct irc_server *s)
+{
+	struct msg msg;
+
+	while (conn_dequeue(s->conn, &msg))
+		handler(s, &msg);
+}
+
+static void
+server_async_cb(struct ev_loop *loop, struct ev_async *self, int revents)
+{
+	(void)loop;
+	(void)self;
+	(void)revents;
+
+	struct conn *conn = IRC_UTIL_CONTAINER_OF(self, struct conn, async_ev);
+
+	switch (conn->async_reason) {
+	case CONN_ASYNC_ERROR:
+		irc_log_warn("server %s: connection lost", conn->parent->name);
+		handle_disconnect(conn->parent);
+		break;
+	case CONN_ASYNC_READY:
+		irc_log_info("server %s: connection ready, identifying", conn->parent->name);
+		server_identify(conn->parent);
+		break;
+	case CONN_ASYNC_INCOMING:
+		irc_log_debug("server %s: fetching incoming events", conn->parent->name);
+		server_dequeue(conn->parent);
+		break;
+	default:
+		break;
+	}
+
+	/* Reset reason for debugging purposes. */
+	conn->async_reason = CONN_ASYNC_NONE;
+}
+
+/* }}} */
 
 struct irc_server *
 irc_server_new(const char *name)
@@ -1480,17 +1712,20 @@ irc_server_new(const char *name)
 	assert(name);
 
 	struct irc_server *s;
+	struct conn *conn;
 
-	/* Connection. */
 	s = irc_util_calloc(1, sizeof (*s));
-	s->conn = conn_new(s);
+
+	/* Private connection. */
+	s->conn = conn = conn_new(s);
+	ev_async_init(&conn->async_ev, server_async_cb);
+	ev_async_start(irc_bot_loop(), &conn->async_ev);
 
 	/* Predefined sane defaults. */
 	s->name         = irc_util_strdup(name);
 	s->port         = IRC_SERVER_DEFAULT_PORT;
 	s->prefix       = irc_util_strdup(IRC_SERVER_DEFAULT_PREFIX);
 	s->ctcp_version = irc_util_strdup(IRC_SERVER_DEFAULT_CTCP_VERSION);
-	s->flags        = IRC_SERVER_FLAGS_IPV4 | IRC_SERVER_FLAGS_IPV6;
 
 	return s;
 }
@@ -1532,8 +1767,10 @@ irc_server_set_ctcp(struct irc_server *s,
 {
 	assert(s);
 
-	s->ctcp_version = irc_util_strdupfree(s->ctcp_version, version);
-	s->ctcp_source  = irc_util_strdupfree(s->ctcp_source, source);
+	if (version)
+		s->ctcp_version = irc_util_strdupfree(s->ctcp_version, version);
+	if (source)
+		s->ctcp_source = irc_util_strdupfree(s->ctcp_source, source);
 }
 
 void
@@ -1573,9 +1810,7 @@ irc_server_connect(struct irc_server *s)
 	}
 #endif
 
-	/* Start with DNS resolving. */
-	if (conn_lookup(s->conn) < 0)
-		conn_connect(s->conn);
+	conn_connect(s->conn);
 }
 
 void
@@ -1585,10 +1820,9 @@ irc_server_disconnect(struct irc_server *s)
 
 	s->state = IRC_SERVER_STATE_DISCONNECTED;
 
-	conn_close(s->conn);
-
-	clear_channels(s, 0);
-	clear_server(s);
+	conn_clear(s);
+	channels_clear(s);
+	server_clear(s);
 }
 
 void
@@ -1624,7 +1858,7 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	char buf[IRC_BUF_LEN];
 	va_list ap;
 
-	if (s->state != IRC_SERVER_STATE_RUNNING) {
+	if (s->state != IRC_SERVER_STATE_IDENTIFYING && s->state != IRC_SERVER_STATE_RUNNING) {
 		errno = ENOTCONN;
 		return -1;
 	}
@@ -1633,7 +1867,7 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	vsnprintf(buf, sizeof (buf), fmt, ap);
 	va_end(ap);
 
-	return conn_push(s->conn, buf);
+	return conn_push(s, buf, strlen(buf));
 }
 
 int
@@ -1661,9 +1895,9 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 	 * and wait for connection.
 	 */
 	if (!(ch = irc_server_find(s, name)))
-		ch = add_channel(s, name, pass, IRC_CHANNEL_FLAGS_NONE);
+		ch = channels_add(s, name, pass, IRC_CHANNEL_FLAGS_NONE);
 
-	if (!(ch->flags & IRC_CHANNEL_FLAGS_JOINED) && s->state == IRC_SERVER_STATE_CONNECTED) {
+	if (!(ch->flags & IRC_CHANNEL_FLAGS_JOINED) && s->state == IRC_SERVER_STATE_RUNNING) {
 		if (pass)
 			ret = irc_server_send(s, "JOIN %s %s", name, pass);
 		else
@@ -1835,9 +2069,6 @@ irc_server_decref(struct irc_server *s)
 	assert(s);
 	assert(s->refc >= 1);
 
-	if (--s->refc == 0) {
-		conn_free(s->conn);
-		clear_channels(s, 1);
-		free(s);
-	}
+	if (--s->refc == 0)
+		server_free(s);
 }

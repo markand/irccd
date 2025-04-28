@@ -162,13 +162,13 @@ get_ctcp(duk_context *ctx, struct irc_server *s)
 	duk_get_prop_string(ctx, -1, "version");
 
 	if (duk_is_string(ctx, -1))
-		irc_util_strlcpy(s->ident.ctcpversion, duk_to_string(ctx, -1), sizeof (s->ident.ctcpversion));
+		irc_util_strlcpy(s->ctcp_version, duk_to_string(ctx, -1), sizeof (s->ctcp_version));
 
 	duk_pop(ctx);
 	duk_get_prop_string(ctx, -1, "source");
 
 	if (duk_is_string(ctx, -1))
-		irc_util_strlcpy(s->ident.ctcpsource, duk_to_string(ctx, -1), sizeof (s->ident.ctcpsource));
+		irc_util_strlcpy(s->ctcp_source, duk_to_string(ctx, -1), sizeof (s->ctcp_source));
 
 	duk_pop_2(ctx);
 }
@@ -184,40 +184,40 @@ Server_prototype_info(duk_context *ctx)
 	duk_push_object(ctx);
 	duk_push_string(ctx, s->name);
 	duk_put_prop_string(ctx, -2, "name");
-	duk_push_string(ctx, s->conn->hostname);
+	duk_push_string(ctx, s->hostname);
 	duk_put_prop_string(ctx, -2, "hostname");
-	duk_push_uint(ctx, s->conn->port);
+	duk_push_uint(ctx, s->port);
 	duk_put_prop_string(ctx, -2, "port");
 	duk_push_boolean(ctx, s->flags & IRC_SERVER_FLAGS_SSL);
 	duk_put_prop_string(ctx, -2, "ssl");
 	duk_push_string(ctx, s->prefix);
 	duk_put_prop_string(ctx, -2, "prefix");
-	duk_push_string(ctx, s->ident.realname);
+	duk_push_string(ctx, s->realname);
 	duk_put_prop_string(ctx, -2, "realname");
-	duk_push_string(ctx, s->ident.nickname);
+	duk_push_string(ctx, s->nickname);
 	duk_put_prop_string(ctx, -2, "nickname");
-	duk_push_string(ctx, s->ident.username);
+	duk_push_string(ctx, s->username);
 	duk_put_prop_string(ctx, -2, "username");
 
 	/* CTCP. */
 	duk_push_object(ctx);
-	duk_push_string(ctx, s->ident.ctcpversion);
+	duk_push_string(ctx, s->ctcp_version);
 	duk_put_prop_string(ctx, -2, "version");
-	duk_push_string(ctx, s->ident.ctcpsource);
+	duk_push_string(ctx, s->ctcp_source);
 	duk_put_prop_string(ctx, -2, "source");
 	duk_put_prop_string(ctx, -2, "ctcp");
 
 	/* Prefixes. */
 	duk_push_array(ctx);
 
-	for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i) {
-		if (s->params.prefixes[i].mode == 0)
+	for (size_t i = 0; i < s->prefixesz; ++i) {
+		if (s->prefixes[i].mode == 0)
 			continue;
 
 		duk_push_object(ctx);
-		duk_push_string(ctx, (char []) { s->params.prefixes[i].mode, '\0' });
+		duk_push_string(ctx, (char []) { s->prefixes[i].mode, '\0' });
 		duk_put_prop_string(ctx, -2, "mode");
-		duk_push_string(ctx, (char []) { s->params.prefixes[i].symbol, '\0' });
+		duk_push_string(ctx, (char []) { s->prefixes[i].symbol, '\0' });
 		duk_put_prop_string(ctx, -2, "symbol");
 		duk_put_prop_index(ctx, -2, i);
 	}
@@ -271,7 +271,7 @@ Server_prototype_isSelf(duk_context *ctx)
 	const struct irc_server *s = self(ctx);
 	const char *target = duk_require_string(ctx, 0);
 
-	duk_push_boolean(ctx, strncmp(target, s->ident.nickname, strlen(s->ident.nickname)) == 0);
+	duk_push_boolean(ctx, strncmp(target, s->nickname, strlen(s->nickname)) == 0);
 
 	return 1;
 }
@@ -429,6 +429,7 @@ Server_prototype_toString(duk_context *ctx)
 static int
 Server_constructor(duk_context *ctx)
 {
+#if 0
 	struct irc_server *s;
 
 	duk_require_object(ctx, 0);
@@ -453,6 +454,8 @@ Server_constructor(duk_context *ctx)
 	duk_push_pointer(ctx, s);
 	duk_put_prop_string(ctx, -2, SIGNATURE);
 	duk_pop(ctx);
+#endif
+	(void)ctx;
 
 	return 0;
 }

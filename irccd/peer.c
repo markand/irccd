@@ -635,6 +635,9 @@ cmd_rule_remove(struct peer *p, char *line)
 static int
 cmd_server_connect(struct peer *p, char *line)
 {
+	(void)line;
+
+#if 0
 	const char *args[6] = {0};
 	int ssl;
 	struct irc_server *s;
@@ -655,6 +658,7 @@ cmd_server_connect(struct peer *p, char *line)
 		s->flags |= IRC_SERVER_FLAGS_SSL;
 
 	irc_bot_server_add(s);
+#endif
 
 	return ok(p);
 }
@@ -775,17 +779,17 @@ cmd_server_info(struct peer *p, char *line)
 		return errno;
 
 	fprintf(fp, "OK %s\n", s->name);
-	fprintf(fp, "%s %u%s\n", s->conn->hostname, s->conn->port,
+	fprintf(fp, "%s %u%s\n", s->hostname, s->port,
 	    s->flags & IRC_SERVER_FLAGS_SSL ? " ssl" : "");
-	fprintf(fp, "%s %s %s\n", s->ident.nickname, s->ident.username, s->ident.realname);
+	fprintf(fp, "%s %s %s\n", s->nickname, s->username, s->realname);
 
 	LL_FOREACH(s->channels, c) {
-		const struct irc_channel_user *user = irc_channel_get(c, s->ident.nickname);
+		const struct irc_channel_user *user = irc_channel_get(c, s->nickname);
 
 		/* Prefix all our own modes on this channel. */
-		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i)
+		for (size_t i = 0; i < s->prefixesz; ++i)
 			if (user && (user->modes & 1 << i))
-				fputc(s->params.prefixes[i].symbol, fp);
+				fputc(s->prefixes[i].symbol, fp);
 
 		if (c->flags & IRC_CHANNEL_FLAGS_JOINED)
 			fprintf(fp, "%s", c->name);
@@ -996,9 +1000,9 @@ static const struct cmd {
 };
 
 static int
-cmp_cmd(const char *key, const struct cmd *cmd)
+cmp_cmd(const void *key, const void *data)
 {
-	return strcmp(key, cmd->name);
+	return strcmp(key, ((const struct cmd *)data)->name);
 }
 
 static const struct cmd *
@@ -1010,7 +1014,7 @@ find(const char *line)
 	sscanf(line, "%31s", cmd);
 
 	return bsearch(cmd, cmds, IRC_UTIL_SIZE(cmds),
-	    sizeof (cmds[0]), (irc_cmp)cmp_cmd);
+	    sizeof (cmds[0]), cmp_cmd);
 }
 
 static void

@@ -107,11 +107,13 @@ irc_bot_hook_clear(void);
 void
 irc_bot_dispatch(const struct irc_event *);
 
+#if 0
 int
 irc_bot_dequeue(struct irc_event *);
 
 void
 irc_bot_post(void (*)(void *), void *);
+#endif
 
 void
 irc_bot_finish(void);

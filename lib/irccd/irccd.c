@@ -143,40 +143,6 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 	}
 }
 
-static void
-invoke(const struct irc_event *ev)
-{
-	struct irc_plugin *p, *ptmp, *plgcmd = NULL;
-	struct irc_hook *h, *htmp;
-
-	LL_FOREACH_SAFE(irc.hooks, h, htmp)
-		irc_hook_invoke(h, ev);
-
-	/*
-	 * Invoke for every plugin the event verbatim. Then, the event may match
-	 * a plugin name command in that case we need to modify the event but
-	 * only one plugin can match by its identifier. For example, the
-	 * following plugins are loaded:
-	 *
-	 * - ask
-	 * - hangman
-	 * - logger
-	 *
-	 * If the message is "!ask will I be reach?" then it will invoke
-	 * onMessage for hangman and logger but onCommand for ask. As such call
-	 * hangman and logger first and modify event before ask.
-	 */
-	LL_FOREACH_SAFE(irc.plugins, p, ptmp) {
-		if (is_command(p, ev))
-			plgcmd = p;
-		else if (invokable(p, ev))
-			irc_plugin_handle(p, ev);
-	}
-
-	if (plgcmd && invokable(plgcmd, ev))
-		irc_plugin_handle(plgcmd, to_command(plgcmd, ev));
-}
-
 static struct irc_plugin *
 find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 {
@@ -276,7 +242,7 @@ irc_bot_server_remove(const char *name)
 	irc_server_disconnect(s);
 
 	/* Don't forget to notify plugins. */
-	invoke(&(struct irc_event) {
+	irc_bot_dispatch(&(struct irc_event) {
 		.type = IRC_EVENT_DISCONNECT,
 		.server = s
 	});
@@ -574,6 +540,41 @@ irc_bot_post(void (*exec)(void *), void *data)
 		irc_util_die("pthread_mutex_unlock: %s\n", strerror(errno));
 #endif
 }
+
+void
+irc_bot_dispatch(const struct irc_event *ev)
+{
+	struct irc_plugin *p, *ptmp, *plgcmd = NULL;
+	struct irc_hook *h, *htmp;
+
+	LL_FOREACH_SAFE(irc.hooks, h, htmp)
+		irc_hook_invoke(h, ev);
+
+	/*
+	 * Invoke for every plugin the event verbatim. Then, the event may match
+	 * a plugin name command in that case we need to modify the event but
+	 * only one plugin can match by its identifier. For example, the
+	 * following plugins are loaded:
+	 *
+	 * - ask
+	 * - hangman
+	 * - logger
+	 *
+	 * If the message is "!ask will I be reach?" then it will invoke
+	 * onMessage for hangman and logger but onCommand for ask. As such call
+	 * hangman and logger first and modify event before ask.
+	 */
+	LL_FOREACH_SAFE(irc.plugins, p, ptmp) {
+		if (is_command(p, ev))
+			plgcmd = p;
+		else if (invokable(p, ev))
+			irc_plugin_handle(p, ev);
+	}
+
+	if (plgcmd && invokable(plgcmd, ev))
+		irc_plugin_handle(plgcmd, to_command(plgcmd, ev));
+}
+
 
 void
 irc_bot_finish(void)
