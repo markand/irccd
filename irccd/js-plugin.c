@@ -570,6 +570,12 @@ wrap_open(struct irc_plugin_loader *ldr, const char *name, const char *path)
 	return js_plugin_open(name, path);
 }
 
+static void
+wrap_finish(struct irc_plugin_loader *ldr)
+{
+	free(ldr);
+}
+
 duk_context *
 js_plugin_get_context(struct irc_plugin *js)
 {
@@ -632,6 +638,8 @@ js_plugin_loader_new(void)
 
 	ldr = irc_util_calloc(1, sizeof (*ldr));
 	ldr->open = wrap_open;
+	ldr->finish = wrap_finish;
+
 	irc_util_strlcpy(ldr->extensions, "js", sizeof (ldr->extensions));
 	irc_util_strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
 

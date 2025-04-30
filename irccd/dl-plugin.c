@@ -269,6 +269,12 @@ wrap_open(struct irc_plugin_loader *ldr, const char *name, const char *path)
 	return dl_plugin_open(name, path);
 }
 
+static void
+wrap_finish(struct irc_plugin_loader *ldr)
+{
+	free(ldr);
+}
+
 struct irc_plugin *
 dl_plugin_open(const char *name, const char *path)
 {
@@ -310,6 +316,7 @@ dl_plugin_loader_new(void)
 
 	ldr = irc_util_calloc(1, sizeof (*ldr));
 	ldr->open = wrap_open;
+	ldr->finish = wrap_finish;
 
 #if defined(_WIN32)
 	irc_util_strlcpy(ldr->extensions, "dll", sizeof (ldr->extensions));

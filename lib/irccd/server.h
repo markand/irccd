@@ -35,45 +35,6 @@ extern "C" {
 
 struct irc_channel;
 
-#if 0
-
-/**
- * \brief Current IRC server state.
- */
-enum irc_server_state {
-	/**
-	 * Socket closed, no connection.
-	 */
-	IRC_SERVER_STATE_DISCONNECTED,
-
-	/**
-	 * Raw TCP socket connection in progress.
-	 */
-	IRC_SERVER_STATE_CONNECTING,
-
-	/**
-	 * SSL connection is handshaking.
-	 */
-	IRC_SERVER_STATE_HANDSHAKING,
-
-	/**
-	 * IRC server protocol exchange and authentication.
-	 */
-	IRC_SERVER_STATE_IDENTIFYING,
-
-	/**
-	 * Connection complete and running.
-	 */
-	IRC_SERVER_STATE_RUNNING,
-
-	/**
-	 * Unused sentinel value.
-	 */
-	IRC_SERVER_STATE_LAST
-};
-
-#endif
-
 enum irc_server_flags {
 	IRC_SERVER_FLAGS_SSL            = (1 << 0),
 	IRC_SERVER_FLAGS_AUTO_REJOIN    = (1 << 1),
@@ -181,15 +142,6 @@ struct irc_server {
 	 */
 	enum irc_server_flags flags;
 
-#if 0
-	/**
-	 * (read-only)
-	 *
-	 * Current server state.
-	 */
-	enum irc_server_state state;
-#endif
-
 	/**
 	 * (read-only)
 	 *
@@ -255,7 +207,18 @@ struct irc_server {
 	 */
 	unsigned int kick_max;
 
+	/**
+	 * (read-only)
+	 *
+	 * IRC server modes and their character prefix.
+	 */
 	struct irc_server_umode *prefixes;
+
+	/**
+	 * (read-only)
+	 *
+	 * Number of elements in ::irc_server::prefixes.
+	 */
 	size_t prefixesz;
 
 	/**

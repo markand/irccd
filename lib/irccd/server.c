@@ -754,7 +754,18 @@ conn__async_connect(struct conn *conn)
 	 * connection was complete and thus we check if we may need to
 	 * try the next endpoint or restart from resolving.
 	 */
-	if (conn->state != CONN_STATE_READY) {
+	switch (conn->state) {
+	case CONN_STATE_READY:
+		conn__switch(conn, CONN_STATE_DEFER);
+		break;
+	case CONN_STATE_DEFER:
+		/*
+		 * Connection was successful before failing, restart entirely
+		 * from scratch after few seconds.
+		 */
+		conn__connect(conn);
+		break;
+	default:
 		if (!conn->ai) {
 			/*
 			 * We may arrive on this state on initial startup which means
@@ -763,11 +774,9 @@ conn__async_connect(struct conn *conn)
 			conn->ai = conn->ai_list;
 			irc_log_info("server %s: trying '%s'",
 			    conn->parent->name, conn__info(conn, conn->ai));
-		} else {
-			if ((conn->ai = conn->ai->ai_next)) {
-				irc_log_warn("server %s: trying next endpoint '%s'",
-				conn->parent->name, conn__info(conn, conn->ai));
-			}
+		} else if ((conn->ai = conn->ai->ai_next)) {
+			irc_log_warn("server %s: trying next endpoint '%s'",
+			conn->parent->name, conn__info(conn, conn->ai));
 		}
 
 		if (!conn->ai) {
@@ -780,13 +789,7 @@ conn__async_connect(struct conn *conn)
 			conn__switch(conn, CONN_STATE_DEFER);
 		} else
 			conn__connect(conn);
-	} else {
-		/*
-		 * Connection was successful before failing, restart entirely
-		 * from scratch after few seconds.
-		 */
-		irc_log_warn("server %s: connection lost", conn->parent->name);
-		conn__switch(conn, CONN_STATE_DEFER);
+		break;
 	}
 
 	conn->state = CONN_STATE_CONNECT;
@@ -843,7 +846,7 @@ conn__async_defer(struct conn *conn)
 	irc_log_warn("server %s: retrying in few seconds...", conn->parent->name);
 
 	ev_timer_stop(irc_bot_loop(), &conn->timer);
-	ev_timer_set(&conn->timer, 30.0, 0.0);
+	ev_timer_set(&conn->timer, 5.0, 0.0);
 	ev_timer_start(irc_bot_loop(), &conn->timer);
 }
 
@@ -906,7 +909,10 @@ conn__timer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
 		break;
 	}
 
-	conn__switch(conn, CONN_STATE_CONNECT);
+	if (!conn->ai)
+		conn__switch(conn, CONN_STATE_RESOLVE);
+	else
+		conn__switch(conn, CONN_STATE_CONNECT);
 }
 
 /*
@@ -1002,24 +1008,6 @@ conn__io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
 	io[conn->state](conn, revents);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static int
 conn_dequeue(struct conn *conn, struct msg *msg)
 {
@@ -1048,10 +1036,14 @@ conn_dequeue(struct conn *conn, struct msg *msg)
 static void
 conn_free(struct conn *conn)
 {
-	if (!conn)
-		return;
-
 	conn__close(conn);
+
+	if (conn->ai_list)
+		freeaddrinfo(conn->ai_list);
+
+	ev_async_stop(irc_bot_loop(), &conn->notify_async);
+	ev_async_stop(irc_bot_loop(), &conn->async_switch);
+
 	free(conn);
 }
 
@@ -1145,8 +1137,6 @@ channels_remove(struct irc_server *s, struct irc_channel *ch)
 	}
 }
 
-
-
 static void
 handle_connect(struct irc_server *s, struct msg *msg)
 {
@@ -1158,10 +1148,6 @@ handle_connect(struct irc_server *s, struct msg *msg)
 	/* Now join all channels that were requested. */
 	LL_FOREACH(s->channels, ch)
 		irc_server_join(s, ch->name, ch->password);
-
-#if 0
-	s->state = IRC_SERVER_STATE_RUNNING;
-#endif
 
 	ev.type = IRC_EVENT_CONNECT;
 	ev.server = s;
@@ -1178,7 +1164,6 @@ handle_disconnect(struct irc_server *s)
 	ev.type = IRC_EVENT_DISCONNECT;
 	ev.server = s;
 
-	irc_log_info("server %s: connection lost", s->name);
 	irc_bot_dispatch(&ev);
 }
 
@@ -1562,7 +1547,6 @@ handle_nicknameinuse(struct irc_server *s, struct msg *msg)
 	(void)msg;
 
 	irc_log_warn("server %s: nickname %s is already in use", s->name, s->nickname);
-	irc_server_disconnect(s);
 }
 
 static void
@@ -1576,7 +1560,6 @@ handle_error(struct irc_server *s, struct msg *msg)
 	ev.server = s;
 	ev.type = IRC_EVENT_DISCONNECT;
 
-	irc_server_disconnect(s);
 	irc_bot_dispatch(&ev);
 }
 
@@ -1731,7 +1714,22 @@ server_free(struct irc_server *s)
 {
 	server_clear(s);
 	server_channels_free(s);
-	conn_free(s->conn);
+
+	if (s->conn)
+		conn_free(s->conn);
+
+	free(s->name);
+	free(s->hostname);
+	free(s->prefix);
+	free(s->nickname);
+	free(s->username);
+	free(s->realname);
+	free(s->password);
+	free(s->ctcp_version);
+	free(s->ctcp_source);
+	free(s->chantypes);
+	free(s->charset);
+	free(s->casemapping);
 	free(s);
 }
 

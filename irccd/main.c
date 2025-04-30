@@ -48,12 +48,12 @@ static struct ev_signal sig_int;
 static struct ev_signal sig_term;
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
 static struct peer *peers;
-static int running = 1;
 
 /* conf.y */
 void
 config_open(const char *);
 
+#if 0
 static void
 broadcast(const struct irc_event *ev)
 {
@@ -67,6 +67,7 @@ broadcast(const struct irc_event *ev)
 		if (p->is_watching)
 			peer_push(p, "%s", buf);
 }
+#endif
 
 static void
 run_info(void)
@@ -156,7 +157,7 @@ sig_cb(struct ev_loop *loop, struct ev_signal *self, int revents)
 	(void)revents;
 
 	irc_log_info("irccd: stopping on signal %d", self->signum);
-	irc_bot_finish();
+	ev_break(loop, EVBREAK_ALL);
 }
 
 static void
