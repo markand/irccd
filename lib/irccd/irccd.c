@@ -575,7 +575,6 @@ irc_bot_dispatch(const struct irc_event *ev)
 		irc_plugin_handle(plgcmd, to_command(plgcmd, ev));
 }
 
-
 void
 irc_bot_finish(void)
 {
