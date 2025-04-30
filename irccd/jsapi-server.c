@@ -99,6 +99,7 @@ get_string(duk_context *ctx, const char *n)
 static inline void
 get_ip(duk_context *ctx, struct irc_server *s)
 {
+#if 0
 	enum irc_server_flags flags = IRC_SERVER_FLAGS_IPV4 |
 				      IRC_SERVER_FLAGS_IPV6;
 
@@ -112,6 +113,9 @@ get_ip(duk_context *ctx, struct irc_server *s)
 
 	s->flags |= flags;
 	duk_pop_n(ctx, 2);
+#endif
+	(void)ctx;
+	(void)s;
 }
 
 static inline void

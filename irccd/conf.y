@@ -486,8 +486,6 @@ server_params
 				$$->flags |= IRC_SERVER_FLAGS_AUTO_REJOIN;
 			else if (strcmp(s->value, "JOIN-INVITE") == 0)
 				$$->flags |= IRC_SERVER_FLAGS_JOIN_INVITE;
-			else if (strcmp(s->value, "AUTO-RECONNECT") == 0)
-				$$->flags |= IRC_SERVER_FLAGS_AUTO_RECO;
 			else
 				irc_util_die("invalid server option: %s\n", s->value);
 		}

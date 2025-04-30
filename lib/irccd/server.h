@@ -35,6 +35,8 @@ extern "C" {
 
 struct irc_channel;
 
+#if 0
+
 /**
  * \brief Current IRC server state.
  */
@@ -70,13 +72,14 @@ enum irc_server_state {
 	IRC_SERVER_STATE_LAST
 };
 
+#endif
+
 enum irc_server_flags {
 	IRC_SERVER_FLAGS_SSL            = (1 << 0),
 	IRC_SERVER_FLAGS_AUTO_REJOIN    = (1 << 1),
 	IRC_SERVER_FLAGS_JOIN_INVITE    = (1 << 2),
-	IRC_SERVER_FLAGS_AUTO_RECONNECT = (1 << 3),
-	IRC_SERVER_FLAGS_NO_IPV4        = (1 << 4),
-	IRC_SERVER_FLAGS_NO_IPV6        = (1 << 5)
+	IRC_SERVER_FLAGS_NO_IPV4        = (1 << 3),
+	IRC_SERVER_FLAGS_NO_IPV6        = (1 << 4)
 };
 
 struct irc_server_user {
@@ -178,12 +181,14 @@ struct irc_server {
 	 */
 	enum irc_server_flags flags;
 
+#if 0
 	/**
 	 * (read-only)
 	 *
 	 * Current server state.
 	 */
 	enum irc_server_state state;
+#endif
 
 	/**
 	 * (read-only)
