@@ -47,7 +47,7 @@ Hook_list(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	LL_FOREACH(irc.hooks, h) {
+	LL_FOREACH(irccd->hooks, h) {
 		duk_push_object(ctx);
 		duk_push_string(ctx, h->name);
 		duk_put_prop_string(ctx, -2, "name");

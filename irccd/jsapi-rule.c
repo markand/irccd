@@ -110,7 +110,7 @@ Rule_list(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	DL_FOREACH(irc.rules, rule) {
+	DL_FOREACH(irccd->rules, rule) {
 		duk_push_object(ctx);
 		duk_push_int(ctx, rule->action);
 		duk_put_prop_string(ctx, -2, "action");

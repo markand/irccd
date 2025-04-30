@@ -18,8 +18,6 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <errno.h>
-#include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -31,6 +29,7 @@
 
 #include "config.h"
 #include "event.h"
+#include "hook.h"
 #include "irccd.h"
 #include "log.h"
 #include "plugin.h"
@@ -38,22 +37,15 @@
 #include "server.h"
 #include "util.h"
 
-struct defer {
-	void (*exec)(void *);
-	void *data;
-	struct defer *next;
-};
-
-struct irc irc = {};
-
+/* Private bot context. */
 static struct {
 	struct ev_loop *loop;
-	struct defer *queue;
-	pthread_t self;
-	pthread_mutex_t mtx;
-} priv = {
-	.mtx = PTHREAD_MUTEX_INITIALIZER
-};
+} priv = {};
+
+/* Public bot context. */
+static struct irccd bot = {};
+
+const struct irccd *irccd = &bot;
 
 static int
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
@@ -93,50 +85,50 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 {
 	switch (ev->type) {
 	case IRC_EVENT_COMMAND:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onCommand");
 	case IRC_EVENT_CONNECT:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    NULL, NULL, p->name, "onConnect");
 	case IRC_EVENT_DISCONNECT:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    NULL, NULL, p->name, "onDisconnect");
 	case IRC_EVENT_INVITE:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->invite.channel, ev->invite.origin, p->name, "onInvite");
 	case IRC_EVENT_JOIN:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->join.channel, ev->join.origin, p->name, "onJoin");
 	case IRC_EVENT_KICK:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->kick.channel, ev->kick.origin, p->name, "onKick");
 		break;
 	case IRC_EVENT_ME:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onMe");
 	case IRC_EVENT_MESSAGE:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onMessage");
 	case IRC_EVENT_MODE:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->mode.channel, ev->mode.origin, p->name, "onMode");
 	case IRC_EVENT_NAMES:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->names.channel, NULL, p->name, "onNames");
 	case IRC_EVENT_NICK:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    NULL, ev->nick.origin, p->name, "onNick");
 	case IRC_EVENT_NOTICE:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->notice.channel, ev->notice.origin, p->name, "onNotice");
 	case IRC_EVENT_PART:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->part.channel, ev->part.origin, p->name, "onPart");
 	case IRC_EVENT_TOPIC:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    ev->topic.channel, ev->topic.origin, p->name, "onTopic");
 	case IRC_EVENT_WHOIS:
-		return irc_rule_matchlist(irc.rules, ev->server->name,
+		return irc_rule_matchlist(bot.rules, ev->server->name,
 		    NULL, NULL, p->name, "onWhois");
 	default:
 		return 1;
@@ -191,12 +183,12 @@ is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 void
 irc_bot_init(struct ev_loop *loop)
 {
-	assert(loop);
-
 	irc_log_to_console();
 
+	if (!loop)
+		loop = ev_default_loop(0);
+
 	priv.loop = loop;
-	priv.self = pthread_self();
 }
 
 struct ev_loop *
@@ -205,18 +197,24 @@ irc_bot_loop(void)
 	return priv.loop;
 }
 
-void
+int
 irc_bot_server_add(struct irc_server *s)
 {
 	assert(s);
-	assert(!irc_bot_server_get(s->name));
+
+	if (irc_bot_server_get(s->name)) {
+		irc_log_warn("irccd: server %s already exists", s->name);
+		return -1;
+	}
 
 	irc_log_info("irccd: added new server: %s", s->name);
 
 	irc_server_incref(s);
 	irc_server_connect(s);
 
-	LL_APPEND(irc.servers, s);
+	LL_APPEND(bot.servers, s);
+
+	return 0;
 }
 
 struct irc_server *
@@ -224,7 +222,7 @@ irc_bot_server_get(const char *name)
 {
 	struct irc_server *s;
 
-	DL_FOREACH(irc.servers, s)
+	DL_FOREACH(bot.servers, s)
 		if (strcmp(s->name, name) == 0)
 			return s;
 
@@ -247,7 +245,7 @@ irc_bot_server_remove(const char *name)
 		.server = s
 	});
 
-	LL_DELETE(irc.servers, s);
+	LL_DELETE(bot.servers, s);
 	irc_server_decref(s);
 }
 
@@ -256,29 +254,37 @@ irc_bot_server_clear(void)
 {
 	struct irc_server *s, *tmp;
 
-	LL_FOREACH_SAFE(irc.servers, s, tmp)
+	LL_FOREACH_SAFE(bot.servers, s, tmp)
 		irc_bot_server_remove(s->name);
 
-	irc.servers = NULL;
+	bot.servers = NULL;
 }
 
-void
+int
 irc_bot_plugin_add(struct irc_plugin *p)
 {
 	assert(p);
-	assert(!irc_bot_plugin_get(p->name));
 
-	if (irc_plugin_load(p) == 0) {
-		LL_PREPEND(irc.plugins, p);
+	int rc;
+
+	if (irc_bot_plugin_get(p->name)) {
+		irc_log_warn("irccd: plugin %s already exists", p->name);
+		return -1;
+	}
+
+	if ((rc = irc_plugin_load(p)) == 0) {
+		LL_PREPEND(bot.plugins, p);
 		irc_log_info("irccd: add new plugin: %s (%s)", p->name, p->description);
 		irc_log_info("irccd: %s: version %s, from %s (%s license)", p->name,
 		    p->version, p->author, p->license);
 	} else
 		irc_log_warn("irccd: plugin %s failed to load", p->name);
+
+	return rc;
 }
 
 struct irc_plugin *
-irc_bot_plugin_find(const char *name, const char *path)
+irc_bot_plugin_search(const char *name, const char *path)
 {
 	assert(name);
 
@@ -291,7 +297,7 @@ irc_bot_plugin_find(const char *name, const char *path)
 	else
 		irc_log_info("irccd: opening plugin %s", name);
 
-	LL_FOREACH(irc.plugin_loaders, ldr) {
+	LL_FOREACH(bot.plugin_loaders, ldr) {
 		if (p)
 			break;
 
@@ -315,8 +321,10 @@ irc_bot_plugin_find(const char *name, const char *path)
 		}
 	}
 
-	if (!p)
-		return irc_log_warn("irccd: could not find plugin %s", name), NULL;
+	if (!p) {
+		irc_log_warn("irccd: could not find plugin %s", name);
+		return NULL;
+	}
 
 	/* Set default paths if they are not set. */
 	irc_plugin_set_path(p, "cache", irc_util_printf(pathbuf, sizeof (pathbuf),
@@ -334,7 +342,7 @@ irc_bot_plugin_get(const char *name)
 {
 	struct irc_plugin *p;
 
-	LL_FOREACH(irc.plugins, p)
+	LL_FOREACH(bot.plugins, p)
 		if (strcmp(p->name, name) == 0)
 			return p;
 
@@ -349,7 +357,7 @@ irc_bot_plugin_remove(const char *name)
 	if (!(p = irc_bot_plugin_get(name)))
 		return;
 
-	LL_DELETE(irc.plugins, p);
+	LL_DELETE(bot.plugins, p);
 	irc_plugin_unload(p);
 	irc_plugin_finish(p);
 }
@@ -359,7 +367,7 @@ irc_bot_plugin_loader_add(struct irc_plugin_loader *ldr)
 {
 	assert(ldr);
 
-	LL_PREPEND(irc.plugin_loaders, ldr);
+	LL_PREPEND(bot.plugin_loaders, ldr);
 }
 
 void
@@ -367,10 +375,10 @@ irc_bot_plugin_clear(void)
 {
 	struct irc_plugin *p, *tmp;
 
-	LL_FOREACH_SAFE(irc.plugins, p, tmp)
+	LL_FOREACH_SAFE(bot.plugins, p, tmp)
 		irc_bot_plugin_remove(p->name);
 
-	irc.plugins = NULL;
+	bot.plugins = NULL;
 }
 
 void
@@ -379,16 +387,16 @@ irc_bot_rule_insert(struct irc_rule *rule, size_t index)
 	assert(rule);
 
 	if (index == 0)
-		DL_PREPEND(irc.rules, rule);
+		DL_PREPEND(bot.rules, rule);
 	else if (index >= irc_bot_rule_size())
-		DL_APPEND(irc.rules, rule);
+		DL_APPEND(bot.rules, rule);
 	else {
 		struct irc_rule *pos;
 
-		for (pos = irc.rules; --index; )
+		for (pos = bot.rules; --index; )
 			pos = pos->next;
 
-		DL_APPEND_ELEM(irc.rules, pos, rule);
+		DL_APPEND_ELEM(bot.rules, pos, rule);
 	}
 }
 
@@ -399,7 +407,7 @@ irc_bot_rule_get(size_t index)
 
 	struct irc_rule *rule;
 
-	for (rule = irc.rules; index-- != 0; )
+	for (rule = bot.rules; index-- != 0; )
 		rule = rule->next;
 
 	return rule;
@@ -415,20 +423,20 @@ irc_bot_rule_move(size_t from, size_t to)
 	if (from == to)
 		return;
 
-	f = t = irc.rules;
+	f = t = bot.rules;
 
 	while (from--)
 		f = f->next;
 
-	DL_DELETE(irc.rules, f);
+	DL_DELETE(bot.rules, f);
 
 	if (to == 0)
-		DL_PREPEND(irc.rules, f);
+		DL_PREPEND(bot.rules, f);
 	else {
 		while (t && to--)
 			t = t->next;
 
-		DL_APPEND_ELEM(irc.rules, t, f);
+		DL_APPEND_ELEM(bot.rules, t, f);
 	}
 }
 
@@ -437,12 +445,12 @@ irc_bot_rule_remove(size_t index)
 {
 	assert(index < irc_bot_rule_size());
 
-	struct irc_rule *pos = irc.rules;
+	struct irc_rule *pos = bot.rules;
 
 	for (size_t i = 0; i < index; ++i)
 		pos = pos->next;
 
-	DL_DELETE(irc.rules, pos);
+	DL_DELETE(bot.rules, pos);
 }
 
 size_t
@@ -451,7 +459,7 @@ irc_bot_rule_size(void)
 	const struct irc_rule *r;
 	size_t total = 0;
 
-	DL_FOREACH(irc.rules, r)
+	DL_FOREACH(bot.rules, r)
 		total++;
 
 	return total;
@@ -462,19 +470,25 @@ irc_bot_rule_clear(void)
 {
 	struct irc_rule *r, *tmp;
 
-	DL_FOREACH_SAFE(irc.rules, r, tmp)
+	DL_FOREACH_SAFE(bot.rules, r, tmp)
 		irc_rule_finish(r);
 
-	irc.rules = NULL;
+	bot.rules = NULL;
 }
 
-void
+int
 irc_bot_hook_add(struct irc_hook *h)
 {
 	assert(h);
-	assert(!irc_bot_hook_get(h->name));
 
-	LL_PREPEND(irc.hooks, h);
+	if (irc_bot_hook_get(h->name)) {
+		irc_log_warn("irccd: hook %s already exists", h->name);
+		return -1;
+	}
+
+	LL_PREPEND(bot.hooks, h);
+
+	return 0;
 }
 
 struct irc_hook *
@@ -482,7 +496,7 @@ irc_bot_hook_get(const char *name)
 {
 	struct irc_hook *h;
 
-	LL_FOREACH(irc.hooks, h)
+	LL_FOREACH(bot.hooks, h)
 		if (strcmp(h->name, name) == 0)
 			return h;
 
@@ -497,7 +511,7 @@ irc_bot_hook_remove(const char *name)
 	struct irc_hook *h;
 
 	if ((h = irc_bot_hook_get(name))) {
-		LL_DELETE(irc.hooks, h);
+		LL_DELETE(bot.hooks, h);
 		irc_hook_free(h);
 	}
 }
@@ -507,38 +521,10 @@ irc_bot_hook_clear(void)
 {
 	struct irc_hook *h, *tmp;
 
-	LL_FOREACH_SAFE(irc.hooks, h, tmp)
+	LL_FOREACH_SAFE(bot.hooks, h, tmp)
 		irc_hook_free(h);
 
-	irc.hooks = NULL;
-}
-
-void
-irc_bot_post(void (*exec)(void *), void *data)
-{
-	(void)exec;
-	(void)data;
-#if 0
-	struct defer *d;
-	int dummy = 1;
-
-	if (pthread_mutex_lock(&mtx) < 0)
-		irc_util_die("pthread_mutex_lock: %s\n", strerror(errno));
-
-	d = irc_util_calloc(1, sizeof (*d));
-	d->exec = exec;
-	d->data = data;
-
-	LL_APPEND(queue, d);
-
-	/* Signal only if I'm not the same thread. */
-	if (!pthread_equal(pthread_self(), self))
-		if (write(pipes[1], &dummy, sizeof (int)) != sizeof (int))
-			irc_util_die("write: %s\n", strerror(errno));
-
-	if (pthread_mutex_unlock(&mtx) < 0)
-		irc_util_die("pthread_mutex_unlock: %s\n", strerror(errno));
-#endif
+	bot.hooks = NULL;
 }
 
 void
@@ -547,7 +533,7 @@ irc_bot_dispatch(const struct irc_event *ev)
 	struct irc_plugin *p, *ptmp, *plgcmd = NULL;
 	struct irc_hook *h, *htmp;
 
-	LL_FOREACH_SAFE(irc.hooks, h, htmp)
+	LL_FOREACH_SAFE(bot.hooks, h, htmp)
 		irc_hook_invoke(h, ev);
 
 	/*
@@ -564,7 +550,7 @@ irc_bot_dispatch(const struct irc_event *ev)
 	 * onMessage for hangman and logger but onCommand for ask. As such call
 	 * hangman and logger first and modify event before ask.
 	 */
-	LL_FOREACH_SAFE(irc.plugins, p, ptmp) {
+	LL_FOREACH_SAFE(bot.plugins, p, ptmp) {
 		if (is_command(p, ev))
 			plgcmd = p;
 		else if (invokable(p, ev))
@@ -578,39 +564,18 @@ irc_bot_dispatch(const struct irc_event *ev)
 void
 irc_bot_finish(void)
 {
-#if 0
 	struct irc_plugin_loader *ld, *ldtmp;
-	struct defer *d, *dtmp;
-	struct pollable *pb, *pbtmp;
-
-	close(pipes[0]);
-	close(pipes[1]);
 
 	/*
-	 * First remove all loaders to mkae sure plugins won't try to load
+	 * First remove all loaders to make sure plugins won't try to load
 	 * new plugins.
 	 */
-	LL_FOREACH_SAFE(irc.plugin_loaders, ld, ldtmp)
+	LL_FOREACH_SAFE(bot.plugin_loaders, ld, ldtmp)
 		irc_plugin_loader_finish(ld);
 
-	/* Remove all deferred calls. */
-	LL_FOREACH_SAFE(queue, d, dtmp)
-		free(d);
-	LL_FOREACH_SAFE(pollables, pb, pbtmp) {
-		if (pb->iface->finish)
-			pb->iface->finish(pb->iface->data);
-
-		free(pb);
-	}
-
-	queue = NULL;
-	pollables = NULL;
-	pollablesz = 0;
+	bot.plugin_loaders = NULL;
 
 	irc_bot_server_clear();
 	irc_bot_plugin_clear();
 	irc_bot_rule_clear();
-
-	pthread_mutex_destroy(&mtx);
-#endif
 }

@@ -25,6 +25,7 @@
 #include <irccd/channel.h>
 #include <irccd/conn.h>
 #include <irccd/irccd.h>
+#include <irccd/plugin.h>
 #include <irccd/server.h>
 #include <irccd/util.h>
 
@@ -509,7 +510,7 @@ Server_list(duk_context *ctx)
 
 	duk_push_object(ctx);
 
-	DL_FOREACH(irc.servers, s) {
+	DL_FOREACH(irccd->servers, s) {
 		jsapi_server_push(ctx, s);
 		duk_put_prop_string(ctx, -2, s->name);
 	}

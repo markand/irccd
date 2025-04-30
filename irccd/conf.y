@@ -28,8 +28,10 @@
 
 #include <utlist.h>
 
+#include <irccd/hook.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
+#include <irccd/plugin.h>
 #include <irccd/rule.h>
 #include <irccd/server.h>
 #include <irccd/util.h>
@@ -647,7 +649,7 @@ plugin
 
 		if (irc_bot_plugin_get($2))
 			irc_util_die("plugin %s already exists\n", $2);
-		if (!(p = irc_bot_plugin_find($2, location)))
+		if (!(p = irc_bot_plugin_search($2, location)))
 			goto cleanup;
 
 		if ($3 && $3->templates)

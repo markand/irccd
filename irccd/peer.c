@@ -29,8 +29,11 @@
 #include <utlist.h>
 
 #include <irccd/conn.h>
+#include <irccd/hook.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
+#include <irccd/plugin.h>
+#include <irccd/rule.h>
 #include <irccd/server.h>
 #include <irccd/util.h>
 
@@ -217,7 +220,7 @@ cmd_hook_list(struct peer *p, char *line)
 
 	fprintf(fp, "OK ");
 
-	LL_FOREACH(irc.hooks, h) {
+	LL_FOREACH(irccd->hooks, h) {
 		fprintf(fp, "%s", h->name);
 
 		if (h->next)
@@ -287,12 +290,10 @@ cmd_plugin_load(struct peer *p, char *line)
 
 	if (parse(line, args, 1) != 1)
 		return EINVAL;
-	if (!(plg = irc_bot_plugin_find(args[0], NULL)))
+	if (!(plg = irc_bot_plugin_search(args[0], NULL)))
 		peer_push(p, "could not load plugin: %s", strerror(errno));
-	else {
-		/* TODO: report error if fails to open. */
+	else
 		irc_bot_plugin_add(plg);
-	}
 
 	return ok(p);
 }
@@ -324,7 +325,7 @@ cmd_plugin_list(struct peer *p, char *line)
 
 	fprintf(fp, "OK ");
 
-	LL_FOREACH(irc.plugins, plg) {
+	LL_FOREACH(irccd->plugins, plg) {
 		fprintf(fp, "%s", plg->name);
 
 		if (plg->next)
@@ -352,7 +353,7 @@ cmd_plugin_reload(struct peer *p, char *line)
 
 		irc_plugin_reload(plg);
 	} else
-		DL_FOREACH(irc.plugins, plg)
+		DL_FOREACH(irccd->plugins, plg)
 			irc_plugin_reload(plg);
 
 	return ok(p);
@@ -561,12 +562,12 @@ cmd_rule_list(struct peer *p, char *line)
 	if (!(fp = fmemopen(out, sizeof (out), "w")))
 		return error(p, "%s", strerror(errno));
 
-	DL_FOREACH(irc.rules, rule)
+	DL_FOREACH(irccd->rules, rule)
 		rulesz++;
 
 	fprintf(fp, "OK %zu\n", rulesz);
 
-	DL_FOREACH(irc.rules, rule) {
+	DL_FOREACH(irccd->rules, rule) {
 		/* Convert : to spaces. */
 		fprintf(fp, "%s\n", rule->action == IRC_RULE_ACCEPT ? "accept" : "drop");
 		fprintf(fp, "%s\n", rule_list_to_spaces(rule->servers));
@@ -880,7 +881,7 @@ cmd_server_list(struct peer *p, char *line)
 
 	fprintf(fp, "OK ");
 
-	DL_FOREACH(irc.servers, s) {
+	DL_FOREACH(irccd->servers, s) {
 		fprintf(fp, "%s", s->name);
 
 		if (s->next)
@@ -927,7 +928,7 @@ cmd_server_reconnect(struct peer *p, char *line)
 
 		irc_server_reconnect(s);
 	} else
-		DL_FOREACH(irc.servers, s)
+		DL_FOREACH(irccd->servers, s)
 			irc_server_reconnect(s);
 
 	return ok(p);

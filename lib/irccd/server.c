@@ -1402,8 +1402,6 @@ handle_msg(struct irc_server *s, struct msg *msg)
 
 	ev.server = s;
 
-	printf("==> MESSAGE OWI\n");
-
 	/*
 	 * Detect CTCP commands which are PRIVMSG with a special boundaries.
 	 *

@@ -30,6 +30,7 @@
 
 #include <irccd/irccd.h>
 #include <irccd/log.h>
+#include <irccd/plugin.h>
 #include <irccd/util.h>
 
 #include "jsapi-http.h"

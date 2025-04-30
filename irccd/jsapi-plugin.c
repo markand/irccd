@@ -169,7 +169,7 @@ Plugin_list(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	LL_FOREACH(irc.plugins, p) {
+	LL_FOREACH(irccd->plugins, p) {
 		duk_push_string(ctx, p->name);
 		duk_put_prop_index(ctx, -2, i++);
 	}

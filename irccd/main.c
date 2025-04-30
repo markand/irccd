@@ -98,7 +98,7 @@ run_paths(void)
 	printf("%-16s%s\n", "data:", IRCCD_DATADIR);
 	printf("\n");
 
-	LL_FOREACH(irc.plugin_loaders, ld) {
+	LL_FOREACH(irccd->plugin_loaders, ld) {
 		printf("Plugins with extensions:");
 		irc_util_strlcpy(extensions, ld->extensions, sizeof (extensions));
 		irc_util_strlcpy(paths, ld->paths, sizeof (paths));
