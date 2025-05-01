@@ -49,17 +49,16 @@
 #include "jsapi-unicode.h"
 #include "jsapi-util.h"
 
+#define SELF(Plg) \
+	IRC_UTIL_CONTAINER_OF(Plg, struct self, parent)
+
 struct self {
-	struct irc_plugin plugin;
+	struct irc_plugin parent;
 	duk_context *ctx;
-	char location[PATH_MAX];
+	char *location;
 	char **options;
 	char **templates;
 	char **paths;
-	char *license;
-	char *version;
-	char *author;
-	char *description;
 };
 
 static void
@@ -92,7 +91,7 @@ metadata(duk_context *ctx, const char *name)
 
 	duk_pop(ctx);
 
-	return ret ? ret : irc_util_strdup("unknown");
+	return ret ? ret : "unknown";
 }
 
 static void
@@ -162,11 +161,11 @@ log_trace(struct self *self)
 	linenumber = duk_get_int(self->ctx, -1);
 	duk_pop(self->ctx);
 
-	irc_log_warn("plugin %s: %s:%d", self->plugin.name, self->location, linenumber);
+	irc_log_warn("plugin %s: %s:%d", self->parent.name, self->location, linenumber);
 
 	/* We can't put a '\n' in irc_log_warn so loop for them. */
 	for (p = stack; *stack && (token = strtok_r(p, "\n", &p)); )
-		irc_log_warn("plugin %s: %s", self->plugin.name, token);
+		irc_log_warn("plugin %s: %s", self->parent.name, token);
 
 	free(stack);
 }
@@ -223,7 +222,7 @@ get_value(duk_context *ctx, const char *table, const char *key)
 static void
 set_template(struct irc_plugin *plg, const char *key, const char *value)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	set_key_value(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES, key, value);
 }
@@ -231,7 +230,7 @@ set_template(struct irc_plugin *plg, const char *key, const char *value)
 static const char *
 get_template(struct irc_plugin *plg, const char *key)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	return get_value(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES, key);
 }
@@ -239,7 +238,7 @@ get_template(struct irc_plugin *plg, const char *key)
 static const char * const *
 get_templates(struct irc_plugin *plg)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	return get_table(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES, &js->templates);
 }
@@ -247,7 +246,7 @@ get_templates(struct irc_plugin *plg)
 static void
 set_path(struct irc_plugin *plg, const char *key, const char *value)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	set_key_value(js->ctx, JSAPI_PLUGIN_PROP_PATHS, key, value);
 }
@@ -255,7 +254,7 @@ set_path(struct irc_plugin *plg, const char *key, const char *value)
 static const char *
 get_path(struct irc_plugin *plg, const char *key)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	return get_value(js->ctx, JSAPI_PLUGIN_PROP_PATHS, key);
 }
@@ -263,7 +262,7 @@ get_path(struct irc_plugin *plg, const char *key)
 static const char * const *
 get_paths(struct irc_plugin *plg)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	return get_table(js->ctx, JSAPI_PLUGIN_PROP_PATHS, &js->paths);
 }
@@ -271,7 +270,7 @@ get_paths(struct irc_plugin *plg)
 static void
 set_option(struct irc_plugin *plg, const char *key, const char *value)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	set_key_value(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, key, value);
 }
@@ -279,7 +278,7 @@ set_option(struct irc_plugin *plg, const char *key, const char *value)
 static const char *
 get_option(struct irc_plugin *plg, const char *key)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	return get_value(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, key);
 }
@@ -287,7 +286,7 @@ get_option(struct irc_plugin *plg, const char *key)
 static const char * const *
 get_options(struct irc_plugin *plg)
 {
-	struct self *js = plg->data;
+	struct self *js = SELF(plg);
 
 	return get_table(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, &js->options);
 }
@@ -295,7 +294,7 @@ get_options(struct irc_plugin *plg)
 static int
 vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 {
-	struct self *self = plg->data;
+	struct self *self = SELF(plg);
 	int nargs = 0, ret = 0;
 
 	duk_get_global_string(self->ctx, function);
@@ -327,7 +326,7 @@ vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 	}
 
 	if (duk_pcall(self->ctx, nargs) != 0) {
-		log_trace(plg->data);
+		log_trace(SELF(plg));
 		ret = -1;
 	}
 
@@ -477,8 +476,11 @@ init(const char *name, const char *path, const char *script)
 	struct self *js;
 
 	js = irc_util_calloc(1, sizeof (*js));
-	js->ctx = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
-	irc_util_strlcpy(js->plugin.name, name, sizeof (js->plugin.name));
+	irc_plugin_init(&js->parent, name);
+
+	/* Javascript */
+	js->ctx      = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
+	js->location = irc_util_strdup(path);
 
 	/* Copy path because Duktape has no notions of it. */
 	irc_util_strlcpy(js->location, path, sizeof (js->location));
@@ -501,7 +503,7 @@ init(const char *name, const char *path, const char *script)
 	jsapi_http_load(js->ctx);
 #endif
 	jsapi_logger_load(js->ctx);
-	jsapi_plugin_load(js->ctx, &js->plugin);
+	jsapi_plugin_load(js->ctx, &js->parent);
 	jsapi_rule_load(js->ctx);
 	jsapi_server_load(js->ctx);
 	jsapi_system_load(js->ctx);
@@ -517,10 +519,12 @@ init(const char *name, const char *path, const char *script)
 		return NULL;
 	}
 
-	js->plugin.license = js->license = metadata(js->ctx, "license");
-	js->plugin.version = js->version = metadata(js->ctx, "version");
-	js->plugin.author = js->author = metadata(js->ctx, "author");
-	js->plugin.description = js->description = metadata(js->ctx, "summary");
+	irc_plugin_set_info(&js->parent,
+	    metadata(js->ctx, "license"),
+	    metadata(js->ctx, "version"),
+	    metadata(js->ctx, "author"),
+	    metadata(js->ctx, "summary")
+	);
 
 	return js;
 }
@@ -546,7 +550,7 @@ unload(struct irc_plugin *plg)
 static void
 finish(struct irc_plugin *plg)
 {
-	struct self *self = plg->data;
+	struct self *self = SELF(plg);
 
 	if (self->ctx)
 		duk_destroy_heap(self->ctx);
@@ -555,10 +559,6 @@ finish(struct irc_plugin *plg)
 	freelist(self->templates);
 	freelist(self->paths);
 
-	free(self->license);
-	free(self->version);
-	free(self->author);
-	free(self->description);
 	free(self);
 }
 
@@ -579,7 +579,7 @@ wrap_finish(struct irc_plugin_loader *ldr)
 duk_context *
 js_plugin_get_context(struct irc_plugin *js)
 {
-	struct self *self = js->data;
+	struct self *self = SELF(js);
 
 	return self->ctx;
 }
@@ -609,26 +609,25 @@ js_plugin_open(const char *name, const char *path)
 		return NULL;
 	}
 
-	self->plugin.data = self;
-	self->plugin.set_template = set_template;
-	self->plugin.get_template = get_template;
-	self->plugin.get_templates = get_templates;
-	self->plugin.set_path = set_path;
-	self->plugin.get_path = get_path;
-	self->plugin.get_paths = get_paths;
-	self->plugin.set_option = set_option;
-	self->plugin.get_option = get_option;
-	self->plugin.get_options = get_options;
-	self->plugin.load = load;
-	self->plugin.reload = reload;
-	self->plugin.unload = unload;
-	self->plugin.handle = handle;
-	self->plugin.finish = finish;
+	self->parent.set_template = set_template;
+	self->parent.get_template = get_template;
+	self->parent.get_templates = get_templates;
+	self->parent.set_path = set_path;
+	self->parent.get_path = get_path;
+	self->parent.get_paths = get_paths;
+	self->parent.set_option = set_option;
+	self->parent.get_option = get_option;
+	self->parent.get_options = get_options;
+	self->parent.load = load;
+	self->parent.reload = reload;
+	self->parent.unload = unload;
+	self->parent.handle = handle;
+	self->parent.finish = finish;
 
 	/* No longer needed. */
 	free(script);
 
-	return &self->plugin;
+	return &self->parent;
 }
 
 struct irc_plugin_loader *

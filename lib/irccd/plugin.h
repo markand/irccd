@@ -28,13 +28,11 @@ extern "C" {
 struct irc_event;
 
 struct irc_plugin {
-	char name[IRC_ID_LEN];
-	const char *license;
-	const char *version;
-	const char *author;
-	const char *description;
-	void *data;
-	struct irc_plugin *next;
+	char *name;
+	char *license;
+	char *version;
+	char *author;
+	char *description;
 
 	void (*set_template)(struct irc_plugin *, const char *, const char *);
 	const char *(*get_template)(struct irc_plugin *, const char *);
@@ -54,6 +52,8 @@ struct irc_plugin {
 	void (*handle)(struct irc_plugin *, const struct irc_event *);
 
 	void (*finish)(struct irc_plugin *);
+
+	struct irc_plugin *next;
 };
 
 struct irc_plugin_loader {
@@ -64,6 +64,16 @@ struct irc_plugin_loader {
 	void *data;
 	struct irc_plugin_loader *next;
 };
+
+void
+irc_plugin_init(struct irc_plugin *plg, const char *name);
+
+void
+irc_plugin_set_info(struct irc_plugin *plg,
+                    const char *license,
+                    const char *version,
+                    const char *author,
+                    const char *description);
 
 void
 irc_plugin_set_template(struct irc_plugin *, const char *, const char *);

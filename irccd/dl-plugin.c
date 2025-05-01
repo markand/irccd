@@ -38,10 +38,13 @@
 #       define SYM(sig, f) ((sig)(f))
 #endif
 
+#define SELF(Plg) \
+	IRC_UTIL_CONTAINER_OF(Plg, struct self, parent)
+
 /* Invoke with arguments and return value. */
 #define INVOKE(pg, name, sig, ...)                                                      \
 do {                                                                                    \
-        struct self *self = pg->data;                                                   \
+        struct self *self = SELF(pg);                                                   \
         sig fn;                                                                         \
                                                                                         \
         if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
@@ -51,7 +54,7 @@ do {                                                                            
 /* Invoke with argument and without return value. */
 #define INVOKE_NR(pg, name, sig, ...)                                                   \
 do {                                                                                    \
-        struct self *self = pg->data;                                                   \
+        struct self *self = SELF(pg);                                                   \
         sig fn;                                                                         \
                                                                                         \
         if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
@@ -61,7 +64,7 @@ do {                                                                            
 /* Invoke without arguments and with return value. */
 #define INVOKE_NA(pg, name, sig)                                                        \
 do {                                                                                    \
-        struct self *self = pg->data;                                                   \
+        struct self *self = SELF(pg);                                                   \
         sig fn;                                                                         \
                                                                                         \
         if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
@@ -71,7 +74,7 @@ do {                                                                            
 /* Invoke without arguments and without return value. */
 #define INVOKE_NA_NR(pg, name, sig)                                                     \
 do {                                                                                    \
-        struct self *self = pg->data;                                                   \
+        struct self *self = SELF(pg);                                                   \
         sig fn;                                                                         \
                                                                                         \
         if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
@@ -79,7 +82,7 @@ do {                                                                            
 } while (0)
 
 struct self {
-	struct irc_plugin plugin;
+	struct irc_plugin parent;
 	char prefix[32];
 	void *handle;
 };
@@ -214,7 +217,7 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 static void
 finish(struct irc_plugin *plg)
 {
-	struct self *self = plg->data;
+	struct self *self = SELF(plg);
 
 	if (self->handle)
 		dlclose(self->handle);
@@ -228,8 +231,7 @@ init(const char *name, const char *path)
 	struct self self;
 	struct stat st;
 
-	memset(&self, 0, sizeof (self));
-	irc_util_strlcpy(self.plugin.name, name, sizeof (self.plugin.name));
+	irc_plugin_init(&self.parent, name);
 
 	/*
 	 * It's not possible to get the exact error code when loading a plugin
@@ -284,29 +286,30 @@ dl_plugin_open(const char *name, const char *path)
 		return NULL;
 
 	/* Data and all callbacks. */
-	self->plugin.data = self;
-	self->plugin.set_template = set_template;
-	self->plugin.get_template = get_template;
-	self->plugin.get_templates = get_templates;
-	self->plugin.set_path = set_path;
-	self->plugin.get_path = get_path;
-	self->plugin.get_paths = get_paths;
-	self->plugin.set_option = set_option;
-	self->plugin.get_option = get_option;
-	self->plugin.get_options = get_options;
-	self->plugin.load = load;
-	self->plugin.reload = reload;
-	self->plugin.unload = unload;
-	self->plugin.handle = handle;
-	self->plugin.finish = finish;
+	self->parent.set_template = set_template;
+	self->parent.get_template = get_template;
+	self->parent.get_templates = get_templates;
+	self->parent.set_path = set_path;
+	self->parent.get_path = get_path;
+	self->parent.get_paths = get_paths;
+	self->parent.set_option = set_option;
+	self->parent.get_option = get_option;
+	self->parent.get_options = get_options;
+	self->parent.load = load;
+	self->parent.reload = reload;
+	self->parent.unload = unload;
+	self->parent.handle = handle;
+	self->parent.finish = finish;
 
 	/* Metadata variables. */
-	self->plugin.author = metadata(self, "author");
-	self->plugin.description = metadata(self, "description");
-	self->plugin.version = metadata(self, "version");
-	self->plugin.license = metadata(self, "license");
+	irc_plugin_set_info(&self->parent,
+	    metadata(self, "author"),
+	    metadata(self, "description"),
+	    metadata(self, "version"),
+	    metadata(self, "license")
+	);
 
-	return &self->plugin;
+	return &self->parent;
 }
 
 struct irc_plugin_loader *

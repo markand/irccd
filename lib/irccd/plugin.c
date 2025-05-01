@@ -18,8 +18,36 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "plugin.h"
+#include "util.h"
+
+void
+irc_plugin_init(struct irc_plugin *plg, const char *name)
+{
+	assert(plg);
+	assert(name);
+
+	memset(plg, 0, sizeof (*plg));
+
+	plg->name = irc_util_strdup(name);
+}
+
+void
+irc_plugin_set_info(struct irc_plugin *plg,
+                    const char *license,
+                    const char *version,
+                    const char *author,
+                    const char *description)
+{
+	assert(plg);
+
+	plg->license     = irc_util_strdupfree(plg->license, license);
+	plg->version     = irc_util_strdupfree(plg->version, version);
+	plg->author      = irc_util_strdupfree(plg->author, author);
+	plg->description = irc_util_strdupfree(plg->description, description);
+}
 
 void
 irc_plugin_set_template(struct irc_plugin *plg, const char *key, const char *value)
@@ -169,6 +197,12 @@ irc_plugin_finish(struct irc_plugin *plg)
 
 	if (plg->finish)
 		plg->finish(plg);
+
+	plg->name        = irc_util_free(plg->license);
+	plg->license     = irc_util_free(plg->license);
+	plg->version     = irc_util_free(plg->version);
+	plg->author      = irc_util_free(plg->author);
+	plg->description = irc_util_free(plg->description);
 }
 
 struct irc_plugin *
