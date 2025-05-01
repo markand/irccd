@@ -49,7 +49,8 @@
 #include "util.h"
 
 #define RECONNECT_DELAY 30.0    /* Seconds to wait before reconnecting. */
-#define CONNECT_TIMEOUT 1800.0  /* Seconds before marking a server as dead. */
+#define CONNECT_TIMEOUT 5.0     /* Seconds before marking a server as dead. */
+#define PING_TIMEOUT    300.0   /* Seconds after assuming ping timeout. */
 
 /*
  * Current connection state.
@@ -83,9 +84,9 @@ enum conn_state {
 	CONN_STATE_READY,
 
 	/*
-	 * Wait before retrying the connection later.
+	 * Retry next connection or later.
 	 */
-	CONN_STATE_DEFER,
+	CONN_STATE_RETRY
 };
 
 /*
@@ -203,6 +204,10 @@ modes_parse(struct irc_server *s, const char *value)
 
 	char modes[16] = {}, syms[16] = {};
 	size_t modesz, symsz;
+
+	/* Just make sure in case this line would come twice. */
+	s->prefixes  = irc_util_free(s->prefixes);
+	s->prefixesz = 0;
 
 	if (sscanf(value, "(%15[^)])%15s", modes, syms) == 2) {
 		modesz = strlen(modes);
@@ -545,13 +550,13 @@ conn__tls_handshake(struct conn *conn)
 		 * usually should not).
 		 */
 		if ((flags = conn->want(conn)) < 0)
-			conn__switch(conn, CONN_STATE_CONNECT);
+			conn__switch(conn, CONN_STATE_RETRY);
 		else
 			conn__watch(conn, flags);
 		break;
 	case -1:
 		irc_log_warn("server %s: SSL handshake failed", conn->parent->name);
-		conn__switch(conn, CONN_STATE_CONNECT);
+		conn__switch(conn, CONN_STATE_RETRY);
 		break;
 	default:
 		conn__switch(conn, CONN_STATE_READY);
@@ -632,6 +637,7 @@ conn__socket(struct conn *conn)
  * May switch to:
  *
  * - CONN_STATE_CONNECT
+ * - CONN_STATE_RETRY
  */
 static void
 conn__resolve(struct conn *conn)
@@ -660,7 +666,7 @@ conn__resolve(struct conn *conn)
 	if ((rc = getaddrinfo(conn->parent->hostname, service, &hints, &conn->ai_list)) != 0) {
 		irc_log_warn("server %s: getaddrinfo: %s", conn->parent->name, gai_strerror(rc));
 		rc = -1;
-		conn__switch(conn, CONN_STATE_DEFER);
+		conn__switch(conn, CONN_STATE_RETRY);
 	} else {
 		rc = 0;
 
@@ -668,6 +674,8 @@ conn__resolve(struct conn *conn)
 			irc_log_debug("server %s: resolves to %s",
 			    conn->parent->name, conn__info(conn, ai));
 
+		/* Start with first one. */
+		conn->ai = conn->ai_list;
 		conn__switch(conn, CONN_STATE_CONNECT);
 	}
 }
@@ -677,14 +685,14 @@ conn__resolve(struct conn *conn)
  *
  * May switch to:
  *
- * - CONN_STATE_CONNECT
  * - CONN_STATE_HANDSHAKE
+ * - CONN_STATE_RETRY
  */
 static void
 conn__connect(struct conn *conn)
 {
 	if (conn__socket(conn) < 0) {
-		conn__switch(conn, CONN_STATE_CONNECT);
+		conn__switch(conn, CONN_STATE_RETRY);
 		return;
 	}
 
@@ -703,6 +711,9 @@ conn__connect(struct conn *conn)
 	 */
 	if (errno == EINPROGRESS || errno == EAGAIN) {
 		irc_log_debug("server %s: connect in progress", conn->parent->name);
+		ev_timer_stop(irc_bot_loop(), &conn->timer);
+		ev_timer_set(&conn->timer, 0.0, CONNECT_TIMEOUT);
+		ev_timer_start(irc_bot_loop(), &conn->timer);
 		ev_io_set(&conn->io_fd, conn->fd, EV_WRITE);
 		ev_io_start(irc_bot_loop(), &conn->io_fd);
 	} else {
@@ -746,60 +757,23 @@ conn__async_resolve(struct conn *conn)
 static void
 conn__async_connect(struct conn *conn)
 {
-	/* Destroy socket and everything else if needed. */
-	conn__close(conn);
-
-	/*
-	 * Connection failed and this may have happened before the
-	 * connection was complete and thus we check if we may need to
-	 * try the next endpoint or restart from resolving.
-	 */
-	switch (conn->state) {
-	case CONN_STATE_READY:
-		conn__switch(conn, CONN_STATE_DEFER);
-		break;
-	case CONN_STATE_DEFER:
-		/*
-		 * Connection was successful before failing, restart entirely
-		 * from scratch after few seconds.
-		 */
-		conn__connect(conn);
-		break;
-	default:
-		if (!conn->ai) {
-			/*
-			 * We may arrive on this state on initial startup which means
-			 * conn->ai is NULL on the first time.
-			 */
-			conn->ai = conn->ai_list;
-			irc_log_info("server %s: trying '%s'",
-			    conn->parent->name, conn__info(conn, conn->ai));
-		} else if ((conn->ai = conn->ai->ai_next)) {
-			irc_log_warn("server %s: trying next endpoint '%s'",
-			conn->parent->name, conn__info(conn, conn->ai));
-		}
-
-		if (!conn->ai) {
-			/*
-			 * No more endpoint for this endpoint, wait a little
-			 * and retry later.
-			 */
-			irc_log_warn("server %s: no more addresses available",
-			    conn->parent->name);
-			conn__switch(conn, CONN_STATE_DEFER);
-		} else
-			conn__connect(conn);
-		break;
-	}
-
 	conn->state = CONN_STATE_CONNECT;
+
+	irc_log_info("server %s: trying remote '%s'",
+	    conn->parent->name, conn__info(conn, conn->ai));
+	conn__connect(conn);
 }
 
+/*
+ * Perform an SSL handshake if the server is configured that way, otherwise
+ * change to ready state.
+ */
 static void
 conn__async_handshake(struct conn *conn)
 {
 	if (conn->parent->flags & IRC_SERVER_FLAGS_SSL) {
 #if defined(IRCCD_WITH_SSL)
+		conn->state = CONN_STATE_HANDSHAKE;
 		conn->ctx = SSL_CTX_new(TLS_method());
 		conn->ssl = SSL_new(conn->ctx);
 
@@ -816,12 +790,19 @@ conn__async_handshake(struct conn *conn)
 #else
 		abort();
 #endif
-	} else
+	} else {
+		/*
+		 * Socket event may already arrive so make sure conn__io_cb
+		 * is not called with CONN_STATE_HANDSHAKE in the meantime.
+		 */
+		conn->state = CONN_STATE_READY;
 		conn__switch(conn, CONN_STATE_READY);
-
-	conn->state = CONN_STATE_HANDSHAKE;
+	}
 }
 
+/*
+ * Enable read watcher and notify the server that event has happened.
+ */
 static void
 conn__async_ready(struct conn *conn)
 {
@@ -829,6 +810,11 @@ conn__async_ready(struct conn *conn)
 
 	/* Start with EV_READ only for now. */
 	conn__watch(conn, EV_READ);
+
+	/* Modify timer to watch for ping timeout. */
+	ev_timer_stop(irc_bot_loop(), &conn->timer);
+	ev_timer_set(&conn->timer, PING_TIMEOUT, PING_TIMEOUT);
+	ev_timer_start(irc_bot_loop(), &conn->timer);
 
 	/*
 	 * Notify parent of success, it will start the IRC protocol exchange by
@@ -839,15 +825,57 @@ conn__async_ready(struct conn *conn)
 }
 
 static void
-conn__async_defer(struct conn *conn)
+conn__async_retry(struct conn *conn)
 {
-	conn->state = CONN_STATE_DEFER;
+	/* Cleanup socket and stuff, at this point it's not recoverable. */
+	conn__close(conn);
 
-	irc_log_warn("server %s: retrying in few seconds...", conn->parent->name);
+	/*
+	 * Depending on the current state we may not do the same thing:
+	 *
+	 * If we are trying to connect to a remote that didn't succeed, try
+	 * immediately the next remote address in the list. Otherwise, wait
+	 * a little and restart from scratch.
+	 */
+	switch (conn->state) {
+	case CONN_STATE_RESOLVE:
+	case CONN_STATE_READY:
+		/*
+		 * We were either unable to get DNS remote information or
+		 * successfully connected to a server. Wait a little because it
+		 * make no sense to retry immediately.
+		 */
+		irc_log_warn("server %s: retrying in few seconds...", conn->parent->name);
+		ev_timer_set(&conn->timer, RECONNECT_DELAY, 0.0);
+		ev_timer_start(irc_bot_loop(), &conn->timer);
+		break;
+	case CONN_STATE_CONNECT:
+	case CONN_STATE_HANDSHAKE:
+		/*
+		 * Connnect or handshake failed, try the next remote
+		 * immediately if available.
+		 */
+		if (conn->ai->ai_next) {
+			conn->ai = conn->ai->ai_next;
+			irc_log_warn("server %s: trying next remote '%s'",
+			    conn->parent->name, conn__info(conn, conn->ai));
+			conn__switch(conn, CONN_STATE_CONNECT);
+		} else {
+			/*
+			 * We have iterated through the entire list of remote
+			 * addresses, wait a little and resolve again.
+			 */
+			irc_log_warn("server %s: no more addresses available",
+			    conn->parent->name);
+			ev_timer_set(&conn->timer, RECONNECT_DELAY, 0.0);
+			ev_timer_start(irc_bot_loop(), &conn->timer);
+		}
+		break;
+	default:
+		break;
+	}
 
-	ev_timer_stop(irc_bot_loop(), &conn->timer);
-	ev_timer_set(&conn->timer, 5.0, 0.0);
-	ev_timer_start(irc_bot_loop(), &conn->timer);
+	conn->state = CONN_STATE_RETRY;
 }
 
 static void
@@ -865,7 +893,7 @@ conn__async_switch_cb(struct ev_loop *loop, struct ev_async *self, int revents)
 		[CONN_STATE_CONNECT]     = conn__async_connect,
 		[CONN_STATE_HANDSHAKE]   = conn__async_handshake,
 		[CONN_STATE_READY]       = conn__async_ready,
-		[CONN_STATE_DEFER]       = conn__async_defer
+		[CONN_STATE_RETRY]       = conn__async_retry
 	};
 
 	assert(conn->state_next != CONN_STATE_CLOSE);
@@ -902,17 +930,13 @@ conn__timer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
 		conn->notify = CONN_NOTIFY_DISCONNECT;
 		ev_async_send(loop, &conn->notify_async);
 		break;
-	case CONN_STATE_DEFER:
+	case CONN_STATE_RETRY:
 		irc_log_info("server %s: auto-reconnecting now", conn->parent->name);
+		conn__switch(conn, CONN_STATE_RESOLVE);
 		break;
 	default:
 		break;
 	}
-
-	if (!conn->ai)
-		conn__switch(conn, CONN_STATE_RESOLVE);
-	else
-		conn__switch(conn, CONN_STATE_CONNECT);
 }
 
 /*
@@ -936,7 +960,7 @@ conn__io_connecting(struct conn *conn, int revents)
 	 */
 	if ((rc = getsockopt(conn->fd, SOL_SOCKET, SO_ERROR, &err, &len)) < 0 || err) {
 		irc_log_warn("server %s: connect: %s", conn->parent->name, strerror(err));
-		conn__switch(conn, CONN_STATE_CONNECT);
+		conn__switch(conn, CONN_STATE_RETRY);
 	} else {
 		ev_timer_again(irc_bot_loop(), &conn->timer);
 		conn__switch(conn, CONN_STATE_HANDSHAKE);
@@ -953,8 +977,7 @@ conn__io_handshaking(struct conn *conn, int revents)
 	(void)revents;
 
 #if defined(IRCCD_WITH_SSL)
-#else
-	return 0;
+	conn__tls_handshake(conn);
 #endif
 }
 
@@ -970,7 +993,7 @@ conn__io_ready(struct conn *conn, int revents)
 
 	if (rc < 0) {
 		/* Oops, connection lost. Retry. */
-		conn__switch(conn, CONN_STATE_CONNECT);
+		conn__switch(conn, CONN_STATE_RETRY);
 
 		/* Notify parent of disconnection. */
 		conn->notify = CONN_NOTIFY_DISCONNECT;
