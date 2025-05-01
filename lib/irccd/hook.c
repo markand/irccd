@@ -145,9 +145,10 @@ child_cb(struct ev_loop *loop, struct ev_child *self, int revents)
 	if (WIFEXITED(self->rstatus))
 		irc_log_debug("hook %s: exited with code %d", parent->name, WEXITSTATUS(self->rstatus));
 	else if (WIFSIGNALED(self->rstatus))
-		irc_log_debug("hook %s: terminated on signal  %d", parent->name, WTERMSIG(self->rstatus));
+		irc_log_debug("hook %s: terminated on signal %d", parent->name, WTERMSIG(self->rstatus));
 
 	ev_child_stop(loop, self);
+	ev_timer_stop(loop, &child->timer);
 
 	LL_DELETE(child->parent->children, child);
 	free(child);
@@ -166,6 +167,50 @@ append(struct irc_hook *h, pid_t pid)
 	ev_child_start(irc_bot_loop(), &child->child);
 
 	LL_APPEND(h->children, child);
+}
+
+static void
+timer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
+{
+	(void)loop;
+	(void)revents;
+
+	struct irc_hook_child *child;
+
+	child = IRC_UTIL_CONTAINER_OF(self, struct irc_hook_child, timer);
+
+	irc_log_warn("hook: would not die, sending SIGKILL");
+	kill(child->pid, SIGKILL);
+}
+
+static inline int
+child_exists(const struct irc_hook *hook, const struct irc_hook_child *child)
+{
+	const struct irc_hook_child *it;
+
+	LL_FOREACH(hook->children, it)
+		if (it == child)
+			return 1;
+
+	return 0;
+}
+
+static void
+stop(struct irc_hook *hook, struct irc_hook_child *child)
+{
+	irc_log_debug("hook %s: stopping active children", hook->name);
+
+	/* Start a timer in case it wouldn't stop on SIGTERM. */
+	ev_timer_init(&child->timer, timer_cb, 5.0, 0.0);
+	ev_timer_start(irc_bot_loop(), &child->timer);
+
+	/*
+	 * Note: the child_cb removes the child from the parent hook so we have
+	 * to check if the hook is still present rather than dereferencing the
+	 * pointer itself.
+	 */
+	while (child_exists(hook, child))
+		ev_run(irc_bot_loop(), EVRUN_ONCE);
 }
 
 struct irc_hook *
@@ -221,7 +266,12 @@ irc_hook_free(struct irc_hook *h)
 {
 	assert(h);
 
-	// TODO: destroy all children.
+	struct irc_hook_child *child, *tmp;
 
+	LL_FOREACH_SAFE(h->children, child, tmp)
+		stop(h, child);
+
+	free(h->name);
+	free(h->path);
 	free(h);
 }

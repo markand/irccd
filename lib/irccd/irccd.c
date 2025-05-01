@@ -577,5 +577,6 @@ irc_bot_finish(void)
 
 	irc_bot_server_clear();
 	irc_bot_plugin_clear();
+	irc_bot_hook_clear();
 	irc_bot_rule_clear();
 }
