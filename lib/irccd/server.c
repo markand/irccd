@@ -415,6 +415,17 @@ conn__close(struct conn *conn)
 #endif
 }
 
+static inline int
+conn__want(const struct conn *conn)
+{
+	int flags = EV_READ;
+
+	if (conn->outsz)
+		flags |= EV_WRITE;
+
+	return flags;
+}
+
 static ssize_t
 conn__plain_recv(struct conn *conn, void *buf, size_t bufsz)
 {
@@ -464,28 +475,17 @@ conn__plain_send(struct conn *conn, const void *buf, size_t bufsz)
 	return ns;
 }
 
-static int
-conn__plain_want(struct conn *conn)
-{
-	int flags = EV_READ;
-
-	if (conn->outsz)
-		flags |= EV_WRITE;
-
-	return flags;
-}
-
 #if defined(IRCCD_WITH_SSL)
 
 /*
  * Indicate what the SSL connection wants.
  */
 static int
-conn__tls_want(struct conn *conn)
+conn__tls_reason(struct conn *conn, int rc)
 {
 	int reason, flags = 0;
 
-	switch ((reason = SSL_get_error(conn->ssl, 0))) {
+	switch ((reason = SSL_get_error(conn->ssl, rc))) {
 	case SSL_ERROR_WANT_READ:
 		flags |= EV_READ;
 		break;
@@ -504,14 +504,15 @@ static ssize_t
 conn__tls_recv(struct conn *conn, void *buf, size_t bufsz)
 {
 	size_t nr = 0;
+	int rc;
 
 	/*
 	 * Returns 0 or 1 only, re-use conn__tls_want to inspect the
 	 * SSL_get_error return value. Caller will automatically call it again
 	 * if needed.
 	 */
-	if (SSL_read_ex(conn->ssl, buf, bufsz, &nr) == 0)
-		return (ssize_t)conn__tls_want(conn);
+	if ((rc = SSL_read_ex(conn->ssl, buf, bufsz, &nr)) == 0)
+		return (ssize_t)conn__tls_reason(conn, rc);
 
 	return (ssize_t)nr;
 }
@@ -520,10 +521,11 @@ static ssize_t
 conn__tls_send(struct conn *conn, const void *buf, size_t bufsz)
 {
 	size_t ns = 0;
+	int rc;
 
 	/* See conn__tls_recv also. */
-	if (SSL_write_ex(conn->ssl, buf, bufsz, &ns) == 0 && conn__tls_want(conn) < 0)
-		ns = -1;
+	if ((rc = SSL_write_ex(conn->ssl, buf, bufsz, &ns)) == 0)
+		return conn__tls_reason(conn, rc);
 
 	return (ssize_t)ns;
 }
@@ -540,28 +542,25 @@ conn__tls_send(struct conn *conn, const void *buf, size_t bufsz)
 static void
 conn__tls_handshake(struct conn *conn)
 {
-	int flags;
+	int rc, flags;
 
-	switch (SSL_do_handshake(conn->ssl)) {
-	case 0:
+	if ((rc = SSL_do_handshake(conn->ssl)) <= 0) {
 		/*
 		 * Handshake still in progress, update the watcher flags if
 		 * needed unless SSL_get_error returns something else (which
 		 * usually should not).
 		 */
-		if ((flags = conn->want(conn)) < 0)
+		if ((flags = conn__tls_reason(conn, rc)) < 0) {
+			irc_log_warn("server %s: SSL handshake failed: %s",
+			conn->parent->name, ERR_error_string(ERR_get_error(), NULL));
 			conn__switch(conn, CONN_STATE_RETRY);
-		else
+		} else {
+			/* Allow more time. */
+			ev_timer_again(irc_bot_loop(), &conn->timer);
 			conn__watch(conn, flags);
-		break;
-	case -1:
-		irc_log_warn("server %s: SSL handshake failed", conn->parent->name);
-		conn__switch(conn, CONN_STATE_RETRY);
-		break;
-	default:
+		}
+	} else
 		conn__switch(conn, CONN_STATE_READY);
-		break;
-	}
 }
 
 #endif
@@ -712,7 +711,7 @@ conn__connect(struct conn *conn)
 	if (errno == EINPROGRESS || errno == EAGAIN) {
 		irc_log_debug("server %s: connect in progress", conn->parent->name);
 		ev_timer_stop(irc_bot_loop(), &conn->timer);
-		ev_timer_set(&conn->timer, 0.0, CONNECT_TIMEOUT);
+		ev_timer_set(&conn->timer, CONNECT_TIMEOUT, 0.0);
 		ev_timer_start(irc_bot_loop(), &conn->timer);
 		ev_io_set(&conn->io_fd, conn->fd, EV_WRITE);
 		ev_io_start(irc_bot_loop(), &conn->io_fd);
@@ -1000,7 +999,7 @@ conn__io_ready(struct conn *conn, int revents)
 		ev_async_send(irc_bot_loop(), &conn->notify_async);
 	} else {
 		/* Update condition if buffers are modified */
-		conn__watch(conn, conn->want(conn));
+		conn__watch(conn, conn__want(conn));
 
 		if (conn->insz > 0) {
 			conn->notify = CONN_NOTIFY_INCOMING;
@@ -1083,14 +1082,12 @@ conn_new(struct irc_server *parent, void (*notify_cb)(struct ev_loop *, struct e
 #if defined(IRCCD_WITH_SSL)
 		conn->recv = conn__tls_recv;
 		conn->send = conn__tls_send;
-		conn->want = conn__tls_want;
 #else
 		abort();
 #endif
 	} else {
 		conn->recv = conn__plain_recv;
 		conn->send = conn__plain_send;
-		conn->want = conn__plain_want;
 	}
 
 	ev_init(&conn->io_fd, conn__io_cb);
@@ -1902,7 +1899,7 @@ irc_server_connect(struct irc_server *s)
 	}
 
 #if !defined(IRCCD_WITH_SSL)
-	if (conn->flags & IRC_CONN_SSL) {
+	if (s->flags & IRC_SERVER_FLAGS_SSL) {
 		irc_log_warn("server %s: SSL requested but not available", s->name);
 		return;
 	}
