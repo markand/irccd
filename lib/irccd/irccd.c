@@ -288,7 +288,7 @@ irc_bot_plugin_search(const char *name, const char *path)
 {
 	assert(name);
 
-	char buf[IRC_PATHS_LEN], pathbuf[PATH_MAX], *t, *token;
+	char *paths = NULL, pathbuf[PATH_MAX], *t, *token;
 	struct irc_plugin *p = NULL;
 	struct irc_plugin_loader *ldr;
 
@@ -308,18 +308,20 @@ irc_bot_plugin_search(const char *name, const char *path)
 			p = open_plugin(ldr, name, path);
 		} else {
 			/* Copy the paths to tokenize it. */
-			irc_util_strlcpy(buf, ldr->paths, sizeof (buf));
+			paths = irc_util_strdup(ldr->paths);
 
 			/*
 			 * For every directory (separated by colon) call find_plugin
 			 * which will append the extension and try to open it.
 			 */
-			for (t = buf; (token = strtok_r(t, ":", &t)); ) {
+			for (t = paths; (token = strtok_r(t, ":", &t)); ) {
 				if ((p = find_plugin(ldr, token, name)))
 					break;
 			}
 		}
 	}
+
+	free(paths);
 
 	if (!p) {
 		irc_log_warn("irccd: could not find plugin %s", name);

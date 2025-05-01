@@ -49,7 +49,10 @@
 #include "jsapi-unicode.h"
 #include "jsapi-util.h"
 
-#define SELF(Plg) \
+#define LDR_PATHS       IRCCD_LIBDIR "/irccd"
+#define LDR_EXTENSIONS  "js"
+
+#define SELF(Plg)                                                       \
 	IRC_UTIL_CONTAINER_OF(Plg, struct self, parent)
 
 struct self {
@@ -482,9 +485,6 @@ init(const char *name, const char *path, const char *script)
 	js->ctx      = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
 	js->location = irc_util_strdup(path);
 
-	/* Copy path because Duktape has no notions of it. */
-	irc_util_strlcpy(js->location, path, sizeof (js->location));
-
 	/* Tables used to retrieve data. */
 	duk_push_object(js->ctx);
 	duk_put_global_string(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS);
@@ -515,6 +515,7 @@ init(const char *name, const char *path, const char *script)
 	if (duk_peval_string(js->ctx, script) != 0) {
 		log_trace(js);
 		duk_destroy_heap(js->ctx);
+		free(js->location);
 		free(js);
 		return NULL;
 	}
@@ -559,6 +560,7 @@ finish(struct irc_plugin *plg)
 	freelist(self->templates);
 	freelist(self->paths);
 
+	free(self->location);
 	free(self);
 }
 
@@ -636,11 +638,10 @@ js_plugin_loader_new(void)
 	struct irc_plugin_loader *ldr;
 
 	ldr = irc_util_calloc(1, sizeof (*ldr));
-	ldr->open = wrap_open;
-	ldr->finish = wrap_finish;
+	irc_plugin_loader_init(ldr, IRCCD_LIBDIR "/irccd/", "js");
 
-	irc_util_strlcpy(ldr->extensions, "js", sizeof (ldr->extensions));
-	irc_util_strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
+	ldr->open   = wrap_open;
+	ldr->finish = wrap_finish;
 
 	return ldr;
 }

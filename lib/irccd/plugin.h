@@ -57,11 +57,26 @@ struct irc_plugin {
 };
 
 struct irc_plugin_loader {
-	char paths[IRC_PATHS_LEN];
-	char extensions[IRC_EXTENSIONS_LEN];
+	/**
+	 * (read-only)
+	 *
+	 * Colon separated list of paths to directories where to search plugins.
+	 */
+	char *paths;
+
+	/**
+	 * (read-only)
+	 *
+	 * Colon separated list of suffixes for this plugin loader excluding '.'
+	 *
+	 * Examples:
+	 *
+	 * - `dylib:so`
+	 * - `js`
+	 */
+	char *extensions;
 	struct irc_plugin *(*open)(struct irc_plugin_loader *, const char *, const char *);
 	void (*finish)(struct irc_plugin_loader *);
-	void *data;
 	struct irc_plugin_loader *next;
 };
 
@@ -116,6 +131,11 @@ irc_plugin_handle(struct irc_plugin *, const struct irc_event *);
 
 void
 irc_plugin_finish(struct irc_plugin *);
+
+void
+irc_plugin_loader_init(struct irc_plugin_loader *ldr,
+                       const char *paths,
+                       const char *extensions);
 
 struct irc_plugin *
 irc_plugin_loader_open(struct irc_plugin_loader *, const char *, const char *);

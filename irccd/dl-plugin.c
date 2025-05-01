@@ -32,52 +32,62 @@
 
 #include "dl-plugin.h"
 
+#define LDR_PATHS IRCCD_LIBDIR "/irccd"
+
+#if defined(_WIN32)
+#       define LDR_EXTENSIONS "dll"
+#elif defined(__APPLE__)
+#       define LDR_EXTENSIONS "so:dylib"
+#else
+#       define LDR_EXTENSIONS "so"
+#endif
+
 #if defined(__GNUC__)
 #       define SYM(sig, f) (__extension__ (sig)(f))
 #else
 #       define SYM(sig, f) ((sig)(f))
 #endif
 
-#define SELF(Plg) \
+#define SELF(Plg)                                                       \
 	IRC_UTIL_CONTAINER_OF(Plg, struct self, parent)
 
 /* Invoke with arguments and return value. */
-#define INVOKE(pg, name, sig, ...)                                                      \
+#define INVOKE(Pg, Name, Sig, ...)                                                      \
 do {                                                                                    \
-        struct self *self = SELF(pg);                                                   \
-        sig fn;                                                                         \
+        struct self *self = SELF(Pg);                                                   \
+        Sig fn;                                                                         \
                                                                                         \
-        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+        if (self->handle && (fn = SYM(Sig, dlsym(self->handle, symbol(self, Name)))))   \
                 return fn(__VA_ARGS__);                                                 \
 } while (0)
 
 /* Invoke with argument and without return value. */
-#define INVOKE_NR(pg, name, sig, ...)                                                   \
+#define INVOKE_NR(Pg, Name, Sig, ...)                                                   \
 do {                                                                                    \
-        struct self *self = SELF(pg);                                                   \
-        sig fn;                                                                         \
+        struct self *self = SELF(Pg);                                                   \
+        Sig fn;                                                                         \
                                                                                         \
-        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+        if (self->handle && (fn = SYM(Sig, dlsym(self->handle, symbol(self, Name)))))   \
                 fn(__VA_ARGS__);                                                        \
 } while (0)
 
 /* Invoke without arguments and with return value. */
-#define INVOKE_NA(pg, name, sig)                                                        \
+#define INVOKE_NA(Pg, Name, Sig)                                                        \
 do {                                                                                    \
-        struct self *self = SELF(pg);                                                   \
-        sig fn;                                                                         \
+        struct self *self = SELF(Pg);                                                   \
+        Sig fn;                                                                         \
                                                                                         \
-        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+        if (self->handle && (fn = SYM(Sig, dlsym(self->handle, symbol(self, Name)))))   \
                 return fn();                                                            \
 } while (0)
 
 /* Invoke without arguments and without return value. */
-#define INVOKE_NA_NR(pg, name, sig)                                                     \
+#define INVOKE_NA_NR(Pg, Name, Sig)                                                     \
 do {                                                                                    \
-        struct self *self = SELF(pg);                                                   \
-        sig fn;                                                                         \
+        struct self *self = SELF(Pg);                                                   \
+        Sig fn;                                                                         \
                                                                                         \
-        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+        if (self->handle && (fn = SYM(Sig, dlsym(self->handle, symbol(self, Name)))))   \
                 fn();                                                                   \
 } while (0)
 
@@ -244,7 +254,6 @@ init(const char *name, const char *path)
 		return NULL;
 
 	if (!(self.handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL))) {
-		printf("==> %s\n", dlerror());
 		irc_log_warn("plugin: %s: %s", path, dlerror());
 		return NULL;
 	}
@@ -318,18 +327,10 @@ dl_plugin_loader_new(void)
 	struct irc_plugin_loader *ldr;
 
 	ldr = irc_util_calloc(1, sizeof (*ldr));
-	ldr->open = wrap_open;
+	irc_plugin_loader_init(ldr, LDR_PATHS, LDR_EXTENSIONS);
+
+	ldr->open   = wrap_open;
 	ldr->finish = wrap_finish;
-
-#if defined(_WIN32)
-	irc_util_strlcpy(ldr->extensions, "dll", sizeof (ldr->extensions));
-#elif defined(__APPLE__)
-	irc_util_strlcpy(ldr->extensions, "so:dylib", sizeof (ldr->extensions));
-#else
-	irc_util_strlcpy(ldr->extensions, "so", sizeof (ldr->extensions));
-#endif
-
-	irc_util_strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
 
 	return ldr;
 }

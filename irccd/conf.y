@@ -568,15 +568,9 @@ server
 			ctcp_source  = s->ctcp_source;
 
 			if ($4->ctcp_version)
-				if (strlen($4->ctcp_version) == 0)
-					ctcp_version = NULL;
-				else
-					ctcp_version = $4->ctcp_version;
+				ctcp_version = strlen($4->ctcp_version) == 0 ? NULL : $4->ctcp_version;
 			if ($4->ctcp_source)
-				if (strlen($4->ctcp_source) == 0)
-					ctcp_source = NULL;
-				else
-					ctcp_source = $4->ctcp_source;
+				ctcp_source = strlen($4->ctcp_source) == 0 ? NULL : $4->ctcp_source;
 
 			irc_server_set_ctcp(s, ctcp_version, ctcp_source);
 		}

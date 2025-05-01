@@ -195,14 +195,29 @@ irc_plugin_finish(struct irc_plugin *plg)
 {
 	assert(plg);
 
-	if (plg->finish)
-		plg->finish(plg);
-
-	plg->name        = irc_util_free(plg->license);
+	plg->name        = irc_util_free(plg->name);
 	plg->license     = irc_util_free(plg->license);
 	plg->version     = irc_util_free(plg->version);
 	plg->author      = irc_util_free(plg->author);
 	plg->description = irc_util_free(plg->description);
+
+	if (plg->finish)
+		plg->finish(plg);
+}
+
+void
+irc_plugin_loader_init(struct irc_plugin_loader *ldr,
+                       const char *paths,
+                       const char *extensions)
+{
+	assert(ldr);
+	assert(paths);
+	assert(extensions);
+
+	memset(ldr, 0, sizeof (*ldr));
+
+	ldr->paths = irc_util_strdup(paths);
+	ldr->extensions = irc_util_strdup(extensions);
 }
 
 struct irc_plugin *
@@ -218,6 +233,9 @@ void
 irc_plugin_loader_finish(struct irc_plugin_loader *ldr)
 {
 	assert(ldr);
+
+	free(ldr->paths);
+	free(ldr->extensions);
 
 	if (ldr->finish)
 		ldr->finish(ldr);
