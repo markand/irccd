@@ -31,7 +31,11 @@ irc_plugin_init(struct irc_plugin *plg, const char *name)
 
 	memset(plg, 0, sizeof (*plg));
 
-	plg->name = irc_util_strdup(name);
+	plg->name        = irc_util_strdup(name);
+	plg->license     = irc_util_strdup(IRC_PLUGIN_DEFAULT_LICENSE);
+	plg->version     = irc_util_strdup(IRC_PLUGIN_DEFAULT_VERSION);
+	plg->author      = irc_util_strdup(IRC_PLUGIN_DEFAULT_AUTHOR);
+	plg->description = irc_util_strdup(IRC_PLUGIN_DEFAULT_DESCRIPTION);
 }
 
 void
@@ -43,10 +47,14 @@ irc_plugin_set_info(struct irc_plugin *plg,
 {
 	assert(plg);
 
-	plg->license     = irc_util_strdupfree(plg->license, license);
-	plg->version     = irc_util_strdupfree(plg->version, version);
-	plg->author      = irc_util_strdupfree(plg->author, author);
-	plg->description = irc_util_strdupfree(plg->description, description);
+	if (license)
+		plg->license = irc_util_strdupfree(plg->license, license);
+	if (version)
+		plg->version = irc_util_strdupfree(plg->version, version);
+	if (author)
+		plg->author = irc_util_strdupfree(plg->author, author);
+	if (description)
+		plg->description = irc_util_strdupfree(plg->description, description);
 }
 
 void

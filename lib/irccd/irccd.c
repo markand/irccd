@@ -136,22 +136,44 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 }
 
 static struct irc_plugin *
+try_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name, const char *ext)
+{
+	char path[PATH_MAX] = {};
+
+	if (ext)
+		snprintf(path, sizeof (path), "%s/%s.%s", base, name, ext);
+	else
+		snprintf(path, sizeof (path), "%s/%s", base, name);
+
+	irc_log_info("irccd: trying %s", path);
+
+	return irc_plugin_loader_open(ldr, name, path);
+}
+
+static struct irc_plugin *
 find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 {
-	char path[PATH_MAX], buf[IRC_EXTENSIONS_LEN], *t, *ext;
+	char *extensions = NULL, *t, *ext;
 	struct irc_plugin *p;
 
-	irc_util_strlcpy(buf, ldr->extensions, sizeof (buf));
+	/* Copy the extensions to iterate over ':' */
+	if (ldr->extensions) {
+		extensions = irc_util_strdup(ldr->extensions);
 
-	for (t = buf; (ext = strtok_r(t, ":", &t)); ) {
-		snprintf(path, sizeof (path), "%s/%s.%s", base, name, ext);
-		irc_log_info("irccd: trying %s", path);
+		for (t = extensions; (ext = strtok_r(t, ":", &t)); )
+			if ((p = try_plugin(ldr, base, name, ext)))
+				break;
 
-		if ((p = irc_plugin_loader_open(ldr, name, path)))
-			return p;
+		free(extensions);
+	} else {
+		/*
+		 * No extension? weird but allow a unique direct filename in the
+		 * directory mentioned.
+		 */
+		p = try_plugin(ldr, base, name, NULL);
 	}
 
-	return NULL;
+	return p;
 }
 
 static inline struct irc_plugin *
@@ -306,7 +328,7 @@ irc_bot_plugin_search(const char *name, const char *path)
 				continue;
 
 			p = open_plugin(ldr, name, path);
-		} else {
+		} else if (paths) {
 			/* Copy the paths to tokenize it. */
 			paths = irc_util_strdup(ldr->paths);
 
