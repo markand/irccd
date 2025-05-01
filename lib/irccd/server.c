@@ -1125,6 +1125,23 @@ conn_push(struct conn *conn, const char *data, size_t datasz)
 	return 0;
 }
 
+/*
+ * Explicit deferred reconnection, usually either from user side or IRC error
+ * that is irrelevant to the connection itself.
+ */
+static void
+conn_reconnect(struct conn *conn)
+{
+	conn__close(conn);
+
+	/*
+	 * Indicate we want to resolve so that retry step will start the timer
+	 * for us.
+	 */
+	conn->state = CONN_STATE_RESOLVE;
+	conn__switch(conn, CONN_STATE_RETRY);
+}
+
 static struct irc_channel *
 channels_add(struct irc_server *s,
                     const char *name,
@@ -1563,6 +1580,7 @@ handle_nicknameinuse(struct irc_server *s, struct msg *msg)
 	(void)msg;
 
 	irc_log_warn("server %s: nickname %s is already in use", s->name, s->nickname);
+	conn_reconnect(s->conn);
 }
 
 static void
