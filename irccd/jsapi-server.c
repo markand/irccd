@@ -23,7 +23,6 @@
 #include <utlist.h>
 
 #include <irccd/channel.h>
-#include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
@@ -65,75 +64,108 @@ require(duk_context *ctx, duk_idx_t index)
 	return sv;
 }
 
-static inline unsigned short
-get_port(duk_context *ctx)
-{
-	unsigned short port;
-
-	duk_get_prop_string(ctx, 0, "port");
-
-	if (!duk_is_number(ctx, -1))
-		(void)duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
-
-	port = duk_to_int(ctx, -1);
-	duk_pop(ctx);
-
-	return port;
-}
-
 static inline const char *
-get_string(duk_context *ctx, const char *n)
+get_string(duk_context *ctx, duk_idx_t obj_idx, const char *n, const char *def)
 {
 	const char *ret;
 
-	duk_get_prop_string(ctx, 0, n);
+	duk_get_prop_string(ctx, obj_idx, n);
 
-	if (!duk_is_string(ctx, -1))
-		(void)duk_error(ctx, DUK_ERR_ERROR, "invalid or missing '%s' property", n);
+	if (!duk_is_undefined(ctx, -1)) {
+		if (!duk_is_string(ctx, -1))
+			(void)duk_error(ctx, DUK_ERR_ERROR, "invalid or missing '%s' property", n);
+		else
+			ret = duk_to_string(ctx, -1);
+	} else
+		ret = def;
 
-	ret = duk_to_string(ctx, -1);
 	duk_pop(ctx);
 
 	return ret;
 }
 
-static inline void
-get_ip(duk_context *ctx, struct irc_server *s)
+static inline const char *
+get_name(duk_context *ctx, duk_idx_t obj_idx)
 {
-#if 0
-	enum irc_server_flags flags = IRC_SERVER_FLAGS_IPV4 |
-				      IRC_SERVER_FLAGS_IPV6;
+	const char *name;
 
-	duk_get_prop_string(ctx, 0, "ipv4");
-	duk_get_prop_string(ctx, 0, "ipv6");
+	if (!(name = get_string(ctx, obj_idx, "name", NULL)))
+		(void)duk_error(ctx, DUK_ERR_ERROR, "missing required 'name' property");
 
-	if (duk_is_boolean(ctx, -1) && !duk_to_boolean(ctx, -1))
-		flags &= ~(IRC_SERVER_FLAGS_IPV4);
-	if (duk_is_boolean(ctx, -2) && !duk_to_boolean(ctx, -2))
-		flags &= ~(IRC_SERVER_FLAGS_IPV6);
-
-	s->flags |= flags;
-	duk_pop_n(ctx, 2);
-#endif
-	(void)ctx;
-	(void)s;
+	return name;
 }
 
-static inline void
-get_ssl(duk_context *ctx, struct irc_server *s)
+static inline const char *
+get_hostname(duk_context *ctx, duk_idx_t obj_idx)
 {
-	duk_get_prop_string(ctx, 0, "ssl");
+	const char *hostname;
+
+	if (!(hostname = get_string(ctx, obj_idx, "hostname", NULL)))
+		(void)duk_error(ctx, DUK_ERR_ERROR, "missing required 'hostname' property");
+
+	return hostname;
+}
+
+static inline unsigned short
+get_port(duk_context *ctx, duk_idx_t obj_idx)
+{
+	unsigned short port;
+
+	duk_get_prop_string(ctx, obj_idx, "port");
+
+	if (!duk_is_undefined(ctx, -1)) {
+		if (!duk_is_number(ctx, -1))
+			(void)duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
+
+		port = duk_to_int(ctx, -1);
+	} else
+		port = IRC_SERVER_DEFAULT_PORT;
+
+	duk_pop(ctx);
+
+	return port;
+}
+
+static void
+get_ident(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *s)
+{
+	const char *nickname, *username, *realname;
+
+	if (!(nickname = get_string(ctx, obj_idx, "nickname", NULL)))
+		(void)duk_error(ctx, DUK_ERR_ERROR, "missing required 'nickname' property");
+	if (!(username = get_string(ctx, obj_idx, "username", NULL)))
+		(void)duk_error(ctx, DUK_ERR_ERROR, "missing required 'username' property");
+	if (!(realname = get_string(ctx, obj_idx, "realname", NULL)))
+		(void)duk_error(ctx, DUK_ERR_ERROR, "missing required 'realname' property");
+
+	irc_server_set_ident(s, nickname, username, realname);
+}
+
+static void
+get_params(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *s)
+{
+	const char *hostname;
+	unsigned int port;
+	enum irc_server_flags flags = 0;
+
+	duk_get_prop_string(ctx, obj_idx, "ssl");
 
 	if (duk_is_boolean(ctx, -1) && duk_to_boolean(ctx, -1))
-		s->flags |= IRC_SERVER_FLAGS_SSL;
+		flags |= IRC_SERVER_FLAGS_SSL;
+
+	hostname = get_hostname(ctx, obj_idx);
+	port = get_port(ctx, obj_idx);
+
+	// TODO: more flags.
+	irc_server_set_params(s, hostname, port, flags);
 
 	duk_pop(ctx);
 }
 
 static inline void
-get_channels(duk_context *ctx, struct irc_server *s)
+get_channels(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *s)
 {
-	duk_get_prop_string(ctx, 0, "channels");
+	duk_get_prop_string(ctx, obj_idx, "channels");
 
 	if (!duk_is_object(ctx, -1)) {
 		duk_pop(ctx);
@@ -155,27 +187,33 @@ get_channels(duk_context *ctx, struct irc_server *s)
 }
 
 static inline void
-get_ctcp(duk_context *ctx, struct irc_server *s)
+get_ctcp(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *s)
 {
-	duk_get_prop_string(ctx, 0, "ctcp");
+	const char *ctcp_version, *ctcp_source;
+
+	duk_get_prop_string(ctx, obj_idx, "ctcp");
 
 	if (!duk_is_object(ctx, -1)) {
 		duk_pop(ctx);
 		return;
 	}
 
-	duk_get_prop_string(ctx, -1, "version");
-
-	if (duk_is_string(ctx, -1))
-		irc_util_strlcpy(s->ctcp_version, duk_to_string(ctx, -1), sizeof (s->ctcp_version));
+	ctcp_version = get_string(ctx, -1, "version", NULL);
+	ctcp_source  = get_string(ctx, -1, "source", NULL);
 
 	duk_pop(ctx);
-	duk_get_prop_string(ctx, -1, "source");
 
-	if (duk_is_string(ctx, -1))
-		irc_util_strlcpy(s->ctcp_source, duk_to_string(ctx, -1), sizeof (s->ctcp_source));
+	if (ctcp_version)
+		ctcp_version = strlen(ctcp_version) == 0 ? NULL : ctcp_version;
+	else
+		ctcp_version = s->ctcp_version;
 
-	duk_pop_2(ctx);
+	if (ctcp_source)
+		ctcp_source = strlen(ctcp_source) == 0 ? NULL : ctcp_source;
+	else
+		ctcp_source = s->ctcp_source;
+
+	irc_server_set_ctcp(s, ctcp_version, ctcp_source);
 }
 
 static int
@@ -434,24 +472,16 @@ Server_prototype_toString(duk_context *ctx)
 static int
 Server_constructor(duk_context *ctx)
 {
-#if 0
 	struct irc_server *s;
 
 	duk_require_object(ctx, 0);
 
-	s = irc_server_new(
-	    get_string(ctx, "name"),
-	    get_string(ctx, "nickname"),
-	    get_string(ctx, "username"),
-	    get_string(ctx, "realname"),
-	    get_string(ctx, "hostname"),
-	    get_port(ctx)
-	);
+	s = irc_server_new(get_name(ctx, 0));
 
-	get_ip(ctx, s);
-	get_ssl(ctx, s);
-	get_channels(ctx, s);
-	get_ctcp(ctx, s);
+	get_ident(ctx, 0, s);
+	get_params(ctx, 0, s);
+	get_channels(ctx, 0, s);
+	get_ctcp(ctx, 0, s);
 
 	irc_server_incref(s);
 
@@ -459,8 +489,6 @@ Server_constructor(duk_context *ctx)
 	duk_push_pointer(ctx, s);
 	duk_put_prop_string(ctx, -2, SIGNATURE);
 	duk_pop(ctx);
-#endif
-	(void)ctx;
 
 	return 0;
 }

@@ -2013,7 +2013,7 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 	if (!(ch = irc_server_find(s, name)))
 		ch = channels_add(s, name, pass, IRC_CHANNEL_FLAGS_NONE);
 
-	if (!(ch->flags & IRC_CHANNEL_FLAGS_JOINED) && conn->state == CONN_STATE_READY) {
+	if (!(ch->flags & IRC_CHANNEL_FLAGS_JOINED) && (conn && conn->state == CONN_STATE_READY)) {
 		if (pass)
 			ret = irc_server_send(s, "JOIN %s %s", name, pass);
 		else

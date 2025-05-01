@@ -28,7 +28,6 @@
 
 #include <utlist.h>
 
-#include <irccd/conn.h>
 #include <irccd/hook.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
