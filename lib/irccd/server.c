@@ -1402,7 +1402,8 @@ handle_part(struct irc_server *s, struct msg *msg)
 static void
 handle_msg(struct irc_server *s, struct msg *msg)
 {
-	struct irc_server_user user = {};
+	time_t now = time(NULL);
+	struct irc_user *user = {};
 	struct irc_event ev = {};
 
 	ev.server = s;
@@ -1414,32 +1415,27 @@ handle_msg(struct irc_server *s, struct msg *msg)
 	 * PRIVMSG jean :\001ACTION I'm eating\001
 	 * PRIVMSG jean :\001VERSION\001
 	 */
-	if (msg_is_ctcp(msg->args[1])) {
-		irc_server_split(msg->prefix, &user);
-
+	if (msg_is_ctcp(msg->args[1]) && (user = irc_util_user_split(msg->prefix))) {
 		if (strcmp(msg->args[1], "\x01""CLIENTINFO\x01") == 0)
-			irc_server_notice(s, user.nickname,
+			irc_server_notice(s, user->nickname,
 			    "\x01""CLIENTINFO ACTION CLIENTINFO SOURCE TIME VERSION\x01");
-		else if (strcmp(msg->args[1], "\x01""SOURCE\x01") == 0)
+		else if (strcmp(msg->args[1], "\x01""SOURCE\x01") == 0 && s->ctcp_source)
 			irc_server_send(s, "NOTICE %s :\x01SOURCE %s\x01",
-			    user.nickname, s->ctcp_source
-			    ? s->ctcp_source
-			    : "http://hg.malikania.fr/irccd");
+			    user->nickname, s->ctcp_source);
 		else if (strcmp(msg->args[1], "\x01""TIME\x01") == 0) {
-			time_t now = time(NULL);
-
 			irc_server_send(s, "NOTICE %s :\x01TIME %s\x01",
-			    user.nickname, ctime(&now));
-		} else if (strcmp(msg->args[1], "\x01VERSION\x01") == 0) {
-			if (strlen(s->ctcp_version) != 0)
-				irc_server_send(s, "NOTICE %s :\x01VERSION %s\x01",
-				    user.nickname, s->ctcp_version);
+			    user->nickname, ctime(&now));
+		} else if (strcmp(msg->args[1], "\x01VERSION\x01") == 0 && s->ctcp_version) {
+			irc_server_send(s, "NOTICE %s :\x01VERSION %s\x01",
+				user->nickname, s->ctcp_version);
 		} else if (strncmp(msg->args[1], "\x01""ACTION", 7) == 0) {
 			ev.type = IRC_EVENT_ME;
 			ev.message.origin = irc_util_strdup(msg->prefix);
 			ev.message.channel = irc_util_strdup(msg->args[0]);
 			ev.message.message = irc_util_strdup(msg_ctcp(msg->args[1]));
 		}
+
+		irc_util_user_free(user);
 	} else {
 		ev.type = IRC_EVENT_MESSAGE;
 		ev.message.origin = irc_util_strdup(msg->prefix);
@@ -1820,6 +1816,7 @@ irc_server_new(const char *name)
 	s->port         = IRC_SERVER_DEFAULT_PORT;
 	s->prefix       = irc_util_strdup(IRC_SERVER_DEFAULT_PREFIX);
 	s->ctcp_version = irc_util_strdup(IRC_SERVER_DEFAULT_CTCP_VERSION);
+	s->ctcp_source  = irc_util_strdup(IRC_SERVER_DEFAULT_CTCP_SOURCE);
 
 	return s;
 }
@@ -1861,10 +1858,8 @@ irc_server_set_ctcp(struct irc_server *s,
 {
 	assert(s);
 
-	if (version)
-		s->ctcp_version = irc_util_strdupfree(s->ctcp_version, version);
-	if (source)
-		s->ctcp_source = irc_util_strdupfree(s->ctcp_source, source);
+	s->ctcp_version = irc_util_strdupfree(s->ctcp_version, version);
+	s->ctcp_source  = irc_util_strdupfree(s->ctcp_source, source);
 }
 
 void
@@ -2143,22 +2138,6 @@ irc_server_strip(const struct irc_server *s, const char **what)
 	}
 
 	return modes;
-}
-
-void
-irc_server_split(const char *prefix, struct irc_server_user *user)
-{
-	assert(prefix);
-	assert(user);
-
-	char fmt[128];
-
-	memset(user, 0, sizeof (*user));
-	snprintf(fmt, sizeof (fmt), "%%%zu[^!]!%%%zu[^@]@%%%zus",
-	    sizeof (user->nickname) - 1,
-	    sizeof (user->username) - 1,
-	    sizeof (user->host) - 1);
-	sscanf(prefix, fmt, user->nickname, user->username, user->host);
 }
 
 void

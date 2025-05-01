@@ -283,10 +283,14 @@ Util_format(duk_context *ctx)
 static int
 Util_splituser(duk_context *ctx)
 {
-	struct irc_server_user user;
+	const char *ident = duk_require_string(ctx, 0);
+	struct irc_user *user;
 
-	irc_server_split(duk_require_string(ctx, 0), &user);
-	duk_push_string(ctx, user.nickname);
+	if ((user = irc_util_user_split(ident))) {
+		duk_push_string(ctx, user->nickname);
+		irc_util_user_free(user);
+	} else
+		duk_push_null(ctx);
 
 	return 1;
 }
@@ -294,10 +298,14 @@ Util_splituser(duk_context *ctx)
 static int
 Util_splithost(duk_context *ctx)
 {
-	struct irc_server_user user;
+	const char *ident = duk_require_string(ctx, 0);
+	struct irc_user *user;
 
-	irc_server_split(duk_require_string(ctx, 0), &user);
-	duk_push_string(ctx, user.host);
+	if ((user = irc_util_user_split(ident))) {
+		duk_push_string(ctx, user->host);
+		irc_util_user_free(user);
+	} else
+		duk_push_null(ctx);
 
 	return 1;
 }

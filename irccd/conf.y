@@ -74,8 +74,8 @@ struct server_params {
 	char *username;
 	char *realname;
 	char *prefix;
-	char *ctcpversion;
-	char *ctcpsource;
+	char *ctcp_version;
+	char *ctcp_source;
 	struct string *channels;
 };
 
@@ -500,9 +500,9 @@ server_params
 
 		for (struct pair *p = $3; p; p = p->next) {
 			if (strcmp(p->key, "version") == 0)
-				$$->ctcpversion = irc_util_strdup(p->value);
+				$$->ctcp_version = irc_util_strdup(p->value);
 			else if (strcmp(p->key, "source") == 0)
-				$$->ctcpsource = irc_util_strdup(p->value);
+				$$->ctcp_source = irc_util_strdup(p->value);
 			else
 				irc_util_die("invalid ctcp key: %s\n", p->key);
 		}
@@ -520,7 +520,7 @@ server
 	{
 		struct irc_server *s;
 		struct string *str;
-		char *at;
+		char *at, *ctcp_version, *ctcp_source;
 
 		if (irc_bot_server_get($2))
 			irc_util_die("server %s already exists\n", $2);
@@ -554,10 +554,32 @@ server
 		if ($4->password)
 			irc_server_set_password(s, $4->password);
 
-		if ($4->ctcpversion)
-			irc_server_set_ctcp(s, $4->ctcpversion, NULL);
-		if ($4->ctcpsource)
-			irc_server_set_ctcp(s, NULL, $4->ctcpsource);
+		/*
+		 * irc_server_set_ctcp expects two arguments, passing NULL
+		 * means "disable" the response and here the configuration file
+		 * may specify three different options:
+		 *
+		 * - key missing (default): use the pre-defined CTCP response
+		 * - key set to empty string: disable the response
+		 * - key set to non-empty string: send that response
+		 */
+		if ($4->ctcp_version || $4->ctcp_source) {
+			ctcp_version = s->ctcp_version;
+			ctcp_source  = s->ctcp_source;
+
+			if ($4->ctcp_version)
+				if (strlen($4->ctcp_version) == 0)
+					ctcp_version = NULL;
+				else
+					ctcp_version = $4->ctcp_version;
+			if ($4->ctcp_source)
+				if (strlen($4->ctcp_source) == 0)
+					ctcp_source = NULL;
+				else
+					ctcp_source = $4->ctcp_source;
+
+			irc_server_set_ctcp(s, ctcp_version, ctcp_source);
+		}
 
 		irc_bot_server_add(s);
 
@@ -568,8 +590,8 @@ server
 		free($4->realname);
 		free($4->prefix);
 		free($4->password);
-		free($4->ctcpversion);
-		free($4->ctcpsource);
+		free($4->ctcp_version);
+		free($4->ctcp_source);
 		free($4);
 	}
 	;

@@ -35,6 +35,12 @@ extern "C" {
 
 #define IRC_UTIL_SIZE(x) (sizeof (x) / sizeof (x[0]))
 
+struct irc_user {
+	char *nickname;
+	char *username;
+	char *host;
+};
+
 void *
 irc_util_malloc(size_t);
 
@@ -119,6 +125,12 @@ irc_util_strlcpy(char *, const char *, size_t);
 
 size_t
 irc_util_strlcat(char *, const char *, size_t);
+
+struct irc_user *
+irc_util_user_split(const char *ident);
+
+void
+irc_util_user_free(struct irc_user *user);
 
 #if defined(__cplusplus)
 }

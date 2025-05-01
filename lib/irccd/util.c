@@ -20,13 +20,15 @@
 #include <errno.h>
 #include <libgen.h>
 #include <limits.h>
+#include <regex.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "util.h"
+
+#define REGEX_USER "([^!]+)!([^@]+)@(.*)"
 
 void *
 irc_util_malloc(size_t size)
@@ -118,6 +120,14 @@ irc_util_strndup(const char *src, size_t n)
 char *
 irc_util_strdupfree(char *ptr, const char *value)
 {
+	/*
+	 * Avoid reallocating if the new value is the original pointer. This may
+	 * happen when user is trying to use default values and does not want to
+	 * check for convenience.
+	 */
+	if (ptr == value)
+		return ptr;
+
 	free(ptr);
 
 	if (value)
@@ -227,4 +237,36 @@ irc_util_stou(const char *s, unsigned long long *u)
 	*u = strtoull(s, NULL, 10);
 
 	return errno == 0 ? 0 : -1;
+}
+
+struct irc_user *
+irc_util_user_split(const char *prefix)
+{
+	assert(prefix);
+
+	struct irc_user *user = NULL;
+	regex_t regex;
+	regmatch_t matches[4] = {};
+
+	if (regcomp(&regex, REGEX_USER, REG_EXTENDED) != 0)
+		return NULL;
+	if (regexec(&regex, prefix, IRC_UTIL_SIZE(matches), matches, 0) == 0) {
+		user           = irc_util_calloc(1, sizeof (*user));
+		user->nickname = irc_util_strndup(&prefix[matches[1].rm_so], matches[1].rm_eo - matches[1].rm_so);
+		user->username = irc_util_strndup(&prefix[matches[2].rm_so], matches[2].rm_eo - matches[2].rm_so);
+		user->host     = irc_util_strndup(&prefix[matches[3].rm_so], matches[3].rm_eo - matches[3].rm_so);
+	}
+
+	regfree(&regex);
+
+	return user;
+}
+
+void
+irc_util_user_free(struct irc_user *user)
+{
+	free(user->nickname);
+	free(user->username);
+	free(user->host);
+	free(user);
 }

@@ -32,6 +32,7 @@ extern "C" {
 #define IRC_SERVER_DEFAULT_PORT 6667
 #define IRC_SERVER_DEFAULT_PREFIX "!"
 #define IRC_SERVER_DEFAULT_CTCP_VERSION "IRC Client Daemon"
+#define IRC_SERVER_DEFAULT_CTCP_SOURCE "http://hg.malikania.fr/irccd"
 
 struct irc_channel;
 
@@ -41,12 +42,6 @@ enum irc_server_flags {
 	IRC_SERVER_FLAGS_JOIN_INVITE    = (1 << 2),
 	IRC_SERVER_FLAGS_NO_IPV4        = (1 << 3),
 	IRC_SERVER_FLAGS_NO_IPV6        = (1 << 4)
-};
-
-struct irc_server_user {
-	char *nickname;
-	char *username;
-	char *host;
 };
 
 struct irc_server_umode {
@@ -84,7 +79,6 @@ struct irc_server {
 	 * IRC server port number.
 	 */
 	unsigned int port;
-
 
 	/**
 	 * (read-only, optional)
@@ -337,9 +331,6 @@ irc_server_whois(struct irc_server *, const char *);
 
 int
 irc_server_strip(const struct irc_server *, const char **);
-
-void
-irc_server_split(const char *, struct irc_server_user *);
 
 void
 irc_server_incref(struct irc_server *);
