@@ -170,8 +170,10 @@ plugin_list_set(struct peer *p,
 	return 0;
 }
 
+#if 0
+
 static const char *
-rule_list_to_spaces(const char *value)
+rule_list_to_spaces(char * const *value)
 {
 	static char buf[IRC_RULE_LEN];
 
@@ -183,6 +185,8 @@ rule_list_to_spaces(const char *value)
 
 	return buf;
 }
+
+#endif
 
 /*
  * HOOK-ADD name path
@@ -391,10 +395,11 @@ cmd_plugin_unload(struct peer *p, char *line)
 static int
 cmd_rule_add(struct peer *p, char *line)
 {
-	char *token, *ptr, *dst, key;
+	char *token, *ptr, key;
 	enum irc_rule_action act;
 	struct irc_rule *rule;
 	unsigned long long index = -1;
+	void (*add)(struct irc_rule *, const char *);
 
 	if (sscanf(line, "RULE-ADD %*s") == EOF)
 		return EINVAL;
@@ -417,8 +422,6 @@ cmd_rule_add(struct peer *p, char *line)
 		++line;
 
 	for (ptr = line; (token = strtok_r(ptr, " ", &ptr)); ) {
-		dst = NULL;
-
 		if (sscanf(token, "%c=%*s", &key) != 1) {
 			errno = EINVAL;
 			goto fail;
@@ -426,31 +429,33 @@ cmd_rule_add(struct peer *p, char *line)
 
 		switch (*token) {
 		case 'c':
-			dst = rule->channels;
+			add = irc_rule_add_channel;
 			break;
 		case 'e':
-			dst = rule->events;
+			add = irc_rule_add_event;
+			break;
 			break;
 		case 'i':
 			if (irc_util_stou(token + 2, &index) < 0)
 				goto fail;
 			break;
 		case 'o':
-			dst = rule->origins;
+			add = irc_rule_add_origin;
 			break;
 		case 'p':
-			dst = rule->plugins;
+			add = irc_rule_add_plugin;
 			break;
 		case 's':
-			dst = rule->servers;
+			add = irc_rule_add_server;
 			break;
 		default:
 			/* TODO: error here. */
+			add = NULL;
 			break;
 		}
 
-		if (dst && irc_rule_add(dst, token + 2) < 0)
-			goto fail;
+		if (add)
+			add(rule, token + 2);
 	}
 
 	irc_bot_rule_insert(rule, index);
@@ -458,7 +463,7 @@ cmd_rule_add(struct peer *p, char *line)
 	return ok(p);
 
 fail:
-	irc_rule_finish(rule);
+	irc_rule_free(rule);
 
 	return error(p, strerror(errno));
 }
@@ -469,9 +474,11 @@ fail:
 static int
 cmd_rule_edit(struct peer *p, char *line)
 {
-	char *token, *ptr, *dst, key, attr;
+	char *token, *ptr, key, attr;
 	struct irc_rule *rule;
 	size_t index = -1;
+	void (*add)(struct irc_rule *, const char *);
+	void (*remove)(struct irc_rule *, const char *);
 
 	/*
 	 * Looks like strtonum does not accept when there is text after the
@@ -510,33 +517,38 @@ cmd_rule_edit(struct peer *p, char *line)
 			else
 				return error(p, "invalid action");
 		} else {
-			dst = NULL;
+			add = NULL;
+			remove = NULL;
 
 			switch (key) {
 			case 'c':
-				dst = rule->channels;
+				add = irc_rule_add_channel;
+				remove = irc_rule_remove_channel;
 				break;
 			case 'e':
-				dst = rule->events;
+				add = irc_rule_add_event;
+				remove = irc_rule_remove_event;
 				break;
 			case 'o':
-				dst = rule->origins;
+				add = irc_rule_add_origin;
+				remove = irc_rule_remove_origin;
 				break;
 			case 'p':
-				dst = rule->plugins;
+				add = irc_rule_add_plugin;
+				remove = irc_rule_remove_plugin;
 				break;
 			case 's':
-				dst = rule->servers;
+				add = irc_rule_add_server;
+				remove = irc_rule_remove_server;
 				break;
 			default:
 				return EINVAL;
 			}
 
-			if (attr == '+') {
-				if (irc_rule_add(dst, token + 2) < 0)
-					return errno;
-			} else if (attr == '-')
-				irc_rule_remove(dst, token + 2);
+			if (attr == '+')
+				add(rule, token + 2);
+			else if (attr == '-')
+				remove(rule, token + 2);
 			else
 				return EINVAL;
 		}
@@ -567,13 +579,14 @@ cmd_rule_list(struct peer *p, char *line)
 	fprintf(fp, "OK %zu\n", rulesz);
 
 	DL_FOREACH(irccd->rules, rule) {
-		/* Convert : to spaces. */
 		fprintf(fp, "%s\n", rule->action == IRC_RULE_ACCEPT ? "accept" : "drop");
+#if 0
 		fprintf(fp, "%s\n", rule_list_to_spaces(rule->servers));
 		fprintf(fp, "%s\n", rule_list_to_spaces(rule->channels));
 		fprintf(fp, "%s\n", rule_list_to_spaces(rule->origins));
 		fprintf(fp, "%s\n", rule_list_to_spaces(rule->plugins));
 		fprintf(fp, "%s\n", rule_list_to_spaces(rule->events));
+#endif
 	}
 
 	if (feof(fp) || ferror(fp)) {

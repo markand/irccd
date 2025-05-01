@@ -17,7 +17,6 @@
  */
 
 #include <assert.h>
-#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,54 +28,109 @@
 #include "rule.h"
 #include "util.h"
 
-static inline void
-lower(char *dst, const char *src)
+static inline int
+list_match(char **list, const char *value)
 {
-	while (*src)
-		*dst++ = tolower(*src++);
+	if (!list)
+		return 1;
+
+	for (char **i = list; *i; ++i)
+		if (strcasecmp(*i, value) == 0)
+			return 1;
+
+	return 0;
 }
 
-static char *
-find(const char *str, const char *value)
+static inline int
+list_contains(char **list, const char *value)
 {
-	char strlower[IRC_RULE_LEN] = {0};
-	char valuelower[IRC_RULE_LEN] = {0};
-	char *p;
+	if (!list)
+		return 0;
 
-	lower(strlower, str);
-	lower(valuelower, value);
+	for (char **i = list; *i; ++i)
+		if (strcasecmp(*i, value) == 0)
+			return 1;
 
-	if ((p = strstr(strlower, valuelower)))
-		return (char *)&str[p - strlower];
+	return 0;
+}
+
+static inline size_t
+list_count(char **list)
+{
+	size_t rc = 0;
+
+	if (list) {
+		for (char **i = list; *i; ++i)
+			++rc;
+	}
+
+	return rc;
+}
+
+static inline char **
+list_free(char **list)
+{
+	if (list) {
+		for (char **i = list; *i; ++i)
+			free(*i);
+
+		free(list);
+	}
 
 	return NULL;
 }
 
-static int
-match(const char *str, const char *value)
+static char **
+list_add(char **list, const char *value)
 {
 	size_t len;
-	const char *p;
 
-	if (!str[0])
-		return 1;
-	if (!value || (len = strlen(value)) == 0 || !(p = find(str, value)))
-		return 0;
+	if (list_contains(list, value))
+		return list;
+
+	len = list_count(list);
 
 	/*
-	 * Consider the following scenario:
-	 *
-	 * value = no
-	 * str   = mlk:freenode:
-	 * p     =         ^
+	 * Reallocate the list plus 2 elements, one for the new value and one
+	 * for the NULL sentinel.
 	 */
-	while (p != str && *p != ':')
-		--p;
-	if (*p == ':')
-		++p;
+	list          = irc_util_reallocarray(list, len + 2, sizeof (char *));
+	list[len]     = irc_util_strdup(value);
+	list[len + 1] = NULL;
 
-	return strncasecmp(p, value, len) == 0;
+	return list;
 }
+
+/*
+ * We reallocate the whole list rather than doing memmove trickery to save space
+ * even though it may happen that the system may not reallocate when shrinking
+ * but assume it does.
+ *
+ * It will also cleanup duplicates in case user modified the list by itself...
+ *
+ * In any case, this function is usually not called that much so we don't need
+ * performance.
+ */
+static char **
+list_remove(char **list, const char *value)
+{
+	char **rc = NULL;
+
+	if (!list)
+		return NULL;
+
+	for (char **i = list; *i; ++i) {
+		if (strcasecmp(*i, value) == 0)
+			continue;
+
+		rc = list_add(rc, *i);
+	}
+
+	list_free(list);
+
+	return rc;
+}
+
 
 struct irc_rule *
 irc_rule_new(enum irc_rule_action action)
@@ -89,40 +143,64 @@ irc_rule_new(enum irc_rule_action action)
 	return r;
 }
 
-int
-irc_rule_add(char *str, const char *value)
+void
+irc_rule_add_server(struct irc_rule *rule, const char *value)
 {
-	size_t slen, vlen;
-
-	if (find(str, value))
-		return 0;
-
-	slen = strlen(str);
-	vlen = strlen(value);
-
-	if (vlen + 1 >= IRC_RULE_LEN - slen) {
-		errno = ENOMEM;
-		return -1;
-	}
-
-	sprintf(&str[slen], "%s:", value);
-
-	return 0;
+	rule->servers = list_add(rule->servers, value);
 }
 
 void
-irc_rule_remove(char *str, const char *value)
+irc_rule_remove_server(struct irc_rule *rule, const char *value)
 {
-	char *pos;
-	size_t vlen;
+	rule->servers = list_remove(rule->servers, value);
+}
 
-	if (!(pos = find(str, value)))
-		return;
+void
+irc_rule_add_channel(struct irc_rule *rule, const char *value)
+{
+	rule->channels = list_add(rule->channels, value);
+}
 
-	vlen = strlen(value) + 1;       /* includes ':' */
+void
+irc_rule_remove_channel(struct irc_rule *rule, const char *value)
+{
+	rule->channels = list_remove(rule->channels, value);
+}
 
-	assert(pos[vlen - 1] == ':');
-	memmove(&pos[0], &pos[vlen], IRC_RULE_LEN - (&pos[vlen] - str));
+void
+irc_rule_add_origin(struct irc_rule *rule, const char *value)
+{
+	rule->origins = list_add(rule->origins, value);
+}
+
+void
+irc_rule_remove_origin(struct irc_rule *rule, const char *value)
+{
+	rule->origins = list_remove(rule->origins, value);
+}
+
+void
+irc_rule_add_plugin(struct irc_rule *rule, const char *value)
+{
+	rule->plugins = list_add(rule->plugins, value);
+}
+
+void
+irc_rule_remove_plugin(struct irc_rule *rule, const char *value)
+{
+	rule->plugins = list_remove(rule->plugins, value);
+}
+
+void
+irc_rule_add_event(struct irc_rule *rule, const char *value)
+{
+	rule->events = list_add(rule->events, value);
+}
+
+void
+irc_rule_remove_event(struct irc_rule *rule, const char *value)
+{
+	rule->events = list_remove(rule->events, value);
 }
 
 int
@@ -133,11 +211,11 @@ irc_rule_match(const struct irc_rule *rule,
                const char *plugin,
                const char *event)
 {
-	return match(rule->servers, server)     &&
-	       match(rule->channels, channel)   &&
-	       match(rule->origins, origin)     &&
-	       match(rule->plugins, plugin)     &&
-	       match(rule->events, event);
+	return list_match(rule->servers, server)     &&
+	       list_match(rule->channels, channel)   &&
+	       list_match(rule->origins, origin)     &&
+	       list_match(rule->plugins, plugin)     &&
+	       list_match(rule->events, event);
 }
 
 int
@@ -159,9 +237,15 @@ irc_rule_matchlist(const struct irc_rule *rules,
 }
 
 void
-irc_rule_finish(struct irc_rule *rule)
+irc_rule_free(struct irc_rule *rule)
 {
 	assert(rule);
+
+	list_free(rule->servers);
+	list_free(rule->channels);
+	list_free(rule->origins);
+	list_free(rule->plugins);
+	list_free(rule->events);
 
 	free(rule);
 }

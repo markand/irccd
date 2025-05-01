@@ -28,24 +28,24 @@
 #include "jsapi-rule.h"
 
 static void
-push_list(duk_context *ctx, const char *value, const char *prop)
+push_list(duk_context *ctx, char * const *list, const char *prop)
 {
-	char tmp[IRC_RULE_LEN], *token, *p;
 	size_t i = 0;
 
-	irc_util_strlcpy(tmp, value, sizeof (tmp));
 	duk_push_array(ctx);
 
-	for (p = tmp; (token = strtok_r(p, ":", &p)); ) {
-		duk_push_string(ctx, token);
-		duk_put_prop_index(ctx, -2, i++);
+	if (list) {
+		for (char * const *v = list; *v; ++v) {
+			duk_push_string(ctx, *v);
+			duk_put_prop_index(ctx, -2, i++);
+		}
 	}
 
 	duk_put_prop_string(ctx, -2, prop);
 }
 
 static void
-get_list(duk_context *ctx, char *dst, const char *prop)
+get_list(duk_context *ctx, const char *prop, struct irc_rule *rule, void (*add)(struct irc_rule *, const char *))
 {
 	duk_get_prop_string(ctx, 1, prop);
 
@@ -58,7 +58,7 @@ get_list(duk_context *ctx, char *dst, const char *prop)
 
 	while (duk_next(ctx, -1, 1)) {
 		if (duk_is_string(ctx, -1))
-			irc_rule_add(dst, duk_to_string(ctx, -1));
+			add(rule, duk_to_string(ctx, -1));
 
 		duk_pop_n(ctx, 2);
 	}
@@ -81,11 +81,11 @@ Rule_add(duk_context *ctx)
 
 	rule = irc_rule_new(action);
 
-	get_list(ctx, rule->servers, "servers");
-	get_list(ctx, rule->channels, "channels");
-	get_list(ctx, rule->origins, "origins");
-	get_list(ctx, rule->plugins, "plugins");
-	get_list(ctx, rule->events, "events");
+	get_list(ctx, "servers", rule, irc_rule_add_server);
+	get_list(ctx, "channels", rule, irc_rule_add_channel);
+	get_list(ctx, "origins", rule, irc_rule_add_origin);
+	get_list(ctx, "plugins", rule, irc_rule_add_plugin);
+	get_list(ctx, "events", rule, irc_rule_add_event);
 
 	irc_bot_rule_insert(rule, index);
 

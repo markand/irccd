@@ -416,15 +416,15 @@ rule
 
 		if ($3) {
 			LL_FOREACH($3->servers, string)
-				irc_rule_add(rule->servers, string->value);
+				irc_rule_add_server(rule, string->value);
 			LL_FOREACH($3->channels, string)
-				irc_rule_add(rule->channels, string->value);
+				irc_rule_add_channel(rule, string->value);
 			LL_FOREACH($3->origins, string)
-				irc_rule_add(rule->origins, string->value);
+				irc_rule_add_origin(rule, string->value);
 			LL_FOREACH($3->plugins, string)
-				irc_rule_add(rule->plugins, string->value);
+				irc_rule_add_plugin(rule, string->value);
 			LL_FOREACH($3->events, string)
-				irc_rule_add(rule->events, string->value);
+				irc_rule_add_event(rule, string->value);
 
 			string_list_finish($3->servers);
 			string_list_finish($3->channels);

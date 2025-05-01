@@ -495,7 +495,7 @@ irc_bot_rule_clear(void)
 	struct irc_rule *r, *tmp;
 
 	DL_FOREACH_SAFE(bot.rules, r, tmp)
-		irc_rule_finish(r);
+		irc_rule_free(r);
 
 	bot.rules = NULL;
 }
