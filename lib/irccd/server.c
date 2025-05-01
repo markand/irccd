@@ -1575,15 +1575,8 @@ handle_nicknameinuse(struct irc_server *s, struct msg *msg)
 static void
 handle_error(struct irc_server *s, struct msg *msg)
 {
-	struct irc_event ev = {};
-
 	if (msg->args[0])
 		irc_log_warn("server %s: %s", s->name, msg->args[0]);
-
-	ev.server = s;
-	ev.type = IRC_EVENT_DISCONNECT;
-
-	irc_bot_dispatch(&ev);
 }
 
 static void
