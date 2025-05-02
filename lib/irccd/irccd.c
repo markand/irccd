@@ -187,20 +187,25 @@ static inline int
 is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 {
 	char *extensions, *token, *p, *ext;
-
-	extensions = irc_util_strdup(ldr->extensions);
+	int valid = 0;
 
 	/* If we're unable to find an extension, assume it's allowed. */
 	if (!(ext = strrchr(path, '.')))
 		return 1;
 
+	extensions = irc_util_strdup(ldr->extensions);
 	ext++;
 
-	for (p = extensions; (token = strtok_r(p, ":", &p)); )
-		if (strcmp(token, ext) == 0)
-			return 1;
+	for (p = extensions; (token = strtok_r(p, ":", &p)); ) {
+		if (strcmp(token, ext) == 0) {
+			valid = 1;
+			break;
+		}
+	}
 
-	return 0;
+	free(extensions);
+
+	return valid;
 }
 
 void

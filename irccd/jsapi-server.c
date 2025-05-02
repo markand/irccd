@@ -433,7 +433,7 @@ Server_prototype_send(duk_context *ctx)
 	struct irc_server *s = self(ctx);
 	const char *raw = duk_require_string(ctx, 0);
 
-	duk_push_boolean(ctx, irc_server_send(s, raw));
+	duk_push_boolean(ctx, irc_server_send(s, "%s", raw));
 
 	return 1;
 }
