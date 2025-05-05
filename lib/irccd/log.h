@@ -43,15 +43,15 @@ irc_log_set_verbose(int);
 void
 irc_log_set_template(const char *);
 
-IRCCD_ATTR_PRINTF(1, 2)
+IRC_ATTR_PRINTF(1, 2)
 void
 irc_log_info(const char *, ...);
 
-IRCCD_ATTR_PRINTF(1, 2)
+IRC_ATTR_PRINTF(1, 2)
 void
 irc_log_warn(const char *, ...);
 
-IRCCD_ATTR_PRINTF(1, 2)
+IRC_ATTR_PRINTF(1, 2)
 void
 irc_log_debug(const char *, ...);
 

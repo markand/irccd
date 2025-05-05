@@ -22,9 +22,9 @@
 #include "config.h"
 
 #if defined(IRCCD_SYS_HAS_ATTRIBUTE_FORMAT_PRINTF)
-#       define IRCCD_ATTR_PRINTF(x, y) __attribute__ ((format(printf, x, y)))
+#       define IRC_ATTR_PRINTF(x, y) __attribute__ ((format(printf, x, y)))
 #else
-#       define IRCCD_ATTR_PRINTF(x, y)
+#       define IRC_ATTR_PRINTF(x, y)
 #endif
 
 #endif /* !IRCCD_ATTRS_H */

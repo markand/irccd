@@ -49,7 +49,7 @@ struct peer {
 struct peer *
 peer_new(int);
 
-IRCCD_ATTR_PRINTF(2, 3)
+IRC_ATTR_PRINTF(2, 3)
 int
 peer_push(struct peer *, const char *, ...);
 

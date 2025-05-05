@@ -23,7 +23,6 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/in.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1143,14 +1142,26 @@ conn_reconnect(struct conn *conn)
 }
 
 static struct irc_channel *
-channels_add(struct irc_server *s,
-                    const char *name,
-                    const char *password,
-                    enum irc_channel_flags flags)
+channels_find(struct irc_server *s, const char *name)
 {
 	struct irc_channel *ch;
 
-	if ((ch = irc_server_find(s, name)))
+	LL_FOREACH(s->channels, ch)
+		if (strcasecmp(ch->name, name) == 0)
+			return ch;
+
+	return NULL;
+}
+
+static struct irc_channel *
+channels_add(struct irc_server *s,
+             const char *name,
+             const char *password,
+             enum irc_channel_flags flags)
+{
+	struct irc_channel *ch;
+
+	if ((ch = channels_find(s, name)))
 		ch->flags |= flags;
 	else {
 		ch = irc_channel_new(name, password, flags);
@@ -1350,7 +1361,7 @@ handle_mode(struct irc_server *s, struct msg *msg)
 	ev.mode.args = irc_util_reallocarray(ev.mode.args, nelem + 1, sizeof (char *));
 	ev.mode.args[nelem] = NULL;
 
-	if (!(ch = irc_server_find(s, ev.mode.channel)))
+	if (!(ch = channels_find(s, ev.mode.channel)))
 		goto skip;
 
 	for (const char *p = ev.mode.mode; *p; ++p) {
@@ -1405,7 +1416,7 @@ handle_part(struct irc_server *s, struct msg *msg)
 	ev.part.channel = irc_util_strdup(msg->args[0]);
 	ev.part.reason = msg->args[1] ? irc_util_strdup(msg->args[1]) : NULL;
 
-	ch = irc_server_find(s, ev.part.channel);
+	ch = channels_find(s, ev.part.channel);
 
 	if (is_self(s, ev.part.origin)) {
 		channels_remove(s, ch);
@@ -1553,7 +1564,7 @@ handle_endofnames(struct irc_server *s, struct msg *msg)
 	ev.names.channel = irc_util_strdup(msg->args[1]);
 
 	/* Construct a string list for every user in the channel. */
-	ch = irc_server_find(s, ev.names.channel);
+	ch = channels_find(s, ev.names.channel);
 
 	if (!(fp = open_memstream(&ev.names.names, &length)))
 		return;
@@ -1850,6 +1861,9 @@ irc_server_set_ident(struct irc_server *s,
 	assert(username);
 	assert(realname);
 
+	/* must not be connected */
+	assert(!s->conn);
+
 	s->nickname = irc_util_strdupfree(s->nickname, nickname);
 	s->username = irc_util_strdupfree(s->username, username);
 	s->realname = irc_util_strdupfree(s->realname, realname);
@@ -1863,6 +1877,9 @@ irc_server_set_params(struct irc_server *s,
 {
 	assert(s);
 	assert(hostname);
+
+	/* must not be connected */
+	assert(!s->conn);
 
 	s->hostname = irc_util_strdupfree(s->hostname, hostname);
 	s->port     = port;
@@ -1893,6 +1910,9 @@ void
 irc_server_set_password(struct irc_server *s, const char *password)
 {
 	assert(s);
+
+	/* must not be connected */
+	assert(!s->conn);
 
 	s->password = irc_util_strdupfree(s->password, password);
 }
@@ -1948,19 +1968,13 @@ irc_server_reconnect(struct irc_server *s)
 	irc_server_connect(s);
 }
 
-struct irc_channel *
-irc_server_find(struct irc_server *s, const char *name)
+const struct irc_channel *
+irc_server_channels_find(struct irc_server *s, const char *name)
 {
 	assert(s);
 	assert(name);
 
-	struct irc_channel *ch;
-
-	LL_FOREACH(s->channels, ch)
-		if (strcasecmp(ch->name, name) == 0)
-			return ch;
-
-	return NULL;
+	return channels_find(s, name);
 }
 
 int
@@ -1969,18 +1983,28 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	assert(s);
 	assert(fmt);
 
+	va_list ap;
+	int rc;
+
+	va_start(ap, fmt);
+	rc = irc_server_send_va(s, fmt, ap);
+	va_end(ap);
+
+	return rc;
+}
+
+int
+irc_server_send_va(struct irc_server *s, const char *fmt, va_list ap)
+{
 	struct conn *conn = s->conn;
 	char buf[IRC_BUF_LEN];
-	va_list ap;
 
 	if (conn->state != CONN_STATE_READY) {
 		errno = ENOTCONN;
 		return -1;
 	}
 
-	va_start(ap, fmt);
 	vsnprintf(buf, sizeof (buf), fmt, ap);
-	va_end(ap);
 
 	return conn_push(conn, buf, strlen(buf));
 }
@@ -2010,7 +2034,7 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 	 * server is connected we send a join command otherwise we put it there
 	 * and wait for connection.
 	 */
-	if (!(ch = irc_server_find(s, name)))
+	if (!(ch = channels_find(s, name)))
 		ch = channels_add(s, name, pass, IRC_CHANNEL_FLAGS_NONE);
 
 	if (!(ch->flags & IRC_CHANNEL_FLAGS_JOINED) && (conn && conn->state == CONN_STATE_READY)) {
