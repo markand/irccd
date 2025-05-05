@@ -19,6 +19,11 @@
 #ifndef IRCCD_SUBST_H
 #define IRCCD_SUBST_H
 
+/**
+ * \file subst.h
+ * \brief Pattern substitution.
+ */
+
 #include <sys/types.h>
 #include <stddef.h>
 #include <time.h>
@@ -27,29 +32,110 @@
 extern "C" {
 #endif
 
+/**
+ * \brief Substitution flags.
+ */
 enum irc_subst_flags {
-	IRC_SUBST_DATE          = (1 << 0),
-	IRC_SUBST_KEYWORDS      = (1 << 1),
-	IRC_SUBST_ENV           = (1 << 2),
-	IRC_SUBST_SHELL         = (1 << 3),
-	IRC_SUBST_IRC_ATTRS     = (1 << 4),
-	IRC_SUBST_SHELL_ATTRS   = (1 << 5)
+	/**
+	 * Allow date and time substitution.
+	 */
+	IRC_SUBST_DATE = (1 << 0),
+
+	/**
+	 * Allow keyword based substitution.
+	 */
+	IRC_SUBST_KEYWORDS = (1 << 1),
+
+	/**
+	 * Allow system environment variable substitution.
+	 *
+	 * \warning Use this with care
+	 */
+	IRC_SUBST_ENV = (1 << 2),
+
+	/**
+	 * Allow system shell variable execution from commands.
+	 *
+	 * \warning Use this with extreme care
+	 */
+	IRC_SUBST_SHELL = (1 << 3),
+
+	/**
+	 * Allow special IRC attributes substitution for color and style.
+	 */
+	IRC_SUBST_IRC_ATTRS = (1 << 4),
+
+	/**
+	 * Allow shell attribute (escape sequence) for color and style.
+	 */
+	IRC_SUBST_SHELL_ATTRS = (1 << 5)
 };
 
+/**
+ * \brief Key-value table of keyword substitution.
+ */
 struct irc_subst_keyword {
+	/**
+	 * (read-only, borrowed)
+	 *
+	 * Keyword name.
+	 */
 	const char *key;
+
+	/**
+	 * (read-only, borrowed)
+	 *
+	 * Keyword replacement.
+	 */
 	const char *value;
 };
 
+/**
+ * \brief Substitution parameters.
+ */
 struct irc_subst {
-	time_t time;
+	/**
+	 * (read-write)
+	 *
+	 * Flags to allow for substitution.
+	 */
 	enum irc_subst_flags flags;
+
+	/**
+	 * (read-write)
+	 *
+	 * Timestamp to use if using ::IRC_SUBST_DATE.
+	 */
+	time_t time;
+
+	/**
+	 * (read-write, borrowed, optional)
+	 *
+	 * Table of keywords to replace if using ::IRC_SUBST_KEYWORDS.
+	 */
 	const struct irc_subst_keyword *keywords;
+
+	/**
+	 * (read-write)
+	 *
+	 * Number of elements in ::irc_subst::keywords if not NULL.
+	 */
 	size_t keywordsz;
 };
 
+/**
+ * Perform a template substitution.
+ *
+ * \pre out != NULL
+ * \pre in != NULL
+ * \param out the output string
+ * \param outsz maximum number of bytes to write in out
+ * \param in the template string
+ * \param subst the substitution parameters
+ * \return the number of bytes written (excluding NUL) or -1 on error
+ */
 ssize_t
-irc_subst(char *, size_t, const char *, const struct irc_subst *);
+irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst);
 
 #if defined(__cplusplus)
 }
