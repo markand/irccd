@@ -38,7 +38,7 @@ project(irccd
 	LANGUAGES C
 	DESCRIPTION "IRC Client Daemon"
 	HOMEPAGE_URL "http://projects.malikania.fr/irccd"
-	VERSION 4.1.0
+	VERSION 5.0.0
 )
 
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
