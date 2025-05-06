@@ -3,6 +3,75 @@ IRC Client Daemon MIGRATING
 
 This document is a small guide to help you migrating to a next major version.
 
+Migrating from 4.x to 5.x
+=========================
+
+C API
+-----
+
+Most of the functions use a different naming scheme depending of the nature of
+the type and how it is allocated.
+
+When a type is designed to be dynamically allocated (such as owned types) they
+are usually allocated on the heap using functions named `irc_<foo>_new` and
+destroyed `irc_<foo>_free`. On the other hand, non-opaque and cheap types are
+allocated on the user stack named `irc_<foo>_init` (or similar) and
+`irc_<foo>_finish`.
+
+Examples:
+
+- `irc_server_new` / `irc_server_free`
+- `irc_hook_new` / `irc_hook_free`
+
+### irccd/channel.h
+
+- A `irc_channel` has now an enum as flags (`enum irc_channel_flags`) rather
+  than a unique `joined` field for future use.
+- A new function `irc_channel_set` should be used to update a nickname
+  information rather than modifying it directly.
+
+### irccd/irccd.h
+
+- Deferred functions such as `irc_bot_post` have been removed in favor of the
+  libev library. Use `ev_timer` or `ev_async` if asynchronous operations are
+  required.
+- The `irc_pollable` interface has been removed for the same reason.
+- The `irc_bot_plugin_find` has been renamed to `irc_bot_plugin_search` for a
+  cleaner meaning.
+
+### irccd/limits.h
+
+The file has been removed as most of the strings are now dynamically allocated
+for a cleaner interface and no more trillions of arbitrary limits.
+
+### irccd/plugin.h
+
+- When a loader create a new plugin, it should first call `irc_plugin_init` to
+  setup default values.
+- The `irc_plugin` should now be initialized by loaders using
+  `irc_plugin_set_info` which will copy the appropriate strings.
+
+### irccd/rule.h
+
+The module implements criteria using NULL-terminated list of strings, use the
+appropriate `irc_rule_<add|remove>_<criterion>()` functions to update them.
+
+### irccd/server.h
+
+The module has been widely simplified and no longer use inner struct types,
+however because it requires several parameters to be set before use new
+functions are needed.
+
+To create a new server dynamically one should now:
+
+1. Call `irc_server_new`,
+2. Set ident information `irc_server_set_ident`,
+3. Set connection information `irc_server_set_params`,
+4. Set an optional password if needed `irc_server_set_password`,
+5. Call `irc_server_connect` (or `irc_bot_server_add` usually).
+
+All of the server fields are now accessible as read-only for convenience.
+
 Migrating from 3.x to 4.x
 =========================
 
