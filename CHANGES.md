@@ -1,6 +1,38 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 5.0.0 ????-??-??
+======================
+
+This is a major release. See MIGRATING.md file for more information.
+
+The key highlight of this release is the integration of libev as the main loop
+making the code slightly more portable, performant and simpler.
+
+C API
+-----
+
+- Most of the string based types are dynamically allocated rather than creating
+  dozens of arbitrary fixed size limits.
+- Functions for allocated types are now coupled as `foo_new` and `foo_free` or
+  `foo_init` and `foo_finish` otherwise.
+- Types that require string list are now implemented using NULL sentinel based
+  lists.
+
+irccd
+-----
+
+- The auto-reconnect feature is automatically enabled on a server and is no
+  longer an option. As an IRC bot, it make sense that a server should be
+  reconnected permanently.
+- All deferred functions have been removed.
+
+misc
+----
+
+The C and Javascript APIs are now documented using doxygen rather than manual
+pages.
+
 irccd 4.1.0 2025-04-23
 ======================
 
