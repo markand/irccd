@@ -94,7 +94,7 @@ static const char *levelstr[] = {
 static void
 wrap(enum level level, const char *fmt, va_list ap)
 {
-	char formatted[1024] = {0}, line[1024] = {0};
+	char formatted[1024] = {}, line[1024] = {};
 	struct irc_subst_keyword kw[] = {
 		{ "message",    line            },
 		{ "level",      levelstr[level] }
