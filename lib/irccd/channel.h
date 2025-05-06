@@ -199,6 +199,16 @@ void
 irc_channel_clear(struct irc_channel *ch);
 
 /**
+ * Indicate how many users are present in the channel.
+ *
+ * \pre ch != NULL
+ * \param ch the channel
+ * \return the number of users
+ */
+size_t
+irc_channel_count(const struct irc_channel *ch);
+
+/**
  * Remove a user from the channel, if present.
  *
  * \pre ch != NULL

@@ -113,14 +113,14 @@ push_modes(duk_context *ctx, char **modes)
 static void
 push_names(duk_context *ctx, const struct irc_event *ev)
 {
-	const char *token;
-	char *p = ev->names.names;
-
 	duk_push_array(ctx);
 
-	for (size_t i = 0; (token = strtok_r(p, " ", &p)); ++i) {
-		irc_server_strip(ev->server, &token);
-		duk_push_string(ctx, token);
+	for (size_t i = 0; i < ev->names.usersz; ++i) {
+		duk_push_object(ctx);
+		duk_push_string(ctx, ev->names.users[i].nickname);
+		duk_put_prop_string(ctx, -2, "nickname");
+		duk_push_int(ctx, ev->names.users[i].modes);
+		duk_put_prop_string(ctx, -2, "modes");
 		duk_put_prop_index(ctx, -2, i);
 	}
 }

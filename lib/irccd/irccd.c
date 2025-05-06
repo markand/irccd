@@ -18,8 +18,9 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <stdlib.h>
+#include <limits.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -185,9 +186,9 @@ open_plugin(struct irc_plugin_loader *ldr, const char *name, const char *path)
 static inline int
 is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 {
-	char exts[IRC_EXTENSIONS_LEN], *token, *p, *ext;
+	char *extensions, *token, *p, *ext;
 
-	irc_util_strlcpy(exts, ldr->extensions, sizeof (exts));
+	extensions = irc_util_strdup(ldr->extensions);
 
 	/* If we're unable to find an extension, assume it's allowed. */
 	if (!(ext = strrchr(path, '.')))
@@ -195,7 +196,7 @@ is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 
 	ext++;
 
-	for (p = exts; (token = strtok_r(p, ":", &p)); )
+	for (p = extensions; (token = strtok_r(p, ":", &p)); )
 		if (strcmp(token, ext) == 0)
 			return 1;
 

@@ -19,15 +19,45 @@
 #ifndef IRCCD_CONFIG_H
 #define IRCCD_CONFIG_H
 
-#define IRCCD_VERSION_MAJOR     @irccd_VERSION_MAJOR@
-#define IRCCD_VERSION_MINOR     @irccd_VERSION_MINOR@
-#define IRCCD_VERSION_PATCH     @irccd_VERSION_PATCH@
-#define IRCCD_VERSION           "@irccd_VERSION@"
+/**
+ * \brief Irccd major version number.
+ */
+#define IRCCD_VERSION_MAJOR @irccd_VERSION_MAJOR@
 
-#define IRCCD_CACHEDIR          "@CMAKE_INSTALL_FULL_LOCALSTATEDIR@/cache/irccd"
-#define IRCCD_SYSCONFDIR        "@CMAKE_INSTALL_FULL_SYSCONFDIR@"
-#define IRCCD_LIBDIR            "@CMAKE_INSTALL_FULL_LIBDIR@"
-#define IRCCD_DATADIR           "@CMAKE_INSTALL_FULL_DATADIR@/irccd"
+/**
+ * \brief Irccd minor version number.
+ */
+#define IRCCD_VERSION_MINOR @irccd_VERSION_MINOR@
+
+/**
+ * \brief Irccd patch version number.
+ */
+#define IRCCD_VERSION_PATCH @irccd_VERSION_PATCH@
+
+/**
+ * \brief Irccd version as a string.
+ */
+#define IRCCD_VERSION "@irccd_VERSION@"
+
+/**
+ * \brief Default system-wide location for cache files.
+ */
+#define IRCCD_CACHEDIR "@CMAKE_INSTALL_FULL_LOCALSTATEDIR@/cache/irccd"
+
+/**
+ * \brief Default system-wide location for configuration files.
+ */
+#define IRCCD_SYSCONFDIR "@CMAKE_INSTALL_FULL_SYSCONFDIR@"
+
+/**
+ * \brief Default system-wide location for plugins.
+ */
+#define IRCCD_LIBDIR "@CMAKE_INSTALL_FULL_LIBDIR@"
+
+/**
+ * \brief Default system-wide location for additional data files.
+ */
+#define IRCCD_DATADIR "@CMAKE_INSTALL_FULL_DATADIR@/irccd"
 
 #cmakedefine IRCCD_WITH_JS
 #cmakedefine IRCCD_WITH_SSL

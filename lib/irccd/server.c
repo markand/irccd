@@ -43,6 +43,7 @@
 #include "channel.h"
 #include "event.h"
 #include "irccd.h"
+#include "limits.h"
 #include "log.h"
 #include "server.h"
 #include "util.h"
@@ -1553,34 +1554,25 @@ handle_names(struct irc_server *s, struct msg *msg)
 static void
 handle_endofnames(struct irc_server *s, struct msg *msg)
 {
-	FILE *fp;
-	size_t length;
 	const struct irc_channel *ch;
 	const struct irc_channel_user *u;
 	struct irc_event ev = {};
+	size_t i = 0;
 
 	ev.type = IRC_EVENT_NAMES;
 	ev.server = s;
 	ev.names.channel = irc_util_strdup(msg->args[1]);
 
-	/* Construct a string list for every user in the channel. */
-	ch = channels_find(s, ev.names.channel);
-
-	if (!(fp = open_memstream(&ev.names.names, &length)))
+	if (!(ch = channels_find(s, ev.names.channel)))
 		return;
 
+	ev.names.usersz = irc_channel_count(ch);
+	ev.names.users  = irc_util_calloc(ev.names.usersz, sizeof (*ev.names.users));
+
 	LL_FOREACH(ch->users, u) {
-		for (size_t i = 0; i < s->prefixesz; ++i)
-			if (u->modes & (1 << i))
-				fprintf(fp, "%c", s->prefixes[i].symbol);
-
-		fprintf(fp, "%s", u->nickname);
-
-		if (u->next)
-			fputc(' ', fp);
+		ev.names.users[i].nickname = irc_util_strdup(u->nickname);
+		ev.names.users[i].modes = u->modes;
 	}
-
-	fclose(fp);
 
 	irc_bot_dispatch(&ev);
 }

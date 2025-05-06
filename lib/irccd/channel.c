@@ -116,6 +116,20 @@ irc_channel_clear(struct irc_channel *ch)
 	ch->flags = IRC_CHANNEL_FLAGS_NONE;
 }
 
+size_t
+irc_channel_count(const struct irc_channel *ch)
+{
+	assert(ch);
+
+	const struct irc_channel_user *user;
+	size_t rc = 0;
+
+	LL_FOREACH(ch->users, user)
+		++rc;
+
+	return rc;
+}
+
 void
 irc_channel_remove(struct irc_channel *ch, const char *nickname)
 {

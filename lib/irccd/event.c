@@ -105,7 +105,7 @@ irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 		break;
 	}
 
-	return written > 0;
+	return written <= 0 ? -1 : 0;
 }
 
 void
@@ -145,7 +145,9 @@ irc_event_finish(struct irc_event *ev)
 		break;
 	case IRC_EVENT_NAMES:
 		free(ev->names.channel);
-		free(ev->names.names);
+		for (size_t i = 0; i < ev->names.usersz; ++i)
+			free(ev->names.users[i].nickname);
+		free(ev->names.users);
 		break;
 	case IRC_EVENT_NICK:
 		free(ev->nick.origin);
