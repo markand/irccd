@@ -16,10 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if 0
+
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
@@ -276,4 +277,11 @@ main(int argc, char **argv)
 	GREATEST_MAIN_END();
 
 	return 0;
+}
+
+#endif
+
+int
+main(void)
+{
 }

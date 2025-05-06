@@ -38,13 +38,13 @@ basics_insert(void)
 	r1 = irc_rule_new(IRC_RULE_DROP);
 	r2 = irc_rule_new(IRC_RULE_DROP);
 
-	irc_rule_add(r1->servers, "s1");
-	irc_rule_add(r2->servers, "s2");
+	irc_rule_add_server(r1, "s1");
+	irc_rule_add_server(r2, "s2");
 
 	irc_bot_rule_insert(r1, 0);
 	irc_bot_rule_insert(r2, 0);
 
-	r = irc.rules;
+	r = irccd->rules;
 	GREATEST_ASSERT_EQ(r2, r);
 	r = r->next;
 	GREATEST_ASSERT_EQ(r1, r);
@@ -61,26 +61,26 @@ basics_remove(void)
 	r2 = irc_rule_new(IRC_RULE_DROP);
 	r3 = irc_rule_new(IRC_RULE_DROP);
 
-	irc_rule_add(r1->servers, "s1");
-	irc_rule_add(r2->servers, "s2");
-	irc_rule_add(r3->servers, "s3");
+	irc_rule_add_server(r1, "s1");
+	irc_rule_add_server(r2, "s2");
+	irc_rule_add_server(r3, "s3");
 
 	irc_bot_rule_insert(r1, -1);
 	irc_bot_rule_insert(r2, -1);
 	irc_bot_rule_insert(r3, -1);
 	irc_bot_rule_remove(1);
 
-	r = irc.rules;
+	r = irccd->rules;
 	GREATEST_ASSERT_EQ(r1, r);
 	r = r->next;
 	GREATEST_ASSERT_EQ(r3, r);
 
 	irc_bot_rule_remove(1);
-	r = irc.rules;
+	r = irccd->rules;
 	GREATEST_ASSERT_EQ(r1, r);
 
 	irc_bot_rule_remove(0);
-	r = irc.rules;
+	r = irccd->rules;
 	GREATEST_ASSERT(!r);
 
 	GREATEST_PASS();
@@ -138,37 +138,37 @@ set(void *udata)
 
 	/* #1 */
 	r1 = irc_rule_new(IRC_RULE_DROP);
-	irc_rule_add(r1->channels, "#staff");
-	irc_rule_add(r1->events, "onCommand");
+	irc_rule_add_channel(r1, "#staff");
+	irc_rule_add_event(r1, "onCommand");
 	irc_bot_rule_insert(r1, -1);
 
 	/* #2 */
 	r2 = irc_rule_new(IRC_RULE_ACCEPT);
-	irc_rule_add(r2->servers, "unsafe");
-	irc_rule_add(r2->channels, "#staff");
-	irc_rule_add(r2->events, "onCommand");
+	irc_rule_add_server(r2, "unsafe");
+	irc_rule_add_channel(r2, "#staff");
+	irc_rule_add_event(r2, "onCommand");
 	irc_bot_rule_insert(r2, -1);
 
 	/* #3-1 */
 	r31 = irc_rule_new(IRC_RULE_DROP);
-	irc_rule_add(r31->plugins, "game");
+	irc_rule_add_plugin(r31, "game");
 	irc_bot_rule_insert(r31, -1);
 
 	/* #3-2 */
 	r32 = irc_rule_new(IRC_RULE_ACCEPT);
-	irc_rule_add(r32->servers, "malikania");
-	irc_rule_add(r32->servers, "localhost");
-	irc_rule_add(r32->channels, "#games");
-	irc_rule_add(r32->plugins, "game");
-	irc_rule_add(r32->events, "onCommand");
-	irc_rule_add(r32->events, "onMessage");
+	irc_rule_add_server(r32, "malikania");
+	irc_rule_add_server(r32, "localhost");
+	irc_rule_add_channel(r32, "#games");
+	irc_rule_add_plugin(r32, "game");
+	irc_rule_add_event(r32, "onCommand");
+	irc_rule_add_event(r32, "onMessage");
 	irc_bot_rule_insert(r32, -1);
 }
 
 GREATEST_TEST
 solve_match1(void)
 {
-	struct irc_rule m = {0};
+	struct irc_rule m = {};
 
 	GREATEST_ASSERT(irc_rule_match(&m, "freenode", "#test", "a", "", ""));
 	GREATEST_ASSERT(irc_rule_match(&m, "", "", "", "", ""));
@@ -178,9 +178,9 @@ solve_match1(void)
 GREATEST_TEST
 solve_match2(void)
 {
-	struct irc_rule m = {0};
+	struct irc_rule m = {};
 
-	irc_rule_add(m.servers, "freenode");
+	irc_rule_add_server(&m, "freenode");
 
 	GREATEST_ASSERT(irc_rule_match(&m, "FreeNode", "#test", "a", "", ""));
 	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#test", "a", "", ""));
@@ -191,10 +191,10 @@ solve_match2(void)
 GREATEST_TEST
 solve_match3(void)
 {
-	struct irc_rule m = {0};
+	struct irc_rule m = {};
 
-	irc_rule_add(m.servers, "freenode");
-	irc_rule_add(m.channels, "#staff");
+	irc_rule_add_server(&m, "freenode");
+	irc_rule_add_channel(&m, "#staff");
 
 	GREATEST_ASSERT(irc_rule_match(&m, "freenode", "#staff", "a", "", ""));
 	GREATEST_ASSERT(!irc_rule_match(&m, "freenode", "#test", "a", "", ""));
@@ -205,11 +205,11 @@ solve_match3(void)
 GREATEST_TEST
 solve_match4(void)
 {
-	struct irc_rule m = {0};
+	struct irc_rule m = {};
 
-	irc_rule_add(m.servers, "malikania");
-	irc_rule_add(m.channels, "#staff");
-	irc_rule_add(m.origins, "a");
+	irc_rule_add_server(&m, "malikania");
+	irc_rule_add_channel(&m, "#staff");
+	irc_rule_add_origin(&m, "a");
 
 	GREATEST_ASSERT(irc_rule_match(&m, "malikania", "#staff", "a", "",""));
 	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "b", "", ""));
@@ -220,10 +220,10 @@ solve_match4(void)
 GREATEST_TEST
 solve_match5(void)
 {
-	struct irc_rule m = {0};
+	struct irc_rule m = {};
 
-	irc_rule_add(m.servers, "malikania");
-	irc_rule_add(m.servers, "freenode");
+	irc_rule_add_server(&m, "malikania");
+	irc_rule_add_server(&m, "freenode");
 
 	GREATEST_ASSERT(irc_rule_match(&m, "malikania", "", "", "", ""));
 	GREATEST_ASSERT(irc_rule_match(&m, "freenode", "", "", "", ""));
@@ -234,10 +234,10 @@ solve_match5(void)
 GREATEST_TEST
 solve_match6(void)
 {
-	struct irc_rule m = {0};
+	struct irc_rule m = {};
 
-	irc_rule_add(m.servers, "malikania");
-	irc_rule_add(m.origins, "markand");
+	irc_rule_add_server(&m, "malikania");
+	irc_rule_add_origin(&m, "markand");
 
 	GREATEST_ASSERT(irc_rule_match(&m, "malikania", "#staff", "markand", "system", "onCommand"));
 	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "", "system", "onNames"));
@@ -249,19 +249,19 @@ GREATEST_TEST
 solve_match7(void)
 {
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irc.rules, "malikania", "#staff", "", "a", "onMessage"));
+	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#staff", "", "a", "onMessage"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irc.rules, "freenode", "#staff", "", "b", "onTopic"));
+	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "freenode", "#staff", "", "b", "onTopic"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irc.rules, "malikania", "#staff", "", "", "onCommand"));
+	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#staff", "", "", "onCommand"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irc.rules, "freenode", "#staff", "", "c", "onCommand"));
+	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "freenode", "#staff", "", "c", "onCommand"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irc.rules, "unsafe", "#staff", "", "c", "onCommand"));
+	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "unsafe", "#staff", "", "c", "onCommand"));
 
 	GREATEST_PASS();
 }
@@ -270,29 +270,29 @@ GREATEST_TEST
 solve_match8(void)
 {
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irc.rules, "malikania", "#games", "", "game", "onMessage"));
+	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irc.rules, "localhost", "#games", "", "game", "onMessage"));
+	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "localhost", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irc.rules, "malikania", "#games", "", "game", "onCommand"));
+	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onCommand"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irc.rules, "malikania", "#games", "", "game", "onQuery"));
+	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onQuery"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irc.rules, "freenode", "#no", "", "game", "onMessage"));
+	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "freenode", "#no", "", "game", "onMessage"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irc.rules, "malikania", "#test", "", "game", "onMessage"));
+	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#test", "", "game", "onMessage"));
 	GREATEST_PASS();
 }
 
 GREATEST_TEST
 solve_match9(void)
 {
-	GREATEST_ASSERT(!irc_rule_matchlist(irc.rules, "MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
+	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
 	GREATEST_PASS();
 }
 

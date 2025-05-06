@@ -33,18 +33,30 @@ clean(void *udata)
 	irc_bot_server_clear();
 }
 
+static inline struct irc_server *
+server_new(const char *name)
+{
+	struct irc_server *s;
+
+	s = irc_server_new(name);
+	irc_server_set_ident(s, "test", "test", "test");
+	irc_server_set_params(s, "127.0.0.1", 6667, 0);
+
+	return s;
+}
+
 GREATEST_TEST
 servers_add(void)
 {
 	struct irc_server *s, *s1, *s2, *s3;
 
-	s1 = irc_server_new("malikania", "x", "x", "x", "localhost", 6667);
-	s2 = irc_server_new("freenode", "x", "x", "x", "localhost", 6667);
-	s3 = irc_server_new("oftc", "x", "x", "x", "localhost", 6667);
+	s1 = server_new("malikania");
+	s2 = server_new("freenode");
+	s3 = server_new("oftc");
 
 	/* irc.servers -> s1 */
 	irc_bot_server_add(s1);
-	s = irc.servers;
+	s = irccd->servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
 	GREATEST_ASSERT_EQ(s, s1);
 	s = s->next;
@@ -52,7 +64,7 @@ servers_add(void)
 
 	/* irc.servers -> s1 -> s2 */
 	irc_bot_server_add(s2);
-	s = irc.servers;
+	s = irccd->servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
 	GREATEST_ASSERT_EQ(s, s1);
 	s = s->next;
@@ -62,7 +74,7 @@ servers_add(void)
 
 	/* irc.servers -> s1 -> s2 -> s3 */
 	irc_bot_server_add(s3);
-	s = irc.servers;
+	s = irccd->servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
 	GREATEST_ASSERT_EQ(s, s1);
 	s = s->next;
@@ -80,9 +92,9 @@ servers_remove(void)
 {
 	struct irc_server *s, *s1, *s2, *s3;
 
-	s1 = irc_server_new("1", "x", "x", "x", "localhost", 6667);
-	s2 = irc_server_new("2", "x", "x", "x", "localhost", 6667);
-	s3 = irc_server_new("3", "x", "x", "x", "localhost", 6667);
+	s1 = server_new("1");
+	s2 = server_new("2");
+	s3 = server_new("3");
 
 	/* Protect deletion from irc_bot_remove_server. */
 	irc_server_incref(s1);
@@ -100,7 +112,7 @@ servers_remove(void)
 	GREATEST_ASSERT_EQ(2, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(2, s3->refc);
-	s = irc.servers;
+	s = irccd->servers;
 	GREATEST_ASSERT_EQ(s, s1);
 	s = s->next;
 	GREATEST_ASSERT_EQ(s, s3);
@@ -113,7 +125,7 @@ servers_remove(void)
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(2, s3->refc);
-	s = irc.servers;
+	s = irccd->servers;
 	GREATEST_ASSERT_EQ(s, s3);
 	s = s->next;
 	GREATEST_ASSERT(!s);
@@ -124,7 +136,7 @@ servers_remove(void)
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(1, s3->refc);
-	s = irc.servers;
+	s = irccd->servers;
 	GREATEST_ASSERT(!s);
 
 	irc_server_decref(s1);
@@ -139,9 +151,9 @@ servers_clear(void)
 {
 	struct irc_server *s1, *s2, *s3;
 
-	s1 = irc_server_new("1", "x", "x", "x", "localhost", 6667);
-	s2 = irc_server_new("2", "x", "x", "x", "localhost", 6667);
-	s3 = irc_server_new("3", "x", "x", "x", "localhost", 6667);
+	s1 = server_new("1");
+	s2 = server_new("2");
+	s3 = server_new("3");
 
 	/* Protect deletion from irc_bot_remove_server. */
 	irc_server_incref(s1);
@@ -156,7 +168,7 @@ servers_clear(void)
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(1, s3->refc);
-	GREATEST_ASSERT(!irc.servers);
+	GREATEST_ASSERT(!irccd->servers);
 	GREATEST_PASS();
 }
 
@@ -174,6 +186,8 @@ GREATEST_MAIN_DEFS();
 int
 main(int argc, char **argv)
 {
+	irc_bot_init(NULL);
+
 	GREATEST_MAIN_BEGIN();
 	GREATEST_RUN_SUITE(suite_servers);
 	GREATEST_MAIN_END();

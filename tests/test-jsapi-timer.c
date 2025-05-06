@@ -16,8 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <poll.h>
-#include <signal.h>
+#include <ev.h>
 
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
@@ -65,18 +64,15 @@ GREATEST_TEST
 basics_single(void)
 {
 	time_t start = time(NULL);
-	struct pollfd fd;
 
 	set_type("Single");
 
-	while (difftime(time(NULL), start) < 3) {
-		irc_bot_prepare(&fd);
-		poll(&fd, 1, 1);
-		irc_bot_flush(&fd);
-	}
+	while (difftime(time(NULL), start) < 3)
+		ev_run(irc_bot_loop(), EVRUN_ONCE);
 
 	GREATEST_ASSERT(duk_get_global_string(ctx, "count"));
 	GREATEST_ASSERT_EQ(duk_get_int(ctx, -1), 1);
+
 	GREATEST_PASS();
 }
 
@@ -84,15 +80,11 @@ GREATEST_TEST
 basics_repeat(void)
 {
 	time_t start = time(NULL);
-	struct pollfd fd;
 
 	set_type("Repeat");
 
-	while (difftime(time(NULL), start) < 3) {
-		irc_bot_prepare(&fd);
-		poll(&fd, 1, 1);
-		irc_bot_flush(&fd);
-	}
+	while (difftime(time(NULL), start) < 3)
+		ev_run(irc_bot_loop(), EVRUN_ONCE);
 
 	GREATEST_ASSERT(duk_get_global_string(ctx, "count"));
 	GREATEST_ASSERT(duk_get_int(ctx, -1) >= 5);
@@ -112,7 +104,7 @@ GREATEST_MAIN_DEFS();
 int
 main(int argc, char **argv)
 {
-	irc_bot_init();
+	irc_bot_init(NULL);
 
 	GREATEST_MAIN_BEGIN();
 	GREATEST_RUN_SUITE(suite_basics);

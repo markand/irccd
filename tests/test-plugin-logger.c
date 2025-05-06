@@ -22,6 +22,7 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
+#include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
@@ -38,7 +39,11 @@ setup(void *udata)
 
 	remove(TOP "/tests/log");
 
-	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
+	server = irc_server_new("test");
+	irc_server_set_ident(server, "test", "test", "test");
+	irc_server_set_params(server, "127.0.0.1", 6667, 0);
+	irc_server_connect(server);
+
 	plugin = js_plugin_open("logger", TOP "/plugins/logger/logger.js");
 
 	if (!plugin)
@@ -56,9 +61,6 @@ setup(void *udata)
 	irc_plugin_set_template(plugin, "topic", "topic=#{server}:#{channel}:#{origin}:#{nickname}:#{topic}");
 	irc_plugin_set_option(plugin, "file", TOP "/tests/log");
 	irc_plugin_load(plugin);
-
-	/* Fake server connected to send data. */
-	server->state = IRC_SERVER_STATE_CONNECTED;
 }
 
 static void
@@ -266,6 +268,9 @@ GREATEST_MAIN_DEFS();
 int
 main(int argc, char **argv)
 {
+	irc_bot_init(NULL);
+	irc_log_to_null();
+
 	GREATEST_MAIN_BEGIN();
 	GREATEST_RUN_SUITE(suite_basics);
 	GREATEST_MAIN_END();

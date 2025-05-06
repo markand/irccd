@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if 0
+
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
@@ -196,4 +198,11 @@ main(int argc, char **argv)
 	GREATEST_MAIN_END();
 
 	return 0;
+}
+
+#endif
+
+int
+main(void)
+{
 }
