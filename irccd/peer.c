@@ -1117,7 +1117,7 @@ io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
 	struct peer *peer;
 	int rc = 0;
 
-	peer = IRC_CONTAINER_OF(self, struct peer, io_fd);
+	peer = IRC_UTIL_CONTAINER_OF(self, struct peer, io_fd);
 
 	if (revents & EV_READ)
 		rc = input(peer);

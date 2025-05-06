@@ -1025,7 +1025,7 @@ conn__io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
 		[CONN_STATE_READY]     = conn__io_ready
 	};
 
-	struct conn *conn = IRC_CONTAINER_OF(self, struct conn, io_fd);
+	struct conn *conn = IRC_UTIL_CONTAINER_OF(self, struct conn, io_fd);
 
 	io[conn->state](conn, revents);
 }

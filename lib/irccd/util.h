@@ -27,9 +27,6 @@
 extern "C" {
 #endif
 
-// TODO: replace later.
-#define IRC_CONTAINER_OF IRC_UTIL_CONTAINER_OF
-
 #define IRC_UTIL_CONTAINER_OF(Ptr, Type, Member) \
         ((Type *)((char *)(1 ? (Ptr) : &((Type *)0)->Member) - offsetof(Type, Member)))
 

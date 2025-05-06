@@ -139,7 +139,7 @@ child_cb(struct ev_loop *loop, struct ev_child *self, int revents)
 	struct irc_hook_child *child;
 	struct irc_hook *parent;
 
-	child = IRC_CONTAINER_OF(self, struct irc_hook_child, child);
+	child = IRC_UTIL_CONTAINER_OF(self, struct irc_hook_child, child);
 	parent = child->parent;
 
 	if (WIFEXITED(self->rstatus))
