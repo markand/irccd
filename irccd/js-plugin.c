@@ -76,10 +76,10 @@ freelist(char **table)
 	free(table);
 }
 
-static char *
+static const char *
 metadata(duk_context *ctx, const char *name)
 {
-	char *ret = NULL;
+	const char *ret = NULL;
 
 	duk_get_global_string(ctx, "info");
 
@@ -87,7 +87,7 @@ metadata(duk_context *ctx, const char *name)
 		duk_get_prop_string(ctx, -1, name);
 
 		if (duk_get_type(ctx, -1) == DUK_TYPE_STRING)
-			ret = irc_util_strdup(duk_get_string(ctx, -1));
+			ret = duk_get_string(ctx, -1);
 
 		duk_pop(ctx);
 	}

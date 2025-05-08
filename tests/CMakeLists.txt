@@ -18,6 +18,10 @@
 
 project(tests)
 
+# TODO: meh, CMake needs top-level this.
+find_package(CURL REQUIRED)
+find_package(Ev REQUIRED)
+
 set(
 	TESTS
 	bot
@@ -28,29 +32,15 @@ set(
 	rule
 	subst
 	util
+	jsapi-chrono
+	jsapi-directory
+	jsapi-file
+	jsapi-irccd
+	jsapi-system
+	jsapi-timer
+	jsapi-unicode
+	jsapi-util
 )
-
-if (IRCCD_WITH_JS)
-	list(
-		APPEND TESTS
-		jsapi-chrono
-		jsapi-directory
-		jsapi-file
-		jsapi-irccd
-		jsapi-system
-		jsapi-timer
-		jsapi-unicode
-		jsapi-util
-		plugin-ask
-		plugin-auth
-		plugin-hangman
-		plugin-history
-		plugin-joke
-		plugin-logger
-		plugin-plugin
-		plugin-tictactoe
-	)
-endif ()
 
 foreach (t ${TESTS})
 	add_executable(test-${t} ${tests_SOURCE_DIR}/test-${t}.c)
@@ -75,3 +65,76 @@ add_dependencies(test-dl-plugin plugin-dl-example)
 set_target_properties(plugin-dl-example PROPERTIES PREFIX "" FOLDER tests)
 target_compile_definitions(test-dl-plugin PRIVATE EXAMPLE_DL_PLUGIN="$<TARGET_FILE:plugin-dl-example>")
 target_link_libraries(plugin-dl-example irccd)
+
+#
+# plugins are based on a mocked server, we rebuild most of the library
+# and irccd using its fake symbols.
+#
+set(
+	SOURCES
+	${CMAKE_SOURCE_DIR}/extern/libbsd/reallocarray.c
+	${CMAKE_SOURCE_DIR}/extern/libbsd/strlcat.c
+	${CMAKE_SOURCE_DIR}/extern/libbsd/strlcpy.c
+	${CMAKE_SOURCE_DIR}/irccd/js-plugin.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-chrono.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-directory.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-file.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-hook.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-http.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-irccd.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-logger.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-plugin.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-rule.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-server.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-system.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-timer.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-unicode.c
+	${CMAKE_SOURCE_DIR}/irccd/jsapi-util.c
+	${CMAKE_SOURCE_DIR}/irccd/unicode.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/hook.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/irccd.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/log.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/plugin.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/rule.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/subst.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/util.c
+)
+
+set(
+	PLUGINS
+	plugin-ask
+	plugin-auth
+	plugin-hangman
+	plugin-history
+	plugin-joke
+	plugin-logger
+	plugin-plugin
+	plugin-tictactoe
+)
+
+foreach (t ${PLUGINS})
+	add_executable(test-${t} ${tests_SOURCE_DIR}/test-${t}.c ${SOURCES})
+	add_test(NAME test-${t} COMMAND test-${t})
+	set_target_properties(test-${t} PROPERTIES FOLDER tests)
+	target_link_libraries(test-${t}
+		libirccd-greatest
+		libirccd-utlist
+		libirccd-duktape
+		CURL::libcurl
+		Ev::Ev
+	)
+	target_include_directories(
+		test-${t}
+		PRIVATE
+			${CMAKE_BINARY_DIR}/lib
+			${CMAKE_BINARY_DIR}/lib/irccd
+			${CMAKE_SOURCE_DIR}
+			${CMAKE_SOURCE_DIR}/irccd
+			${CMAKE_SOURCE_DIR}/lib
+	)
+	target_compile_definitions(
+		test-${t}
+		PRIVATE
+			TOP="${CMAKE_SOURCE_DIR}"
+	)
+endforeach ()

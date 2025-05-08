@@ -16,12 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if 0
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/conn.h>
+#include "mock/server.c"
+
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
@@ -29,7 +28,6 @@
 #include <irccd/util.h>
 
 #define CALL(t, m) do {                                                 \
-        memset(server->conn->out, 0, sizeof (server->conn->out));       \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = t,                                              \
                 .server = server,                                       \
@@ -42,7 +40,6 @@
 } while (0)
 
 #define CALL_EX(t, o, c, m) do {                                        \
-        memset(server->conn->out, 0, sizeof (server->conn->out));       \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = t,                                              \
                 .server = server,                                       \
@@ -55,6 +52,7 @@
 } while (0)
 
 static struct irc_server *server;
+static struct mock_server *mock;
 static struct irc_plugin *plugin;
 
 static void
@@ -64,7 +62,8 @@ setup(void *udata)
 
 	remove(TOP "/tests/seen.json");
 
-	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
+	server = irc_server_new("test");
+	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 	plugin = js_plugin_open("history", TOP "/plugins/history/history.js");
 
 	if (!plugin)
@@ -79,9 +78,6 @@ setup(void *udata)
 	irc_plugin_set_template(plugin, "unknown", "unknown=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}");
 	irc_plugin_set_option(plugin, "file", TOP "/tests/seen.json");
 	irc_plugin_load(plugin);
-
-	/* Fake server connected to send data. */
-	server->state = IRC_SERVER_STATE_CONNECTED;
 }
 
 static void
@@ -100,7 +96,7 @@ basics_error(void)
 {
 	irc_plugin_set_option(plugin, "file", TOP "/tests/data/error.json");
 	CALL(IRC_EVENT_COMMAND, "seen francis");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #history :error=history:!history:test:#history:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #history error=history:!history:test:#history:jean!jean@localhost:jean", mock->out->line);
 	GREATEST_PASS();
 }
 
@@ -112,7 +108,7 @@ basics_seen(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#history", "hello");
 	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "seen jean");
 
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :seen=history:!history:test:#history:francis!francis@localhost:francis:jean:%d:%d\r\n", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #history seen=history:!history:test:#history:francis!francis@localhost:francis:jean:%d:%d", &d1, &d2));
 
 	GREATEST_PASS();
 }
@@ -125,7 +121,7 @@ basics_said(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#history", "hello");
 	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "said jean");
 
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :said=history:!history:test:#history:francis!francis@localhost:francis:jean:hello:%d:%d", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #history said=history:!history:test:#history:francis!francis@localhost:francis:jean:hello:%d:%d", &d1, &d2));
 
 	GREATEST_PASS();
 }
@@ -144,7 +140,7 @@ basics_silent(void)
 	});
 	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "said jean");
 
-	GREATEST_ASSERT_STR_EQ(server->conn->out, "PRIVMSG #history :silent=history:!history:test:#history:francis!francis@localhost:francis:jean\r\n");
+	GREATEST_ASSERT_STR_EQ("message #history silent=history:!history:test:#history:francis!francis@localhost:francis:jean", mock->out->line);
 
 	GREATEST_PASS();
 }
@@ -155,7 +151,7 @@ basics_unknown(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#history", "hello");
 	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "said nobody");
 
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #history :unknown=history:!history:test:#history:francis!francis@localhost:francis:nobody\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #history unknown=history:!history:test:#history:francis!francis@localhost:francis:nobody", mock->out->line);
 	GREATEST_PASS();
 }
 
@@ -167,10 +163,10 @@ basics_case_insensitive(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "JeaN!JeaN@localhost", "#history", "hello");
 
 	CALL_EX(IRC_EVENT_COMMAND, "destructor!dst@localhost", "#HISTORY", "said JEAN");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d\r\n", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #history said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d", &d1, &d2));
 
 	CALL_EX(IRC_EVENT_COMMAND, "destructor!dst@localhost", "#HiSToRy", "said JeaN");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d\r\n", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #history said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d", &d1, &d2));
 
 	GREATEST_PASS();
 }
@@ -197,11 +193,4 @@ main(int argc, char **argv)
 	GREATEST_MAIN_END();
 
 	return 0;
-}
-
-#endif
-
-int
-main(void)
-{
 }

@@ -250,12 +250,15 @@ irc_util_user_split(const char *prefix)
 
 	if (regcomp(&regex, REGEX_USER, REG_EXTENDED) != 0)
 		return NULL;
+
+	user = irc_util_calloc(1, sizeof (*user));
+
 	if (regexec(&regex, prefix, IRC_UTIL_SIZE(matches), matches, 0) == 0) {
-		user           = irc_util_calloc(1, sizeof (*user));
 		user->nickname = irc_util_strndup(&prefix[matches[1].rm_so], matches[1].rm_eo - matches[1].rm_so);
 		user->username = irc_util_strndup(&prefix[matches[2].rm_so], matches[2].rm_eo - matches[2].rm_so);
 		user->host     = irc_util_strndup(&prefix[matches[3].rm_so], matches[3].rm_eo - matches[3].rm_so);
-	}
+	} else
+		user->nickname = irc_util_strdup(prefix);
 
 	regfree(&regex);
 

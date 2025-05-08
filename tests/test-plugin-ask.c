@@ -16,18 +16,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if 0
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
+#include "mock/server.c"
+
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
-#include <irccd/server.h>
-#include <irccd/util.h>
 
 static struct irc_server *server;
 static struct irc_plugin *plugin;
+
+static struct mock_server *mock;
 
 static void
 setup(void *udata)
@@ -35,6 +35,8 @@ setup(void *udata)
 	(void)udata;
 
 	server = irc_server_new("test");
+	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
+
 	plugin = js_plugin_open("test", TOP "/plugins/ask/ask.js");
 
 	if (!plugin)
@@ -74,12 +76,10 @@ basics_simple(void)
 			}
 		});
 
-		if (strcmp(server->conn->out, "PRIVMSG #test :jean, NO\r\n") == 0)
+		if (strcmp(mock->out->line, "message #test jean, NO") == 0)
 			yes = 1;
-		else if (strcmp(server->conn->out, "PRIVMSG #test :jean, YES\r\n") == 0)
+		else if (strcmp(mock->out->line, "message #test jean, YES") == 0)
 			no = 1;
-
-		memset(server->conn->out, 0, sizeof (server->conn->out));
 	}
 
 	GREATEST_ASSERT(no);
@@ -105,11 +105,4 @@ main(int argc, char **argv)
 	GREATEST_MAIN_END();
 
 	return 0;
-}
-
-#endif
-
-int
-main(void)
-{
 }
