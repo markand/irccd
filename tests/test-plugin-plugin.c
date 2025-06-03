@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if 0
-
 #include <string.h>
 
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
+
+#include "mock/server.c"
 
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
@@ -31,7 +31,6 @@
 #include <irccd/util.h>
 
 #define CALL(t, m) do {                                                 \
-        memset(server->conn->out, 0, sizeof (server->conn->out));       \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = t,                                              \
                 .server = server,                                       \
@@ -44,15 +43,17 @@
 } while (0)
 
 static struct irc_server *server;
+static struct mock_server *mock;
 static struct irc_plugin *plugin, *fake;
 
 static struct irc_plugin *
 fake_new(int n)
 {
 	struct irc_plugin *p;
+	char name[32] = {};
 
 	p = irc_util_calloc(1, sizeof (*p));
-	irc_plugin_init(p, irc_util_printf("plugin-n-%d", n));
+	irc_plugin_init(p, irc_util_printf(name, sizeof (name), "plugin-n-%d", n));
 
 	return p;
 }
@@ -62,8 +63,8 @@ setup(void *udata)
 {
 	(void)udata;
 
-#if 0
-	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
+	server = irc_server_new("test");
+	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 	plugin = js_plugin_open("plugin", TOP "/plugins/plugin/plugin.js");
 
 	if (!plugin)
@@ -77,20 +78,14 @@ setup(void *udata)
 	fake->description = "Fake White Beer 2000";
 	strcpy(fake->name, "fake");
 
-	irc_bot_init();
+	irc_bot_init(NULL);
 	irc_bot_plugin_add(fake);
-
 	irc_plugin_set_template(plugin, "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}");
 	irc_plugin_set_template(plugin, "info", "info=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{author}:#{license}:#{name}:#{summary}:#{version}");
 	irc_plugin_set_template(plugin, "not-found", "not-found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{name}");
 	irc_plugin_set_template(plugin, "too-long", "too-long=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}");
 	irc_server_incref(server);
-
 	irc_plugin_load(plugin);
-
-	/* Fake server connected to send data. */
-	server->state = IRC_SERVER_STATE_CONNECTED;
-#endif
 }
 
 static void
@@ -106,53 +101,45 @@ teardown(void *udata)
 GREATEST_TEST
 basics_usage(void)
 {
-#if 0
 	CALL(IRC_EVENT_COMMAND, "");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 
 	CALL(IRC_EVENT_COMMAND, "fail");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 
 	CALL(IRC_EVENT_COMMAND, "info");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 
-#endif
 	GREATEST_PASS();
 }
 
 GREATEST_TEST
 basics_info(void)
 {
-#if 0
 	CALL(IRC_EVENT_COMMAND, "info fake");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :info=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:David:BEER:fake:Fake White Beer 2000:0.0.0.0.0.0.1\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #plugin info=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:David:BEER:fake:Fake White Beer 2000:0.0.0.0.0.0.1", mock->out->line);
 
-#endif
 	GREATEST_PASS();
 }
 
 GREATEST_TEST
 basics_not_found(void)
 {
-#if 0
 	CALL(IRC_EVENT_COMMAND, "info doesnotexist");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :not-found=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:doesnotexist\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #plugin not-found=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:doesnotexist", mock->out->line);
 
-#endif
 	GREATEST_PASS();
 }
 
 GREATEST_TEST
 basics_too_long(void)
 {
-#if 0
 	for (int i = 0; i < 100; ++i)
 		irc_bot_plugin_add(fake_new(i));
 
 	CALL(IRC_EVENT_COMMAND, "list");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :too-long=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #plugin too-long=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 
-#endif
 	GREATEST_PASS();
 }
 
@@ -176,11 +163,4 @@ main(int argc, char **argv)
 	GREATEST_MAIN_END();
 
 	return 0;
-}
-
-#endif
-
-int
-main(void)
-{
 }

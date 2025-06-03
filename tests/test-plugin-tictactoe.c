@@ -16,12 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if 0
-
-#include <signal.h>
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
+
+#include "mock/server.c"
 
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
@@ -31,7 +29,6 @@
 #include <irccd/util.h>
 
 #define CALL(t, m) do {                                                 \
-        memset(server->conn->out, 0, sizeof (server->conn->out));       \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = t,                                              \
                 .server = server,                                       \
@@ -44,7 +41,6 @@
 } while (0)
 
 #define CALL_EX(t, o, c, m) do {                                        \
-        memset(server->conn->out, 0, sizeof (server->conn->out));       \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = t,                                              \
                 .server = server,                                       \
@@ -57,6 +53,7 @@
 } while (0)
 
 static struct irc_server *server;
+static struct mock_server *mock;
 static struct irc_plugin *plugin;
 
 static void
@@ -64,13 +61,14 @@ setup(void *udata)
 {
 	(void)udata;
 
-	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
+	server = irc_server_new("test");
+	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 	plugin = js_plugin_open("tictactoe", TOP "/plugins/tictactoe/tictactoe.js");
 
 	if (!plugin)
 		irc_util_die("could not load plugin\n");
 
-	irc_bot_init();
+	irc_bot_init(NULL);
 	irc_server_incref(server);
 	irc_plugin_set_template(plugin, "draw", "draw=#{channel}:#{command}:#{nickname}:#{plugin}:#{server}");
 	irc_plugin_set_template(plugin, "invalid", "invalid=#{channel}:#{command}:#{nickname}:#{origin}:#{plugin}:#{server}");
@@ -80,13 +78,21 @@ setup(void *udata)
 	irc_plugin_set_template(plugin, "win", "win=#{channel}:#{command}:#{nickname}:#{plugin}:#{server}");
 	irc_plugin_load(plugin);
 
-	/* We need tw players on a channel to play the game. */
+	/* We need two players on a channel to play the game. */
 	irc_server_join(server, "#tictactoe", NULL);
 	irc_channel_add(server->channels, "a", 0);
 	irc_channel_add(server->channels, "b", 0);
+}
 
-	/* Fake server connected to send data. */
-	server->state = IRC_SERVER_STATE_CONNECTED;
+static const char *
+line_no(size_t index)
+{
+	struct mock_server_msg *msg = mock->out;
+
+	for (; index; --index)
+		msg = msg ? msg->next : msg;
+
+	return msg ? msg->line : "";
 }
 
 static void
@@ -101,17 +107,10 @@ teardown(void *udata)
 static char
 next(void)
 {
-	const char *lines[5] = {0};
-	char player = 0, *buf;
+	char player = 0;
 
-	/* We need to skip 4 lines.*/
-	buf = irc_util_strdup(server->conn->out);
-	irc_util_split(buf, lines, 5, '\n');
-
-	if (!lines[4] || sscanf(lines[4], "PRIVMSG #tictactoe :turn=#tictactoe:!tictactoe:%c:tictactoe:test\r\n", &player) != 1)
+	if (sscanf(line_no(0), "message #tictactoe turn=#tictactoe:!tictactoe:%c:tictactoe:test", &player) != 1)
 		irc_util_die("could not determine player\n");
-
-	free(buf);
 
 	return player;
 }
@@ -127,7 +126,6 @@ play(const char *value)
 GREATEST_TEST
 basics_win(void)
 {
-	const char *lines[5] = {0};
 	char k1, k2;
 
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "b");
@@ -138,12 +136,11 @@ basics_win(void)
 	play("b2");
 	play("a3");
 
-	GREATEST_ASSERT_EQ(5U, irc_util_split(server->conn->out, lines, 5, '\n'));
-	GREATEST_ASSERT_EQ(0, sscanf(lines[0], "PRIVMSG #tictactoe :  a b c\r"));
-	GREATEST_ASSERT_EQ(2, sscanf(lines[1], "PRIVMSG #tictactoe :1 %c %c .\r", &k1, &k2));
-	GREATEST_ASSERT_EQ(2, sscanf(lines[2], "PRIVMSG #tictactoe :2 %c %c .\r", &k1, &k2));
-	GREATEST_ASSERT_EQ(1, sscanf(lines[3], "PRIVMSG #tictactoe :3 %c . .\r", &k1));
-	GREATEST_ASSERT_EQ(1, sscanf(lines[4], "PRIVMSG #tictactoe :win=#tictactoe:!tictactoe:%c:tictactoe:test\r\n", &k1));
+	GREATEST_ASSERT_EQ(0, sscanf(line_no(4), "message #tictactoe   a b c"));
+	GREATEST_ASSERT_EQ(2, sscanf(line_no(3), "message #tictactoe 1 %c %c .", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(line_no(2), "message #tictactoe 2 %c %c .", &k1, &k2));
+	GREATEST_ASSERT_EQ(1, sscanf(line_no(1), "message #tictactoe 3 %c . .", &k1));
+	GREATEST_ASSERT_EQ(1, sscanf(line_no(0), "message #tictactoe win=#tictactoe:!tictactoe:%c:tictactoe:test", &k1));
 
 	GREATEST_PASS();
 }
@@ -157,7 +154,6 @@ basics_draw(void)
 	 * 2 o x x
 	 * 3 x o x
 	 */
-	const char *lines[5] = {0};
 	char k1, k2, k3;
 
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "b");
@@ -172,12 +168,11 @@ basics_draw(void)
 	play("a 1");
 	play("b 1");
 
-	GREATEST_ASSERT_EQ(5U, irc_util_split(server->conn->out, lines, 5, '\n'));
-	GREATEST_ASSERT_EQ(0, sscanf(lines[0], "PRIVMSG #tictactoe :  a b c\r"));
-	GREATEST_ASSERT_EQ(3, sscanf(lines[1], "PRIVMSG #tictactoe :1 %c %c %c\r", &k1, &k2, &k3));
-	GREATEST_ASSERT_EQ(3, sscanf(lines[2], "PRIVMSG #tictactoe :2 %c %c %c\r", &k1, &k2, &k3));
-	GREATEST_ASSERT_EQ(3, sscanf(lines[3], "PRIVMSG #tictactoe :3 %c %c %c\r", &k1, &k2, &k3));
-	GREATEST_ASSERT_EQ(1, sscanf(lines[4], "PRIVMSG #tictactoe :draw=#tictactoe:!tictactoe:%c:tictactoe:test\r\n", &k1));
+	GREATEST_ASSERT_EQ(0, sscanf(line_no(4), "message #tictactoe   a b c"));
+	GREATEST_ASSERT_EQ(3, sscanf(line_no(3), "message #tictactoe 1 %c %c %c", &k1, &k2, &k3));
+	GREATEST_ASSERT_EQ(3, sscanf(line_no(2), "message #tictactoe 2 %c %c %c", &k1, &k2, &k3));
+	GREATEST_ASSERT_EQ(3, sscanf(line_no(1), "message #tictactoe 3 %c %c %c", &k1, &k2, &k3));
+	GREATEST_ASSERT_EQ(1, sscanf(line_no(0), "message #tictactoe draw=#tictactoe:!tictactoe:%c:tictactoe:test", &k1));
 
 	GREATEST_PASS();
 }
@@ -192,7 +187,7 @@ basics_used(void)
 	play("a 1");
 	play("a 1");
 
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :used=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe used=#tictactoe:!tictactoe:%c:%c:tictactoe:testn", &k1, &k2));
 
 	GREATEST_PASS();
 }
@@ -204,15 +199,15 @@ basics_invalid(void)
 
 	/* Player select itself. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "a");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
 
 	/* Player select the bot. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "t");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
 
 	/* Someone not on the channel. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "jean");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
 
 	GREATEST_PASS();
 }
@@ -261,7 +256,7 @@ basics_disconnect(void)
 	});
 
 	play("a 1");
-	GREATEST_ASSERT_STR_EQ("", server->conn->out);
+	GREATEST_ASSERT(!mock->out);
 
 	GREATEST_PASS();
 }
@@ -283,7 +278,7 @@ basics_kick(void)
 	});
 
 	play("a 1");
-	GREATEST_ASSERT_STR_EQ("", server->conn->out);
+	GREATEST_ASSERT(!mock->out);
 
 	GREATEST_PASS();
 }
@@ -304,7 +299,7 @@ basics_part(void)
 	});
 
 	play("a 1");
-	GREATEST_ASSERT_STR_EQ("", server->conn->out);
+	GREATEST_ASSERT(!mock->out);
 
 	GREATEST_PASS();
 }
@@ -333,11 +328,4 @@ main(int argc, char **argv)
 	GREATEST_MAIN_END();
 
 	return 0;
-}
-
-#endif
-
-int
-main(void)
-{
 }

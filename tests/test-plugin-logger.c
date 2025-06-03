@@ -22,6 +22,8 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
+#include "mock/server.c"
+
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>

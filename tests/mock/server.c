@@ -36,6 +36,18 @@ append_out(struct irc_server *s, const char *fmt, ...)
 	return 0;
 }
 
+static struct irc_channel *
+channels_find(struct irc_server *s, const char *name)
+{
+	struct irc_channel *ch;
+
+	LL_FOREACH(s->channels, ch)
+		if (strcasecmp(ch->name, name) == 0)
+			return ch;
+
+	return NULL;
+}
+
 static void
 mock_free(struct irc_server *s)
 {
@@ -173,18 +185,27 @@ irc_server_invite(struct irc_server *s, const char *channel, const char *target)
 int
 irc_server_join(struct irc_server *s, const char *name, const char *password)
 {
+	struct irc_channel *channel;
+
+	channel = irc_channel_new(name, password, IRC_CHANNEL_FLAGS_JOINED);
+	LL_APPEND(s->channels, channel);
+
 	return append_out(s, "join %s %s", name, password ? password : "nil");
 }
 
 int
 irc_server_kick(struct irc_server *s, const char *channel, const char *target, const char *reason)
 {
+	irc_channel_remove(channels_find(s, channel), target);
+
 	return append_out(s, "kick %s %s %s", channel, target, reason ? reason : "nil");
 }
 
 int
 irc_server_part(struct irc_server *s, const char *channel, const char *reason)
 {
+	irc_channel_remove(channels_find(s, channel), s->nickname);
+
 	return append_out(s, "part %s %s", channel, reason ? reason : "nil");
 }
 

@@ -86,6 +86,7 @@ set(
 	${CMAKE_SOURCE_DIR}/irccd/jsapi-unicode.c
 	${CMAKE_SOURCE_DIR}/irccd/jsapi-util.c
 	${CMAKE_SOURCE_DIR}/irccd/unicode.c
+	${CMAKE_SOURCE_DIR}/lib/irccd/channel.c
 	${CMAKE_SOURCE_DIR}/lib/irccd/hook.c
 	${CMAKE_SOURCE_DIR}/lib/irccd/irccd.c
 	${CMAKE_SOURCE_DIR}/lib/irccd/log.c

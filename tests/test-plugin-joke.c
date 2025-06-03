@@ -16,19 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if 0
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/conn.h>
+#include "mock/server.c"
+
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
 #include <irccd/util.h>
 
 #define CALL() do {                                                     \
-        memset(server->conn->out, 0, sizeof (server->conn->out));       \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
                 .type = IRC_EVENT_COMMAND,                              \
                 .server = server,                                       \
@@ -41,6 +39,7 @@
 } while (0)
 
 static struct irc_server *server;
+static struct mock_server *mock;
 static struct irc_plugin *plugin;
 
 static void
@@ -48,7 +47,8 @@ setup(void *udata)
 {
 	(void)udata;
 
-	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
+	server = irc_server_new("test");
+	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 	plugin = js_plugin_open("joke", TOP "/plugins/joke/joke.js");
 
 	if (!plugin)
@@ -56,12 +56,8 @@ setup(void *udata)
 
 	irc_server_incref(server);
 	irc_plugin_set_template(plugin, "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}");
-
 	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/jokes.json");
 	irc_plugin_load(plugin);
-
-	/* Fake server connected to send data. */
-	server->state = IRC_SERVER_STATE_CONNECTED;
 }
 
 static void
@@ -86,14 +82,16 @@ basics_simple(void)
 	 * bbbb
 	 * bbbb
 	 */
+	struct mock_server_msg *msg;
 	int aaa = 0, bbbb = 0;
 
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < 2; ++i)
 		CALL();
 
-		if (strcmp(server->conn->out, "PRIVMSG #joke :aaa\r\n") == 0)
+	LL_FOREACH(mock->out, msg) {
+		if (strcmp(msg->line, "message #joke aaa") == 0)
 			aaa = 1;
-		else if (strcmp(server->conn->out, "PRIVMSG #joke :bbbb\r\nPRIVMSG #joke :bbbb\r\n") == 0)
+		else if (strcmp(msg->line, "message #joke bbbb") == 0)
 			bbbb = 1;
 	}
 
@@ -115,7 +113,7 @@ errors_toobig(void)
 
 	for (int i = 0; i < 64; ++i) {
 		CALL();
-		GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :a\r\n", server->conn->out);
+		GREATEST_ASSERT_STR_EQ("message #joke a", mock->out->line);
 	}
 
 	GREATEST_PASS();
@@ -130,7 +128,7 @@ errors_invalid(void)
 
 	for (int i = 0; i < 64; ++i) {
 		CALL();
-		GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :a\r\n", server->conn->out);
+		GREATEST_ASSERT_STR_EQ("message #joke a", mock->out->line);
 	}
 
 	GREATEST_PASS();
@@ -142,7 +140,7 @@ errors_not_found(void)
 	irc_plugin_set_option(plugin, "file", "doesnotexist.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
 
 	GREATEST_PASS();
 }
@@ -153,7 +151,7 @@ errors_not_array(void)
 	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-not-array.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
 
 	GREATEST_PASS();
 }
@@ -164,7 +162,7 @@ errors_empty(void)
 	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-empty.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);
+	GREATEST_ASSERT_STR_EQ("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
 
 	GREATEST_PASS();
 }
@@ -198,11 +196,4 @@ main(int argc, char **argv)
 	GREATEST_MAIN_END();
 
 	return 0;
-}
-
-#endif
-
-int
-main(void)
-{
 }
