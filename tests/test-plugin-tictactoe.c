@@ -255,8 +255,19 @@ basics_disconnect(void)
 		.server = server
 	});
 
-	play("a 1");
-	GREATEST_ASSERT(!mock->out);
+	/*
+	 * Clear the output of the server, the plugin should drop the game for
+	 * this server/channel couple and thus the next player would not
+	 * generate any kind of message from the plugin.
+	 */
+	mock_clear(server);
+	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "a 1");
+
+	/*
+	 * Server is still connected, so we expect the plugin to tell that the
+	 * game is invalid.
+	 */
+	GREATEST_ASSERT_STR_EQ(line_no(0), "message #tictactoe invalid=#tictactoe:!tictactoe:a:a:tictactoe:test");
 
 	GREATEST_PASS();
 }
@@ -264,6 +275,8 @@ basics_disconnect(void)
 GREATEST_TEST
 basics_kick(void)
 {
+	const void *addr;
+
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "b");
 
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -277,8 +290,13 @@ basics_kick(void)
 		}
 	});
 
+	/*
+	 * We must have the exact same response before and after the user
+	 * attempt of playing.
+	 */
+	addr = mock->out;
 	play("a 1");
-	GREATEST_ASSERT(!mock->out);
+	GREATEST_ASSERT(addr == mock->out);
 
 	GREATEST_PASS();
 }
@@ -286,6 +304,8 @@ basics_kick(void)
 GREATEST_TEST
 basics_part(void)
 {
+	const void *addr;
+
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "b");
 
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -298,8 +318,10 @@ basics_part(void)
 		}
 	});
 
+	/* Exactly the same case as basics_kick. */
+	addr = mock->out;
 	play("a 1");
-	GREATEST_ASSERT(!mock->out);
+	GREATEST_ASSERT(addr == mock->out);
 
 	GREATEST_PASS();
 }

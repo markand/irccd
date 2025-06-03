@@ -48,8 +48,11 @@ channels_find(struct irc_server *s, const char *name)
 	return NULL;
 }
 
+/*
+ * Clear what has been appended to the output queue.
+ */
 static void
-mock_free(struct irc_server *s)
+mock_clear(struct irc_server *s)
 {
 	struct mock_server *mock;
 	struct mock_server_msg *msg, *tmp;
@@ -60,6 +63,17 @@ mock_free(struct irc_server *s)
 		free(msg->line);
 		free(msg);
 	}
+
+	mock->out = NULL;
+}
+
+static void
+mock_free(struct irc_server *s)
+{
+	struct mock_server *mock;
+
+	mock = IRC_UTIL_CONTAINER_OF(s, struct mock_server, parent);
+	mock_clear(s);
 
 	free(mock->parent.name);
 	free(mock);

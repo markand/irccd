@@ -72,11 +72,8 @@ setup(void *udata)
 
 	/* Prepare a fake plugin. */
 	fake = irc_util_calloc(1, sizeof (*fake));
-	fake->author = "David";
-	fake->version = "0.0.0.0.0.0.1";
-	fake->license = "BEER";
-	fake->description = "Fake White Beer 2000";
-	strcpy(fake->name, "fake");
+	irc_plugin_init(fake, "fake");
+	irc_plugin_set_info(fake, "BEER", "0.0.0.0.0.0.1", "David", "Fake White Beer 2000");
 
 	irc_bot_init(NULL);
 	irc_bot_plugin_add(fake);
