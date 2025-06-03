@@ -250,19 +250,27 @@ init(const char *name, const char *path)
 	 * condition but at least we can print an error message if there are
 	 * other errors than missing file.
 	 */
-	if (stat(path, &st) < 0 && errno == ENOENT)
+	if (path != NULL && stat(path, &st) < 0 && errno == ENOENT) {
+		irc_log_warn("plugin: %s: %s", path, strerror(errno));
 		return NULL;
+	}
 
 	if (!(self.handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL))) {
 		irc_log_warn("plugin: %s: %s", path, dlerror());
 		return NULL;
 	}
 
-	/* Compute prefix name */
-	irc_util_strlcpy(self.prefix, irc_util_basename(path), sizeof (self.prefix));
+	/*
+	 * Compute prefix name, usually from the file name which we will remove
+	 * the extension, otherwise we use the name as alternative.
+	 */
+	if (path) {
+		irc_util_strlcpy(self.prefix, irc_util_basename(path), sizeof (self.prefix));
 
-	/* Remove plugin extension. */
-	self.prefix[strcspn(self.prefix, ".")] = '\0';
+		/* Remove plugin extension. */
+		self.prefix[strcspn(self.prefix, ".")] = '\0';
+	} else
+		irc_util_strlcpy(self.prefix, name, sizeof (self.prefix));
 
 	/* Remove every invalid identifiers. */
 	for (char *p = self.prefix; *p; ++p)

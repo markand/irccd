@@ -52,19 +52,14 @@ foreach (t ${TESTS})
 		PRIVATE
 			TOP="${CMAKE_SOURCE_DIR}"
 			IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>"
+			TEST_EXECUTABLE="$<TARGET_FILE:test-${t}>"
 	)
 endforeach ()
 
 #
-# Test: dl-plugin
+# Special case for test-dl-plugin which export symbols to be loaded by itself.
 #
-# We need a sample plugin to open.
-#
-add_library(plugin-dl-example MODULE ${tests_SOURCE_DIR}/data/example-dl-plugin.c)
-add_dependencies(test-dl-plugin plugin-dl-example)
-set_target_properties(plugin-dl-example PROPERTIES PREFIX "" FOLDER tests)
-target_compile_definitions(test-dl-plugin PRIVATE EXAMPLE_DL_PLUGIN="$<TARGET_FILE:plugin-dl-example>")
-target_link_libraries(plugin-dl-example irccd)
+set_target_properties(test-dl-plugin PROPERTIES ENABLE_EXPORTS On POSITION_INDEPENDENT_CODE On)
 
 #
 # plugins are based on a mocked server, we rebuild most of the library
