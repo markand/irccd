@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define _POSIX_C_SOURCE 202405L
 #include <sys/socket.h>
 #include <assert.h>
 #include <ctype.h>

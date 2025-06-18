@@ -1,9 +1,0 @@
--Ibuild
--Ibuild/irccd
--Iextern/libduktape
--Iextern/libjson
--Ilibirccd
--Ilibirccd-ctl
--Ilibirccd-daemon
--Ilibirccd-js
--Ilibirccd-test

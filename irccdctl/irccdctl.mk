@@ -1,0 +1,12 @@
+IRCCDCTL := irccdctl/irccdctl
+
+$(IRCCDCTL): $(LIBIRCCD)
+$(IRCCDCTL): private CFLAGS += $(LIBIRCCD_CFLAGS)
+$(IRCCDCTL): private LDLIBS += $(LIBIRCCD_LDFLAGS)
+
+all:: $(IRCCDCTL)
+
+clean::
+	rm -f $(IRCCDCTL) $(IRCCDCTL_DEPS) $(IRCCDCTL_OBJS)
+
+-include $(IRCCDCTL_DEPS)

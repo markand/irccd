@@ -1,4 +1,0 @@
-Checks: '*'
-WarningsAsErrors: true
-AnalyzeTemporaryDtors: false
-FormatStyle: none

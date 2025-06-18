@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define _POSIX_C_SOURCE 202405L
 #include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
@@ -499,7 +500,7 @@ init(const char *name, const char *path, const char *script)
 	jsapi_directory_load(js->ctx);
 	jsapi_file_load(js->ctx);
 	jsapi_hook_load(js->ctx);
-#if defined(IRCCD_WITH_HTTP)
+#if IRCCD_WITH_HTTP == 1
 	jsapi_http_load(js->ctx);
 #endif
 	jsapi_logger_load(js->ctx);

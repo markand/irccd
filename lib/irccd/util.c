@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define _GNU_SOURCE
 #include <assert.h>
 #include <errno.h>
 #include <libgen.h>
@@ -59,20 +60,6 @@ irc_util_realloc(void *ptr, size_t size)
 
 	if (!(ret = realloc(ptr, size)) && size)
 		irc_util_die("realloc: %s\n", strerror(errno));
-
-	return ret;
-}
-
-void *
-irc_util_reallocarray(void *ptr, size_t n, size_t size)
-{
-	/* extern/libbsd/reallocarray.c */
-	void *openbsd_reallocarray(void *, size_t, size_t);
-
-	void *ret;
-
-	if (!(ret = openbsd_reallocarray(ptr, n, size)))
-		irc_util_die("reallocarray: %s\n", strerror(errno));
 
 	return ret;
 }
@@ -237,6 +224,28 @@ irc_util_stou(const char *s, unsigned long long *u)
 	*u = strtoull(s, NULL, 10);
 
 	return errno == 0 ? 0 : -1;
+}
+
+void *
+irc_util_reallocarray(void *ptr, size_t n, size_t w)
+{
+	return reallocarray(ptr, n, w);
+}
+
+size_t
+irc_util_strlcpy(char *dst, const char *src, size_t len)
+{
+	assert(dst);
+
+	return strlcpy(dst, src, len);
+}
+
+size_t
+irc_util_strlcat(char *dst, const char *src, size_t len)
+{
+	assert(dst);
+
+	return strlcat(dst, src, len);
 }
 
 struct irc_user *

@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define _GNU_SOURCE
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <assert.h>
@@ -27,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <ev.h>
@@ -35,7 +37,7 @@
 
 #include "config.h"
 
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 #       include <openssl/err.h>
 #       include <openssl/ssl.h>
 #endif
@@ -155,7 +157,7 @@ struct conn {
 	struct ev_async  notify_async;
 
 	/* OpenSSL boring stuff. */
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 	SSL_CTX *ctx;
 	SSL *ssl;
 #endif
@@ -404,7 +406,7 @@ conn__close(struct conn *conn)
 	ev_io_stop(irc_bot_loop(), &conn->io_fd);
 	ev_timer_stop(irc_bot_loop(), &conn->timer);
 
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 	if (conn->ssl)
 		SSL_free(conn->ssl);
 	if (conn->ctx)
@@ -475,7 +477,7 @@ conn__plain_send(struct conn *conn, const void *buf, size_t bufsz)
 	return ns;
 }
 
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 
 /*
  * Indicate what the SSL connection wants.
@@ -656,7 +658,7 @@ conn__resolve(struct conn *conn)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags    = AI_NUMERICSERV;
 
-	snprintf(service, sizeof (service), "%hu", conn->parent->port);
+	snprintf(service, sizeof (service), "%u", conn->parent->port);
 
 	/*
 	 * If this function fail there is nothing we can do except going
@@ -771,7 +773,7 @@ static void
 conn__async_handshake(struct conn *conn)
 {
 	if (conn->parent->flags & IRC_SERVER_FLAGS_SSL) {
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 		conn->state = CONN_STATE_HANDSHAKE;
 		conn->ctx = SSL_CTX_new(TLS_method());
 		conn->ssl = SSL_new(conn->ctx);
@@ -975,7 +977,7 @@ conn__io_handshaking(struct conn *conn, int revents)
 	(void)conn;
 	(void)revents;
 
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 	conn__tls_handshake(conn);
 #endif
 }
@@ -1079,7 +1081,7 @@ conn_new(struct irc_server *parent, void (*notify_cb)(struct ev_loop *, struct e
 	conn->fd = -1;
 
 	if (parent->flags & IRC_SERVER_FLAGS_SSL) {
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 		conn->recv = conn__tls_recv;
 		conn->send = conn__tls_send;
 #else
@@ -1432,7 +1434,7 @@ static void
 handle_msg(struct irc_server *s, struct msg *msg)
 {
 	time_t now = time(NULL);
-	struct irc_user *user = {};
+	struct irc_user *user;
 	struct irc_event ev = {};
 
 	ev.server = s;
@@ -1923,7 +1925,7 @@ irc_server_connect(struct irc_server *s)
 		return;
 	}
 
-#if !defined(IRCCD_WITH_SSL)
+#if !IRCCD_WITH_SSL == 1
 	if (s->flags & IRC_SERVER_FLAGS_SSL) {
 		irc_log_warn("server %s: SSL requested but not available", s->name);
 		return;

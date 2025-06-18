@@ -18,12 +18,10 @@
 
 %{
 
-#include <sys/types.h>
-
 #include <irccd/limits.h>
 #include <irccd/rule.h>
 
-#include "conf.tab.h"
+#include "conf.h"
 
 int yylineno;
 

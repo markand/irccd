@@ -6,13 +6,22 @@
 \.swp$
 \.swo$
 
+# object files.
+\.a$
+\.d$
+\.o$
+
+# target artifacts
+^irccd/conf\.[ch]$
+^irccd/irccd$
+^irccd/lex\.c$
+^irccdctl/irccdctl$
+^lib/irccd/config\.h$
+
 # vscodium specific.
 ^\.cache
 ^\.vscode
+^compile_commands\.json$
 
 # macOS specific.
 \.DS_Store$
-
-# CMake specific.
-^build
-^CMakeUserPresets\.json$

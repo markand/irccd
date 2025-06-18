@@ -1,0 +1,18 @@
+LIBDUKTAPE := extern/libduktape/libduktape.a
+
+LIBDUKTAPE_SRCS := extern/libduktape/duktape.c
+LIBDUKTAPE_OBJS := $(LIBDUKTAPE_SRCS:.c=.o)
+LIBDUKTAPE_DEPS := $(LIBDUKTAPE_SRCS:.c=.d)
+
+LIBDUKTAPE_CFLAGS += -Iextern/libduktape
+LIBDUKTAPE_LDFLAGS += -lm
+
+$(LIBDUKTAPE): $(LIBDUKTAPE_OBJS)
+$(LIBDUKTAPE_OBJS): private CFLAGS := $(LIBDUKTAPE_CFLAGS)
+
+all:: $(LIBDUKTAPE)
+
+clean::
+	rm -f $(LIBDUKTAPE) $(LIBDUKTAPE_DEPS) $(LIBDUKTAPE_OBJS)
+
+-include $(LIBDUKTAPE_DEPS)

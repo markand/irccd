@@ -22,47 +22,56 @@
 /**
  * \brief Irccd major version number.
  */
-#define IRCCD_VERSION_MAJOR @irccd_VERSION_MAJOR@
+#define IRCCD_VERSION_MAJOR @MAJOR@
 
 /**
  * \brief Irccd minor version number.
  */
-#define IRCCD_VERSION_MINOR @irccd_VERSION_MINOR@
+#define IRCCD_VERSION_MINOR @MINOR@
 
 /**
  * \brief Irccd patch version number.
  */
-#define IRCCD_VERSION_PATCH @irccd_VERSION_PATCH@
+#define IRCCD_VERSION_PATCH @PATCH@
 
 /**
  * \brief Irccd version as a string.
  */
-#define IRCCD_VERSION "@irccd_VERSION@"
+#define IRCCD_VERSION "@MAJOR@.@MINOR@.@PATCH@"
 
 /**
  * \brief Default system-wide location for cache files.
  */
-#define IRCCD_CACHEDIR "@CMAKE_INSTALL_FULL_LOCALSTATEDIR@/cache/irccd"
+#define IRCCD_CACHEDIR "@VARDIR@/cache/irccd"
 
 /**
  * \brief Default system-wide location for configuration files.
  */
-#define IRCCD_SYSCONFDIR "@CMAKE_INSTALL_FULL_SYSCONFDIR@"
+#define IRCCD_SYSCONFDIR "@ETCDIR@"
 
 /**
  * \brief Default system-wide location for plugins.
  */
-#define IRCCD_LIBDIR "@CMAKE_INSTALL_FULL_LIBDIR@"
+#define IRCCD_LIBDIR "@LIBDIR@"
 
 /**
  * \brief Default system-wide location for additional data files.
  */
-#define IRCCD_DATADIR "@CMAKE_INSTALL_FULL_DATADIR@/irccd"
+#define IRCCD_DATADIR "@SHAREDIR@/irccd"
 
-#cmakedefine IRCCD_WITH_JS
-#cmakedefine IRCCD_WITH_SSL
-#cmakedefine IRCCD_WITH_HTTP
+/**
+ * \brief Set to 1 if HTTP is enabled, 0 otherwise
+ */
+#define HTTP @HTTP@
 
-#cmakedefine IRCCD_SYS_HAS_ATTRIBUTE_FORMAT_PRINTF
+/**
+ * \brief Set to 1 if Javascript is enabled, 0 otherwise
+ */
+#define JS @JS@
+
+/**
+ * \brief Set to 1 if OpenSSL is enabled, 0 otherwise
+ */
+#define SSL @SSL@
 
 #endif /* !IRCCD_CONFIG_H */

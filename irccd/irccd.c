@@ -1,5 +1,5 @@
 /*
- * main.c -- irccd(1) main file
+ * irccd.c -- irccd(1) main file
  *
  * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
  *
@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define _POSIX_C_SOURCE 202405L
 #include <errno.h>
 #include <signal.h>
 #include <stdio.h>
@@ -39,7 +40,7 @@
 #include "peer.h"
 #include "transport.h"
 
-#if defined(IRCCD_WITH_JS)
+#if IRCCD_WITH_JS == 1
 #       include "js-plugin.h"
 #endif
 
@@ -72,12 +73,12 @@ broadcast(const struct irc_event *ev)
 static void
 run_info(void)
 {
-#if defined(IRCCD_WITH_JS)
+#if IRCCD_WITH_JS == 1
 	const char *with_js = "yes";
 #else
 	const char *with_js = "no";
 #endif
-#if defined(IRCCD_WITH_SSL)
+#if IRCCD_WITH_SSL == 1
 	const char *with_ssl = "yes";
 #else
 	const char *with_ssl = "no";
@@ -168,7 +169,7 @@ init(void)
 	irc_bot_init(loop);
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
 
-#if defined(IRCCD_WITH_JS)
+#if IRCCD_WITH_JS == 1
 	irc_bot_plugin_loader_add(js_plugin_loader_new());
 #endif
 

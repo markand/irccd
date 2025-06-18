@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define _XOPEN_SOURCE 800
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/un.h>
