@@ -1,4 +1,4 @@
 Name: irccd
 Description: Native C interface for irccd plugins
-Version: @irccd_VERSION_MAJOR@.@irccd_VERSION_MINOR@.@irccd_VERSION_PATCH@
-Cflags: -I@CMAKE_INSTALL_FULL_INCLUDEDIR@
+Version: @VERSION@
+Cflags: -I@INCLUDEDIR@

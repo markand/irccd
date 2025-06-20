@@ -69,4 +69,13 @@ all:: $(LIBIRCCD)
 clean::
 	rm -f $(LIBIRCCD) $(LIBIRCCD_DEPS) $(LIBIRCCD_OBJS) lib/irccd/config.h
 
+install::
+	mkdir -p $(DESTDIR)$(INCLUDEDIR)/irccd
+	cp lib/irccd/*.h $(DESTDIR)$(INCLUDEDIR)/irccd
+	mkdir -p $(DESTDIR)$(LIBDIR)/share/pkgconfig
+	sed \
+		-e "s,@INCLUDEDIR@,$(INCLUDEDIR),g" \
+		-e "s,@VERSION@,$(VERSION),g" \
+		< lib/irccd.pc.in > $(LIBDIR)/share/pkgconfig/irccd.pc
+
 -include $(LIBIRCCD_DEPS)
