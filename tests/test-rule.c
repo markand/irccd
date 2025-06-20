@@ -16,75 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/rule.h>
 #include <irccd/irccd.h>
-
-static void
-clean(void *udata)
-{
-	(void)udata;
-
-	irc_bot_rule_clear();
-}
-
-GREATEST_TEST
-basics_insert(void)
-{
-	struct irc_rule *r, *r1, *r2;
-
-	r1 = irc_rule_new(IRC_RULE_DROP);
-	r2 = irc_rule_new(IRC_RULE_DROP);
-
-	irc_rule_add_server(r1, "s1");
-	irc_rule_add_server(r2, "s2");
-
-	irc_bot_rule_insert(r1, 0);
-	irc_bot_rule_insert(r2, 0);
-
-	r = irccd->rules;
-	GREATEST_ASSERT_EQ(r2, r);
-	r = r->next;
-	GREATEST_ASSERT_EQ(r1, r);
-
-	GREATEST_PASS();
-}
-
-GREATEST_TEST
-basics_remove(void)
-{
-	struct irc_rule *r, *r1, *r2, *r3;
-
-	r1 = irc_rule_new(IRC_RULE_DROP);
-	r2 = irc_rule_new(IRC_RULE_DROP);
-	r3 = irc_rule_new(IRC_RULE_DROP);
-
-	irc_rule_add_server(r1, "s1");
-	irc_rule_add_server(r2, "s2");
-	irc_rule_add_server(r3, "s3");
-
-	irc_bot_rule_insert(r1, -1);
-	irc_bot_rule_insert(r2, -1);
-	irc_bot_rule_insert(r3, -1);
-	irc_bot_rule_remove(1);
-
-	r = irccd->rules;
-	GREATEST_ASSERT_EQ(r1, r);
-	r = r->next;
-	GREATEST_ASSERT_EQ(r3, r);
-
-	irc_bot_rule_remove(1);
-	r = irccd->rules;
-	GREATEST_ASSERT_EQ(r1, r);
-
-	irc_bot_rule_remove(0);
-	r = irccd->rules;
-	GREATEST_ASSERT(!r);
-
-	GREATEST_PASS();
-}
 
 /*
  * Simulate the following rules configuration:
@@ -127,12 +62,15 @@ basics_remove(void)
  * action       = accept
  */
 
-static void
-set(void *udata)
-{
-	(void)udata;
+static int catalog;
 
+void
+setUp(void)
+{
 	struct irc_rule *r1, *r2, *r31, *r32;
+
+	if (!catalog)
+		return;
 
 	irc_bot_rule_clear();
 
@@ -165,30 +103,86 @@ set(void *udata)
 	irc_bot_rule_insert(r32, -1);
 }
 
-GREATEST_TEST
+void
+tearDown(void)
+{
+	irc_bot_rule_clear();
+}
+
+static void
+basics_insert(void)
+{
+	struct irc_rule *r, *r1, *r2;
+
+	r1 = irc_rule_new(IRC_RULE_DROP);
+	r2 = irc_rule_new(IRC_RULE_DROP);
+
+	irc_rule_add_server(r1, "s1");
+	irc_rule_add_server(r2, "s2");
+
+	irc_bot_rule_insert(r1, 0);
+	irc_bot_rule_insert(r2, 0);
+
+	r = irccd->rules;
+	TEST_ASSERT_EQUAL_PTR(r2, r);
+	r = r->next;
+	TEST_ASSERT_EQUAL_PTR(r1, r);
+}
+
+static void
+basics_remove(void)
+{
+	struct irc_rule *r, *r1, *r2, *r3;
+
+	r1 = irc_rule_new(IRC_RULE_DROP);
+	r2 = irc_rule_new(IRC_RULE_DROP);
+	r3 = irc_rule_new(IRC_RULE_DROP);
+
+	irc_rule_add_server(r1, "s1");
+	irc_rule_add_server(r2, "s2");
+	irc_rule_add_server(r3, "s3");
+
+	irc_bot_rule_insert(r1, -1);
+	irc_bot_rule_insert(r2, -1);
+	irc_bot_rule_insert(r3, -1);
+	irc_bot_rule_remove(1);
+
+	r = irccd->rules;
+	TEST_ASSERT_EQUAL_PTR(r1, r);
+	r = r->next;
+	TEST_ASSERT_EQUAL_PTR(r3, r);
+
+	irc_bot_rule_remove(1);
+	r = irccd->rules;
+	TEST_ASSERT_EQUAL_PTR(r1, r);
+
+	irc_bot_rule_remove(0);
+	r = irccd->rules;
+	TEST_ASSERT(!r);
+}
+
+static void
 solve_match1(void)
 {
 	struct irc_rule m = {};
 
-	GREATEST_ASSERT(irc_rule_match(&m, "freenode", "#test", "a", "", ""));
-	GREATEST_ASSERT(irc_rule_match(&m, "", "", "", "", ""));
-	GREATEST_PASS();
+	TEST_ASSERT(irc_rule_match(&m, "freenode", "#test", "a", "", ""));
+	TEST_ASSERT(irc_rule_match(&m, "", "", "", "", ""));
 }
 
-GREATEST_TEST
+static void
 solve_match2(void)
 {
 	struct irc_rule m = {};
 
 	irc_rule_add_server(&m, "freenode");
 
-	GREATEST_ASSERT(irc_rule_match(&m, "FreeNode", "#test", "a", "", ""));
-	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#test", "a", "", ""));
-	GREATEST_ASSERT(irc_rule_match(&m, "freenode", "", "jean", "", "onMessage"));
-	GREATEST_PASS();
+	TEST_ASSERT(irc_rule_match(&m, "FreeNode", "#test", "a", "", ""));
+	TEST_ASSERT(!irc_rule_match(&m, "malikania", "#test", "a", "", ""));
+	TEST_ASSERT(irc_rule_match(&m, "freenode", "", "jean", "", "onMessage"));
 }
 
-GREATEST_TEST
+static void
 solve_match3(void)
 {
 	struct irc_rule m = {};
@@ -196,13 +190,12 @@ solve_match3(void)
 	irc_rule_add_server(&m, "freenode");
 	irc_rule_add_channel(&m, "#staff");
 
-	GREATEST_ASSERT(irc_rule_match(&m, "freenode", "#staff", "a", "", ""));
-	GREATEST_ASSERT(!irc_rule_match(&m, "freenode", "#test", "a", "", ""));
-	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "a", "", ""));
-	GREATEST_PASS();
+	TEST_ASSERT(irc_rule_match(&m, "freenode", "#staff", "a", "", ""));
+	TEST_ASSERT(!irc_rule_match(&m, "freenode", "#test", "a", "", ""));
+	TEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "a", "", ""));
 }
 
-GREATEST_TEST
+static void
 solve_match4(void)
 {
 	struct irc_rule m = {};
@@ -211,13 +204,12 @@ solve_match4(void)
 	irc_rule_add_channel(&m, "#staff");
 	irc_rule_add_origin(&m, "a");
 
-	GREATEST_ASSERT(irc_rule_match(&m, "malikania", "#staff", "a", "",""));
-	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "b", "", ""));
-	GREATEST_ASSERT(!irc_rule_match(&m, "freenode", "#staff", "a", "", ""));
-	GREATEST_PASS();
+	TEST_ASSERT(irc_rule_match(&m, "malikania", "#staff", "a", "",""));
+	TEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "b", "", ""));
+	TEST_ASSERT(!irc_rule_match(&m, "freenode", "#staff", "a", "", ""));
 }
 
-GREATEST_TEST
+static void
 solve_match5(void)
 {
 	struct irc_rule m = {};
@@ -225,13 +217,12 @@ solve_match5(void)
 	irc_rule_add_server(&m, "malikania");
 	irc_rule_add_server(&m, "freenode");
 
-	GREATEST_ASSERT(irc_rule_match(&m, "malikania", "", "", "", ""));
-	GREATEST_ASSERT(irc_rule_match(&m, "freenode", "", "", "", ""));
-	GREATEST_ASSERT(!irc_rule_match(&m, "no", "", "", "", ""));
-	GREATEST_PASS();
+	TEST_ASSERT(irc_rule_match(&m, "malikania", "", "", "", ""));
+	TEST_ASSERT(irc_rule_match(&m, "freenode", "", "", "", ""));
+	TEST_ASSERT(!irc_rule_match(&m, "no", "", "", "", ""));
 }
 
-GREATEST_TEST
+static void
 solve_match6(void)
 {
 	struct irc_rule m = {};
@@ -239,93 +230,77 @@ solve_match6(void)
 	irc_rule_add_server(&m, "malikania");
 	irc_rule_add_origin(&m, "markand");
 
-	GREATEST_ASSERT(irc_rule_match(&m, "malikania", "#staff", "markand", "system", "onCommand"));
-	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "", "system", "onNames"));
-	GREATEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "jean", "system", "onMessage"));
-	GREATEST_PASS();
+	TEST_ASSERT(irc_rule_match(&m, "malikania", "#staff", "markand", "system", "onCommand"));
+	TEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "", "system", "onNames"));
+	TEST_ASSERT(!irc_rule_match(&m, "malikania", "#staff", "jean", "system", "onMessage"));
 }
 
-GREATEST_TEST
+static void
 solve_match7(void)
 {
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#staff", "", "a", "onMessage"));
+	TEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#staff", "", "a", "onMessage"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "freenode", "#staff", "", "b", "onTopic"));
+	TEST_ASSERT(irc_rule_matchlist(irccd->rules, "freenode", "#staff", "", "b", "onTopic"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#staff", "", "", "onCommand"));
+	TEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#staff", "", "", "onCommand"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "freenode", "#staff", "", "c", "onCommand"));
+	TEST_ASSERT(!irc_rule_matchlist(irccd->rules, "freenode", "#staff", "", "c", "onCommand"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "unsafe", "#staff", "", "c", "onCommand"));
-
-	GREATEST_PASS();
+	TEST_ASSERT(irc_rule_matchlist(irccd->rules, "unsafe", "#staff", "", "c", "onCommand"));
 }
 
-GREATEST_TEST
+static void
 solve_match8(void)
 {
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onMessage"));
+	TEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "localhost", "#games", "", "game", "onMessage"));
+	TEST_ASSERT(irc_rule_matchlist(irccd->rules, "localhost", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	GREATEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onCommand"));
+	TEST_ASSERT(irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onCommand"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onQuery"));
+	TEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#games", "", "game", "onQuery"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "freenode", "#no", "", "game", "onMessage"));
+	TEST_ASSERT(!irc_rule_matchlist(irccd->rules, "freenode", "#no", "", "game", "onMessage"));
 
 	/* Not allowed */
-	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#test", "", "game", "onMessage"));
-	GREATEST_PASS();
+	TEST_ASSERT(!irc_rule_matchlist(irccd->rules, "malikania", "#test", "", "game", "onMessage"));
 }
 
-GREATEST_TEST
+static void
 solve_match9(void)
 {
-	GREATEST_ASSERT(!irc_rule_matchlist(irccd->rules, "MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
-	GREATEST_PASS();
+	TEST_ASSERT(!irc_rule_matchlist(irccd->rules, "MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(clean, NULL);
-	GREATEST_RUN_TEST(basics_insert);
-	GREATEST_RUN_TEST(basics_remove);
-}
-
-GREATEST_SUITE(suite_solve)
-{
-	GREATEST_SET_SETUP_CB(set, NULL);
-	GREATEST_RUN_TEST(solve_match1);
-	GREATEST_RUN_TEST(solve_match2);
-	GREATEST_RUN_TEST(solve_match3);
-	GREATEST_RUN_TEST(solve_match4);
-	GREATEST_RUN_TEST(solve_match5);
-	GREATEST_RUN_TEST(solve_match6);
-	GREATEST_RUN_TEST(solve_match7);
-	GREATEST_RUN_TEST(solve_match8);
-	GREATEST_RUN_TEST(solve_match9);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_RUN_SUITE(suite_solve);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_insert);
+	RUN_TEST(basics_remove);
+
+	catalog = 1;
+
+	RUN_TEST(solve_match1);
+	RUN_TEST(solve_match2);
+	RUN_TEST(solve_match3);
+	RUN_TEST(solve_match4);
+	RUN_TEST(solve_match5);
+	RUN_TEST(solve_match6);
+	RUN_TEST(solve_match7);
+	RUN_TEST(solve_match8);
+	RUN_TEST(solve_match9);
+
+	return UNITY_END();
 }

@@ -18,17 +18,14 @@
 
 #include <string.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
-
-#include "mock/server.c"
+#include <unity.h>
 
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
-#include <irccd/server.h>
-#include <irccd/util.h>
+
+#include "mock/server.h"
 
 #define CALL(t, m) do {                                                 \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
@@ -58,11 +55,9 @@ fake_new(int n)
 	return p;
 }
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	server = irc_server_new("test");
 	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 	plugin = js_plugin_open("plugin", TOP "/plugins/plugin/plugin.js");
@@ -85,79 +80,60 @@ setup(void *udata)
 	irc_plugin_load(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_bot_finish();
 	irc_plugin_finish(plugin);
 	irc_server_decref(server);
 }
 
-GREATEST_TEST
+static void
 basics_usage(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
-	GREATEST_ASSERT_STR_EQ("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 
 	CALL(IRC_EVENT_COMMAND, "fail");
-	GREATEST_ASSERT_STR_EQ("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 
 	CALL(IRC_EVENT_COMMAND, "info");
-	GREATEST_ASSERT_STR_EQ("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #plugin usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_info(void)
 {
 	CALL(IRC_EVENT_COMMAND, "info fake");
-	GREATEST_ASSERT_STR_EQ("message #plugin info=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:David:BEER:fake:Fake White Beer 2000:0.0.0.0.0.0.1", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #plugin info=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:David:BEER:fake:Fake White Beer 2000:0.0.0.0.0.0.1", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_not_found(void)
 {
 	CALL(IRC_EVENT_COMMAND, "info doesnotexist");
-	GREATEST_ASSERT_STR_EQ("message #plugin not-found=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:doesnotexist", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #plugin not-found=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:doesnotexist", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_too_long(void)
 {
 	for (int i = 0; i < 100; ++i)
 		irc_bot_plugin_add(fake_new(i));
 
 	CALL(IRC_EVENT_COMMAND, "list");
-	GREATEST_ASSERT_STR_EQ("message #plugin too-long=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #plugin too-long=plugin:!plugin:test:#plugin:jean!jean@localhost:jean", mock->out->line);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_usage);
-	GREATEST_RUN_TEST(basics_info);
-	GREATEST_RUN_TEST(basics_not_found);
-	GREATEST_RUN_TEST(basics_too_long);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_usage);
+	RUN_TEST(basics_info);
+	RUN_TEST(basics_not_found);
+	RUN_TEST(basics_too_long);
+
+	return UNITY_END();
 }

@@ -19,10 +19,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
-
-#include "mock/server.c"
+#include <unity.h>
 
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
@@ -34,11 +31,9 @@
 static struct irc_server *server;
 static struct irc_plugin *plugin;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	remove(TOP "/tests/log");
 
 	server = irc_server_new("test");
@@ -65,11 +60,9 @@ setup(void *udata)
 	irc_plugin_load(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	remove(TOP "/tests/log");
 
 	irc_plugin_finish(plugin);
@@ -96,7 +89,7 @@ last(void)
 	return buf;
 }
 
-GREATEST_TEST
+static void
 basics_join(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -108,11 +101,10 @@ basics_join(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("join=test:#staff:jean!jean@localhost:jean", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("join=test:#staff:jean!jean@localhost:jean", last());
 }
 
-GREATEST_TEST
+static void
 basics_kick(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -126,11 +118,10 @@ basics_kick(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood", last());
 }
 
-GREATEST_TEST
+static void
 basics_me(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -143,11 +134,10 @@ basics_me(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("me=test:#staff:jean!jean@localhost:jean:is drinking water", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("me=test:#staff:jean!jean@localhost:jean:is drinking water", last());
 }
 
-GREATEST_TEST
+static void
 basics_message(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -160,11 +150,10 @@ basics_message(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message=test:#staff:jean!jean@localhost:jean:hello guys", last());
 }
 
-GREATEST_TEST
+static void
 basics_mode(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -178,11 +167,10 @@ basics_mode(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("mode=test:jean!jean@localhost:#staff:+ov:francis benoit", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("mode=test:jean!jean@localhost:#staff:+ov:francis benoit", last());
 }
 
-GREATEST_TEST
+static void
 basics_notice(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -195,11 +183,10 @@ basics_notice(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("notice=test:jean!jean@localhost:chris:tu veux voir mon chat ?", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("notice=test:jean!jean@localhost:chris:tu veux voir mon chat ?", last());
 }
 
-GREATEST_TEST
+static void
 basics_part(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -212,11 +199,10 @@ basics_part(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("part=test:#staff:jean!jean@localhost:jean:too noisy here", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("part=test:#staff:jean!jean@localhost:jean:too noisy here", last());
 }
 
-GREATEST_TEST
+static void
 basics_topic(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -229,11 +215,10 @@ basics_topic(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah", last());
 }
 
-GREATEST_TEST
+static void
 basics_case_insensitive(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -246,36 +231,26 @@ basics_case_insensitive(void)
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys", last());
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message=test:#staff:jean!jean@localhost:jean:hello guys", last());
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_join);
-	GREATEST_RUN_TEST(basics_kick);
-	GREATEST_RUN_TEST(basics_me);
-	GREATEST_RUN_TEST(basics_message);
-	GREATEST_RUN_TEST(basics_mode);
-	GREATEST_RUN_TEST(basics_notice);
-	GREATEST_RUN_TEST(basics_part);
-	GREATEST_RUN_TEST(basics_topic);
-	GREATEST_RUN_TEST(basics_case_insensitive);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
 	irc_bot_init(NULL);
 	irc_log_to_null();
 
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_join);
+	RUN_TEST(basics_kick);
+	RUN_TEST(basics_me);
+	RUN_TEST(basics_message);
+	RUN_TEST(basics_mode);
+	RUN_TEST(basics_notice);
+	RUN_TEST(basics_part);
+	RUN_TEST(basics_topic);
+	RUN_TEST(basics_case_insensitive);
+
+	return UNITY_END();
 }

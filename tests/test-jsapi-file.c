@@ -19,8 +19,7 @@
 #include <sys/stat.h>
 #include <stdio.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
@@ -28,11 +27,9 @@
 static struct irc_plugin *plugin;
 static duk_context *ctx;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	plugin = js_plugin_open("example", TOP "/tests/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 
@@ -40,96 +37,73 @@ setup(void *udata)
 	duk_put_global_string(ctx, "TOP");
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
 	ctx = NULL;
 }
 
-GREATEST_TEST
+static void
 free_basename(void)
 {
 	if (duk_peval_string(ctx, "result = Irccd.File.basename('/usr/local/etc/irccd.conf');"))
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("irccd.conf", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING("irccd.conf", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 free_dirname(void)
 {
 	if (duk_peval_string(ctx, "result = Irccd.File.dirname('/usr/local/etc/irccd.conf');"))
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("/usr/local/etc", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING("/usr/local/etc", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 free_exists(void)
 {
 	if (duk_peval_string(ctx, "result = Irccd.File.exists(TOP + '/tests/data/root/file-1.txt')"))
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 free_exists2(void)
 {
 	if (duk_peval_string(ctx, "result = Irccd.File.exists('file_which_does_not_exist.txt')"))
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(!duk_get_boolean(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(!duk_get_boolean(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 free_remove(void)
 {
 	FILE *fp;
 	struct stat st;
 
 	if (!(fp = fopen(TOP "/tests/test.bin", "w")))
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	fclose(fp);
 
 	if (duk_peval_string(ctx, "Irccd.File.remove(TOP + '/tests/test.bin')") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(stat(TOP "/tests/test.bin", &st) < 0);
-
-	GREATEST_PASS();
+	TEST_ASSERT(stat(TOP "/tests/test.bin", &st) < 0);
 }
 
-GREATEST_SUITE(suite_free)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(free_basename);
-	GREATEST_RUN_TEST(free_dirname);
-	GREATEST_RUN_TEST(free_exists);
-	GREATEST_RUN_TEST(free_exists2);
-	GREATEST_RUN_TEST(free_remove);
-}
-
-GREATEST_TEST
+static void
 object_basename(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -138,15 +112,13 @@ object_basename(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("file-1.txt", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING("file-1.txt", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_basename_closed(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -156,15 +128,13 @@ object_basename_closed(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("file-1.txt", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING("file-1.txt", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_dirname(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -173,15 +143,13 @@ object_dirname(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(TOP "/tests/data/root", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING(TOP "/tests/data/root", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_dirname_closed(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -191,15 +159,13 @@ object_dirname_closed(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(TOP "/tests/data/root", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING(TOP "/tests/data/root", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_lines(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -207,21 +173,19 @@ object_lines(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_EQ(3, duk_get_length(ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(ctx, -1, 0));
-	GREATEST_ASSERT_STR_EQ("a", duk_get_string(ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(ctx, -2, 1));
-	GREATEST_ASSERT_STR_EQ("b", duk_get_string(ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(ctx, -3, 2));
-	GREATEST_ASSERT_STR_EQ("c", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_INT(3, duk_get_length(ctx, -1));
+	TEST_ASSERT(duk_get_prop_index(ctx, -1, 0));
+	TEST_ASSERT_EQUAL_STRING("a", duk_get_string(ctx, -1));
+	TEST_ASSERT(duk_get_prop_index(ctx, -2, 1));
+	TEST_ASSERT_EQUAL_STRING("b", duk_get_string(ctx, -1));
+	TEST_ASSERT(duk_get_prop_index(ctx, -3, 2));
+	TEST_ASSERT_EQUAL_STRING("c", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_lines_closed(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -235,15 +199,13 @@ object_lines_closed(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "name"));
+	TEST_ASSERT_EQUAL_STRING("SystemError", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_seek1(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -253,15 +215,13 @@ object_seek1(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(".", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING(".", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_seek2(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -272,15 +232,13 @@ object_seek2(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(".", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING(".", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_seek3(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -290,15 +248,13 @@ object_seek3(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("t", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING("t", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_seek_closed(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -312,15 +268,13 @@ object_seek_closed(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "name"));
+	TEST_ASSERT_EQUAL_STRING("SystemError", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_read(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -329,15 +283,13 @@ object_read(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("file-1.txt\n", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_STRING("file-1.txt\n", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_read_closed(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -351,15 +303,13 @@ object_read_closed(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "name"));
+	TEST_ASSERT_EQUAL_STRING("SystemError", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_readline(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -372,22 +322,20 @@ object_readline(void)
 
 	if (ret != 0) {
 		puts(duk_to_string(ctx, -1));
-		GREATEST_FAIL();
+		TEST_FAIL();
 	}
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_EQ(3, duk_get_length(ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(ctx, -1, 0));
-	GREATEST_ASSERT_STR_EQ("a", duk_get_string(ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(ctx, -2, 1));
-	GREATEST_ASSERT_STR_EQ("b", duk_get_string(ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(ctx, -3, 2));
-	GREATEST_ASSERT_STR_EQ("c", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_INT(3, duk_get_length(ctx, -1));
+	TEST_ASSERT(duk_get_prop_index(ctx, -1, 0));
+	TEST_ASSERT_EQUAL_STRING("a", duk_get_string(ctx, -1));
+	TEST_ASSERT(duk_get_prop_index(ctx, -2, 1));
+	TEST_ASSERT_EQUAL_STRING("b", duk_get_string(ctx, -1));
+	TEST_ASSERT(duk_get_prop_index(ctx, -3, 2));
+	TEST_ASSERT_EQUAL_STRING("c", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_readline_closed(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -405,45 +353,38 @@ object_readline_closed(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT_EQ(0, duk_get_length(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT_EQUAL_INT(0, duk_get_length(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "name"));
+	TEST_ASSERT_EQUAL_STRING("SystemError", duk_get_string(ctx, -1));
 }
-
-GREATEST_SUITE(suite_object)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(object_basename);
-	GREATEST_RUN_TEST(object_basename_closed);
-	GREATEST_RUN_TEST(object_dirname);
-	GREATEST_RUN_TEST(object_dirname_closed);
-	GREATEST_RUN_TEST(object_lines);
-	GREATEST_RUN_TEST(object_lines_closed);
-	GREATEST_RUN_TEST(object_seek1);
-	GREATEST_RUN_TEST(object_seek2);
-	GREATEST_RUN_TEST(object_seek3);
-	GREATEST_RUN_TEST(object_seek_closed);
-	GREATEST_RUN_TEST(object_read);
-	GREATEST_RUN_TEST(object_read_closed);
-	GREATEST_RUN_TEST(object_readline);
-	GREATEST_RUN_TEST(object_readline_closed);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_free);
-	GREATEST_RUN_SUITE(suite_object);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(free_basename);
+	RUN_TEST(free_dirname);
+	RUN_TEST(free_exists);
+	RUN_TEST(free_exists2);
+	RUN_TEST(free_remove);
+	RUN_TEST(object_basename);
+	RUN_TEST(object_basename_closed);
+	RUN_TEST(object_dirname);
+	RUN_TEST(object_dirname_closed);
+	RUN_TEST(object_lines);
+	RUN_TEST(object_lines_closed);
+	RUN_TEST(object_seek1);
+	RUN_TEST(object_seek2);
+	RUN_TEST(object_seek3);
+	RUN_TEST(object_seek_closed);
+	RUN_TEST(object_read);
+	RUN_TEST(object_read_closed);
+	RUN_TEST(object_readline);
+	RUN_TEST(object_readline_closed);
+
+	return UNITY_END();
 }

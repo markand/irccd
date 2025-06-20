@@ -16,16 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
-
-#include "mock/server.c"
+#include <unity.h>
 
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
-#include <irccd/server.h>
-#include <irccd/util.h>
+
+#include "mock/server.h"
 
 #define CALL(t, m) do {                                                 \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
@@ -55,11 +52,9 @@ static struct irc_server *server;
 static struct mock_server *mock;
 static struct irc_plugin *plugin;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	server = irc_server_new("test");
 	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 
@@ -84,30 +79,27 @@ setup(void *udata)
 	irc_plugin_load(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 	irc_server_decref(server);
 }
 
-GREATEST_TEST
+static void
 basics_asked(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
-	GREATEST_ASSERT_STR_EQ("message #hangman start=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ _", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message #hangman start=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ _", mock->out->line);
 
 	CALL(IRC_EVENT_MESSAGE, "s");
-	GREATEST_ASSERT_STR_EQ("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", mock->out->line);
 
 	CALL(IRC_EVENT_MESSAGE, "s");
-	GREATEST_ASSERT_STR_EQ("message #hangman asked=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman asked=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_dead(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
@@ -121,66 +113,59 @@ basics_dead(void)
 	CALL(IRC_EVENT_MESSAGE, "h");
 	CALL(IRC_EVENT_MESSAGE, "i");
 	CALL(IRC_EVENT_MESSAGE, "j");
-	GREATEST_ASSERT_STR_EQ("message #hangman dead=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman dead=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_found(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
 	CALL(IRC_EVENT_MESSAGE, "s");
-	GREATEST_ASSERT_STR_EQ("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_start(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
-	GREATEST_ASSERT_STR_EQ("message #hangman start=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ _", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman start=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ _", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_win1(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
 	CALL(IRC_EVENT_MESSAGE, "s");
 	CALL(IRC_EVENT_MESSAGE, "k");
 	CALL(IRC_EVENT_MESSAGE, "y");
-	GREATEST_ASSERT_STR_EQ("message #hangman win=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman win=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_win2(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
 	CALL(IRC_EVENT_COMMAND, "sky");
-	GREATEST_ASSERT_STR_EQ("message #hangman win=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman win=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_wrong_letter(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
 	CALL(IRC_EVENT_MESSAGE, "x");
-	GREATEST_ASSERT_STR_EQ("message #hangman wrong-letter=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:x", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman wrong-letter=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:x", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_wrong_word(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
 	CALL(IRC_EVENT_COMMAND, "cheese");
-	GREATEST_ASSERT_STR_EQ("message #hangman wrong-word=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:cheese", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman wrong-word=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:cheese", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_collaborative_enabled(void)
 {
 	irc_plugin_set_option(plugin, "collaborative", "true");
@@ -190,30 +175,26 @@ basics_collaborative_enabled(void)
 
 	/* Forbidden to play twice. */
 	CALL(IRC_EVENT_MESSAGE, "k");
-	GREATEST_ASSERT_STR_EQ("message #hangman wrong-player=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:k", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message #hangman wrong-player=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:k", mock->out->line);
 
 	/* Use a different nickname now. */
 	CALL_EX(IRC_EVENT_MESSAGE, "francis!francis@localhost", "#hangman", "k");
-	GREATEST_ASSERT_STR_EQ("message #hangman found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_case_insensitive(void)
 {
 	CALL_EX(IRC_EVENT_COMMAND, "jean!jean@localhost", "#hangman", "");
 
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#HANGMAN", "s");
-	GREATEST_ASSERT_STR_EQ("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", mock->out->line);
 
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#HaNGMaN", "k");
-	GREATEST_ASSERT_STR_EQ("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s k _", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s k _", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_query(void)
 {
 	/*
@@ -223,56 +204,44 @@ basics_query(void)
 	irc_plugin_set_option(plugin, "collaborative", "true");
 
 	CALL_EX(IRC_EVENT_COMMAND, "jean!jean@localhost", "t", "");
-	GREATEST_ASSERT_STR_EQ("message jean!jean@localhost start=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:_ _ _", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message jean!jean@localhost start=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:_ _ _", mock->out->line);
 
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "t", "s");
-	GREATEST_ASSERT_STR_EQ("message jean!jean@localhost found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s _ _", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message jean!jean@localhost found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s _ _", mock->out->line);
 
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "t", "k");
-	GREATEST_ASSERT_STR_EQ("message jean!jean@localhost found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s k _", mock->out->line);
+	TEST_ASSERT_EQUAL_STRING("message jean!jean@localhost found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s k _", mock->out->line);
 
 	CALL_EX(IRC_EVENT_COMMAND, "jean!jean@localhost", "t", "sky");
-	GREATEST_ASSERT_STR_EQ("message jean!jean@localhost win=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:sky", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message jean!jean@localhost win=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:sky", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_running(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
 	CALL(IRC_EVENT_MESSAGE, "y");
 	CALL(IRC_EVENT_COMMAND, "");
-	GREATEST_ASSERT_STR_EQ("message #hangman running=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ y", mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #hangman running=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ y", mock->out->line);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_asked);
-	GREATEST_RUN_TEST(basics_dead);
-	GREATEST_RUN_TEST(basics_found);
-	GREATEST_RUN_TEST(basics_start);
-	GREATEST_RUN_TEST(basics_win1);
-	GREATEST_RUN_TEST(basics_win2);
-	GREATEST_RUN_TEST(basics_wrong_letter);
-	GREATEST_RUN_TEST(basics_wrong_word);
-	GREATEST_RUN_TEST(basics_collaborative_enabled);
-	GREATEST_RUN_TEST(basics_case_insensitive);
-	GREATEST_RUN_TEST(basics_query);
-	GREATEST_RUN_TEST(basics_running);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_asked);
+	RUN_TEST(basics_dead);
+	RUN_TEST(basics_found);
+	RUN_TEST(basics_start);
+	RUN_TEST(basics_win1);
+	RUN_TEST(basics_win2);
+	RUN_TEST(basics_wrong_letter);
+	RUN_TEST(basics_wrong_word);
+	RUN_TEST(basics_collaborative_enabled);
+	RUN_TEST(basics_case_insensitive);
+	RUN_TEST(basics_query);
+	RUN_TEST(basics_running);
+
+	return UNITY_END();
 }

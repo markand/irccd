@@ -16,57 +16,64 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/channel.h>
 
-GREATEST_TEST
+void
+setUp(void)
+{
+}
+
+void
+tearDown(void)
+{
+}
+
+static void
 basics_add(void)
 {
 	struct irc_channel *ch;
 	struct irc_channel_user *user;
 
 	ch = irc_channel_new("#test", NULL, IRC_CHANNEL_FLAGS_JOINED);
-	GREATEST_ASSERT_STR_EQ("#test", ch->name);
-	GREATEST_ASSERT(!ch->password);
-	GREATEST_ASSERT(ch->flags & IRC_CHANNEL_FLAGS_JOINED);
+	TEST_ASSERT_EQUAL_STRING("#test", ch->name);
+	TEST_ASSERT(!ch->password);
+	TEST_ASSERT(ch->flags & IRC_CHANNEL_FLAGS_JOINED);
 
 	irc_channel_add(ch, "markand", 1);
 	user = ch->users;
-	GREATEST_ASSERT_EQ(1, user->modes);
-	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+	TEST_ASSERT_EQUAL(1, user->modes);
+	TEST_ASSERT_EQUAL_STRING("markand", user->nickname);
 
 	irc_channel_add(ch, "markand", 2);
 	user = ch->users;
-	GREATEST_ASSERT_EQ(1, user->modes);
-	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+	TEST_ASSERT_EQUAL(1, user->modes);
+	TEST_ASSERT_EQUAL_STRING("markand", user->nickname);
 
 	irc_channel_add(ch, "jean", 4);
 	user = ch->users;
-	GREATEST_ASSERT_EQ(4, user->modes);
-	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
+	TEST_ASSERT_EQUAL(4, user->modes);
+	TEST_ASSERT_EQUAL_STRING("jean", user->nickname);
 	user = user->next;
-	GREATEST_ASSERT_EQ(1, user->modes);
-	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+	TEST_ASSERT_EQUAL(1, user->modes);
+	TEST_ASSERT_EQUAL_STRING("markand", user->nickname);
 
 	irc_channel_add(ch, "zoe", 0);
 	user = ch->users;
-	GREATEST_ASSERT_EQ(0, user->modes);
-	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
+	TEST_ASSERT_EQUAL(0, user->modes);
+	TEST_ASSERT_EQUAL_STRING("zoe", user->nickname);
 	user = user->next;
-	GREATEST_ASSERT_EQ(4, user->modes);
-	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
+	TEST_ASSERT_EQUAL(4, user->modes);
+	TEST_ASSERT_EQUAL_STRING("jean", user->nickname);
 	user = user->next;
-	GREATEST_ASSERT_EQ(1, user->modes);
-	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+	TEST_ASSERT_EQUAL(1, user->modes);
+	TEST_ASSERT_EQUAL_STRING("markand", user->nickname);
 
 	irc_channel_free(ch);
-
-	GREATEST_PASS();
 }
 
-GREATEST_TEST
+static void
 basics_remove(void)
 {
 	struct irc_channel *ch;
@@ -80,40 +87,31 @@ basics_remove(void)
 
 	irc_channel_remove(ch, "jean");
 	user = ch->users;
-	GREATEST_ASSERT_EQ(0, user->modes);
-	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
+	TEST_ASSERT_EQUAL(0, user->modes);
+	TEST_ASSERT_EQUAL_STRING("zoe", user->nickname);
 	user = user->next;
-	GREATEST_ASSERT_EQ(1, user->modes);
-	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+	TEST_ASSERT_EQUAL(1, user->modes);
+	TEST_ASSERT_EQUAL_STRING("markand", user->nickname);
 
 	irc_channel_remove(ch, "zoe");
 	user = ch->users;
-	GREATEST_ASSERT_EQ(1, user->modes);
-	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+	TEST_ASSERT_EQUAL(1, user->modes);
+	TEST_ASSERT_EQUAL_STRING("markand", user->nickname);
 
 	/* Also test case sensitivity. */
 	irc_channel_remove(ch, "MaRKaND");
-	GREATEST_ASSERT(!ch->users);
+	TEST_ASSERT(!ch->users);
 
 	irc_channel_free(ch);
-
-	GREATEST_PASS();
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_RUN_TEST(basics_add);
-	GREATEST_RUN_TEST(basics_remove);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_add);
+	RUN_TEST(basics_remove);
+
+	return UNITY_END();
 }

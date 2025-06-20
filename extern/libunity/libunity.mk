@@ -1,5 +1,5 @@
 #
-# irccdctl.mk -- irccdctl utility
+# libunity.mk -- embedded unity test framework
 #
 # Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
 #
@@ -16,15 +16,20 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-IRCCDCTL := irccdctl/irccdctl
+LIBUNITY := extern/libunity/libunity.a
 
-$(IRCCDCTL): $(LIBIRCCD)
-$(IRCCDCTL): private CFLAGS += $(LIBIRCCD_CFLAGS)
-$(IRCCDCTL): private LDLIBS += $(LIBIRCCD_LDFLAGS)
+LIBUNITY_SRCS := extern/libunity/unity.c
+LIBUNITY_OBJS := $(LIBUNITY_SRCS:.c=.o)
+LIBUNITY_DEPS := $(LIBUNITY_SRCS:.c=.d)
 
-all:: $(IRCCDCTL)
+LIBUNITY_CFLAGS += -Iextern/libunity
+
+$(LIBUNITY): $(LIBUNITY_OBJS)
+$(LIBUNITY_OBJS): private CFLAGS := $(LIBUNITY_CFLAGS)
+
+all:: $(LIBUNITY)
 
 clean::
-	rm -f $(IRCCDCTL) $(IRCCDCTL_DEPS) $(IRCCDCTL_OBJS)
+	rm -f $(LIBUNITY) $(LIBUNITY_DEPS) $(LIBUNITY_OBJS)
 
--include $(IRCCDCTL_DEPS)
+-include $(LIBUNITY_DEPS)

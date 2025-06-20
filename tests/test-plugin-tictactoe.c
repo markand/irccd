@@ -16,17 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
-
-#include "mock/server.c"
+#include <unity.h>
 
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
-#include <irccd/server.h>
-#include <irccd/util.h>
+
+#include "mock/server.h"
 
 #define CALL(t, m) do {                                                 \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
@@ -56,11 +53,9 @@ static struct irc_server *server;
 static struct mock_server *mock;
 static struct irc_plugin *plugin;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	server = irc_server_new("test");
 	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 	plugin = js_plugin_open("tictactoe", TOP "/plugins/tictactoe/tictactoe.js");
@@ -84,6 +79,14 @@ setup(void *udata)
 	irc_channel_add(server->channels, "b", 0);
 }
 
+void
+tearDown(void)
+{
+	irc_plugin_finish(plugin);
+	irc_server_decref(server);
+}
+
+
 static const char *
 line_no(size_t index)
 {
@@ -93,15 +96,6 @@ line_no(size_t index)
 		msg = msg ? msg->next : msg;
 
 	return msg ? msg->line : "";
-}
-
-static void
-teardown(void *udata)
-{
-	(void)udata;
-
-	irc_plugin_finish(plugin);
-	irc_server_decref(server);
 }
 
 static char
@@ -123,7 +117,7 @@ play(const char *value)
 	CALL_EX(IRC_EVENT_MESSAGE, player, "#tictactoe", (char *)value);
 }
 
-GREATEST_TEST
+static void
 basics_win(void)
 {
 	char k1, k2;
@@ -136,16 +130,14 @@ basics_win(void)
 	play("b2");
 	play("a3");
 
-	GREATEST_ASSERT_EQ(0, sscanf(line_no(4), "message #tictactoe   a b c"));
-	GREATEST_ASSERT_EQ(2, sscanf(line_no(3), "message #tictactoe 1 %c %c .", &k1, &k2));
-	GREATEST_ASSERT_EQ(2, sscanf(line_no(2), "message #tictactoe 2 %c %c .", &k1, &k2));
-	GREATEST_ASSERT_EQ(1, sscanf(line_no(1), "message #tictactoe 3 %c . .", &k1));
-	GREATEST_ASSERT_EQ(1, sscanf(line_no(0), "message #tictactoe win=#tictactoe:!tictactoe:%c:tictactoe:test", &k1));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_INT(0, sscanf(line_no(4), "message #tictactoe   a b c"));
+	TEST_ASSERT_EQUAL_INT(2, sscanf(line_no(3), "message #tictactoe 1 %c %c .", &k1, &k2));
+	TEST_ASSERT_EQUAL_INT(2, sscanf(line_no(2), "message #tictactoe 2 %c %c .", &k1, &k2));
+	TEST_ASSERT_EQUAL_INT(1, sscanf(line_no(1), "message #tictactoe 3 %c . .", &k1));
+	TEST_ASSERT_EQUAL_INT(1, sscanf(line_no(0), "message #tictactoe win=#tictactoe:!tictactoe:%c:tictactoe:test", &k1));
 }
 
-GREATEST_TEST
+static void
 basics_draw(void)
 {
 	/*
@@ -168,16 +160,14 @@ basics_draw(void)
 	play("a 1");
 	play("b 1");
 
-	GREATEST_ASSERT_EQ(0, sscanf(line_no(4), "message #tictactoe   a b c"));
-	GREATEST_ASSERT_EQ(3, sscanf(line_no(3), "message #tictactoe 1 %c %c %c", &k1, &k2, &k3));
-	GREATEST_ASSERT_EQ(3, sscanf(line_no(2), "message #tictactoe 2 %c %c %c", &k1, &k2, &k3));
-	GREATEST_ASSERT_EQ(3, sscanf(line_no(1), "message #tictactoe 3 %c %c %c", &k1, &k2, &k3));
-	GREATEST_ASSERT_EQ(1, sscanf(line_no(0), "message #tictactoe draw=#tictactoe:!tictactoe:%c:tictactoe:test", &k1));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_INT(0, sscanf(line_no(4), "message #tictactoe   a b c"));
+	TEST_ASSERT_EQUAL_INT(3, sscanf(line_no(3), "message #tictactoe 1 %c %c %c", &k1, &k2, &k3));
+	TEST_ASSERT_EQUAL_INT(3, sscanf(line_no(2), "message #tictactoe 2 %c %c %c", &k1, &k2, &k3));
+	TEST_ASSERT_EQUAL_INT(3, sscanf(line_no(1), "message #tictactoe 3 %c %c %c", &k1, &k2, &k3));
+	TEST_ASSERT_EQUAL_INT(1, sscanf(line_no(0), "message #tictactoe draw=#tictactoe:!tictactoe:%c:tictactoe:test", &k1));
 }
 
-GREATEST_TEST
+static void
 basics_used(void)
 {
 	char k1, k2;
@@ -187,32 +177,28 @@ basics_used(void)
 	play("a 1");
 	play("a 1");
 
-	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe used=#tictactoe:!tictactoe:%c:%c:tictactoe:testn", &k1, &k2));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_INT(2, sscanf(mock->out->line, "message #tictactoe used=#tictactoe:!tictactoe:%c:%c:tictactoe:testn", &k1, &k2));
 }
 
-GREATEST_TEST
+static void
 basics_invalid(void)
 {
 	char k1, k2;
 
 	/* Player select itself. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "a");
-	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
+	TEST_ASSERT_EQUAL_INT(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
 
 	/* Player select the bot. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "t");
-	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
+	TEST_ASSERT_EQUAL_INT(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
 
 	/* Someone not on the channel. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "jean");
-	GREATEST_ASSERT_EQ(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_INT(2, sscanf(mock->out->line, "message #tictactoe invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test", &k1, &k2));
 }
 
-GREATEST_TEST
+static void
 basics_random(void)
 {
 	/*
@@ -239,13 +225,11 @@ basics_random(void)
 		play("a 3");
 	}
 
-	GREATEST_ASSERT(a);
-	GREATEST_ASSERT(b);
-
-	GREATEST_PASS();
+	TEST_ASSERT(a);
+	TEST_ASSERT(b);
 }
 
-GREATEST_TEST
+static void
 basics_disconnect(void)
 {
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "b");
@@ -260,19 +244,17 @@ basics_disconnect(void)
 	 * this server/channel couple and thus the next player would not
 	 * generate any kind of message from the plugin.
 	 */
-	mock_clear(server);
+	mock_server_clear(server);
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "a 1");
 
 	/*
 	 * Server is still connected, so we expect the plugin to tell that the
 	 * game is invalid.
 	 */
-	GREATEST_ASSERT_STR_EQ(line_no(0), "message #tictactoe invalid=#tictactoe:!tictactoe:a:a:tictactoe:test");
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING(line_no(0), "message #tictactoe invalid=#tictactoe:!tictactoe:a:a:tictactoe:test");
 }
 
-GREATEST_TEST
+static void
 basics_kick(void)
 {
 	const void *addr;
@@ -296,12 +278,10 @@ basics_kick(void)
 	 */
 	addr = mock->out;
 	play("a 1");
-	GREATEST_ASSERT(addr == mock->out);
-
-	GREATEST_PASS();
+	TEST_ASSERT(addr == mock->out);
 }
 
-GREATEST_TEST
+static void
 basics_part(void)
 {
 	const void *addr;
@@ -321,33 +301,22 @@ basics_part(void)
 	/* Exactly the same case as basics_kick. */
 	addr = mock->out;
 	play("a 1");
-	GREATEST_ASSERT(addr == mock->out);
-
-	GREATEST_PASS();
+	TEST_ASSERT(addr == mock->out);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_win);
-	GREATEST_RUN_TEST(basics_draw);
-	GREATEST_RUN_TEST(basics_used);
-	GREATEST_RUN_TEST(basics_invalid);
-	GREATEST_RUN_TEST(basics_random);
-	GREATEST_RUN_TEST(basics_disconnect);
-	GREATEST_RUN_TEST(basics_kick);
-	GREATEST_RUN_TEST(basics_part);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_win);
+	RUN_TEST(basics_draw);
+	RUN_TEST(basics_used);
+	RUN_TEST(basics_invalid);
+	RUN_TEST(basics_random);
+	RUN_TEST(basics_disconnect);
+	RUN_TEST(basics_kick);
+	RUN_TEST(basics_part);
+
+	return UNITY_END();
 }

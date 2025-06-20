@@ -16,8 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/config.h>
 #include <irccd/js-plugin.h>
@@ -26,27 +25,23 @@
 static struct irc_plugin *plugin;
 static duk_context *ctx;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	plugin = js_plugin_open("example", TOP "/tests/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
 	ctx = NULL;
 }
 
-GREATEST_TEST
+static void
 basics_popen(void)
 {
 	int ret = duk_peval_string(ctx,
@@ -55,15 +50,13 @@ basics_popen(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "r"));
-	GREATEST_ASSERT_STR_EQ(IRCCD_VERSION, duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "r"));
+	TEST_ASSERT_EQUAL_STRING(IRCCD_VERSION, duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 basics_sleep(void)
 {
 	time_t start, now;
@@ -71,16 +64,14 @@ basics_sleep(void)
 	start = time(NULL);
 
 	if (duk_peval_string(ctx, "Irccd.System.sleep(2)") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	now = time(NULL);
 
-	GREATEST_ASSERT(difftime(now, start) >= 2);
-
-	GREATEST_PASS();
+	TEST_ASSERT(difftime(now, start) >= 2);
 }
 
-GREATEST_TEST
+static void
 basics_usleep(void)
 {
 	time_t start, now;
@@ -88,32 +79,21 @@ basics_usleep(void)
 	start = time(NULL);
 
 	if (duk_peval_string(ctx, "Irccd.System.usleep(2000000)") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	now = time(NULL);
 
-	GREATEST_ASSERT(difftime(now, start) >= 2);
-
-	GREATEST_PASS();
+	TEST_ASSERT(difftime(now, start) >= 2);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_popen);
-	GREATEST_RUN_TEST(basics_sleep);
-	GREATEST_RUN_TEST(basics_usleep);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_popen);
+	RUN_TEST(basics_sleep);
+	RUN_TEST(basics_usleep);
+
+	return UNITY_END();
 }

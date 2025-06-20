@@ -18,8 +18,7 @@
 
 #include <unistd.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
@@ -27,44 +26,39 @@
 static struct irc_plugin *plugin;
 static duk_context *ctx;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	plugin = js_plugin_open("example", TOP "/tests/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
 	ctx = NULL;
 }
 
-GREATEST_TEST
+static void
 basics_simple(void)
 {
 	if (duk_peval_string(ctx, "timer = new Irccd.Chrono();") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	sleep(1);
 
 	if (duk_peval_string(ctx, "result = timer.elapsed;") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "result");
 
-	GREATEST_ASSERT_IN_RANGE(1000U, duk_get_uint(ctx, -1), 100);
-	GREATEST_PASS();
+	TEST_ASSERT_UINT_WITHIN(1000U, duk_get_uint(ctx, -1), 100);
 }
 
-GREATEST_TEST
+static void
 basics_reset(void)
 {
 	/*
@@ -73,40 +67,30 @@ basics_reset(void)
 	 * be greater than 1s.
 	 */
 	if (duk_peval_string(ctx, "timer = new Irccd.Chrono()") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	sleep(1);
 
 	if (duk_peval_string(ctx, "timer.reset();") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	sleep(1);
 
 	if (duk_peval_string(ctx, "result = timer.elapsed") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "result");
 
-	GREATEST_ASSERT_IN_RANGE(1000U, duk_get_uint(ctx, -1), 100);
-	GREATEST_PASS();
+	TEST_ASSERT_UINT_WITHIN(1000U, duk_get_uint(ctx, -1), 100);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_simple);
-	GREATEST_RUN_TEST(basics_reset);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_simple);
+	RUN_TEST(basics_reset);
+
+	return UNITY_END();
 }

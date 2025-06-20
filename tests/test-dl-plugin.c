@@ -24,8 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/dl-plugin.h>
 #include <irccd/event.h>
@@ -35,106 +34,71 @@
 
 static struct irc_plugin *plugin;
 
-static void
-test_setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
-	/* TODO: No idea how to stop greatest from here. */
 	if ((plugin = dl_plugin_open("plugin-dl-example", NULL)) == NULL)
-		exit(1);
+		TEST_FAIL();
 }
 
-static void
-test_teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 }
 
-GREATEST_TEST
+static void
 test_options_set_get(void)
 {
 	irc_plugin_set_option(plugin, "option-1", "new-value-1");
-	GREATEST_ASSERT_STR_EQ("new-value-1", irc_plugin_get_option(plugin, "option-1"));
-	GREATEST_ASSERT(!irc_plugin_get_option(plugin, "not-found"));
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("new-value-1", irc_plugin_get_option(plugin, "option-1"));
+	TEST_ASSERT(!irc_plugin_get_option(plugin, "not-found"));
 }
 
-GREATEST_TEST
+static void
 test_options_list(void)
 {
 	const char * const *options = irc_plugin_get_options(plugin);
 
-	GREATEST_ASSERT_STR_EQ("option-1", options[0]);
-	GREATEST_ASSERT(!options[1]);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("option-1", options[0]);
+	TEST_ASSERT(!options[1]);
 }
 
-GREATEST_SUITE(suite_options)
-{
-	GREATEST_SET_SETUP_CB(test_setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(test_teardown, NULL);
-	GREATEST_RUN_TEST(test_options_set_get);
-	GREATEST_RUN_TEST(test_options_list);
-}
-
-GREATEST_TEST
+static void
 test_paths_set_get(void)
 {
 	irc_plugin_set_path(plugin, "path-1", "new-value-1");
-	GREATEST_ASSERT_STR_EQ("new-value-1", irc_plugin_get_path(plugin, "path-1"));
-	GREATEST_ASSERT(!irc_plugin_get_path(plugin, "not-found"));
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("new-value-1", irc_plugin_get_path(plugin, "path-1"));
+	TEST_ASSERT(!irc_plugin_get_path(plugin, "not-found"));
 }
 
-GREATEST_TEST
+static void
 test_paths_list(void)
 {
 	const char * const *paths = irc_plugin_get_paths(plugin);
 
-	GREATEST_ASSERT_STR_EQ("path-1", paths[0]);
-	GREATEST_ASSERT(!paths[1]);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("path-1", paths[0]);
+	TEST_ASSERT(!paths[1]);
 }
 
-GREATEST_SUITE(suite_paths)
-{
-	GREATEST_SET_SETUP_CB(test_setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(test_teardown, NULL);
-	GREATEST_RUN_TEST(test_paths_set_get);
-	GREATEST_RUN_TEST(test_paths_list);
-}
-
-GREATEST_TEST
+static void
 test_templates_set_get(void)
 {
 	irc_plugin_set_template(plugin, "template-1", "new-value-1");
-	GREATEST_ASSERT_STR_EQ("new-value-1", irc_plugin_get_template(plugin, "template-1"));
-	GREATEST_ASSERT(!irc_plugin_get_template(plugin, "not-found"));
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("new-value-1", irc_plugin_get_template(plugin, "template-1"));
+	TEST_ASSERT(!irc_plugin_get_template(plugin, "not-found"));
 }
 
-GREATEST_TEST
+static void
 test_templates_list(void)
 {
 	const char * const *templates = irc_plugin_get_templates(plugin);
 
-	GREATEST_ASSERT_STR_EQ("template-1", templates[0]);
-	GREATEST_ASSERT(!templates[1]);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("template-1", templates[0]);
+	TEST_ASSERT(!templates[1]);
 }
 
-GREATEST_SUITE(suite_templates)
-{
-	GREATEST_SET_SETUP_CB(test_setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(test_teardown, NULL);
-	GREATEST_RUN_TEST(test_templates_set_get);
-	GREATEST_RUN_TEST(test_templates_list);
-}
-
-GREATEST_TEST
+static void
 test_calls_simple(void)
 {
 #if 0
@@ -151,32 +115,24 @@ test_calls_simple(void)
 	irc_plugin_unload(plugin);
 	irc_plugin_reload(plugin);
 	irc_plugin_handle(plugin, &ev);
-	GREATEST_ASSERT_STR_EQ("EVENT\r\n", server.conn->out);
-
+	TEST_ASSERT_EQUAL_STRING("EVENT\r\n", server.conn->out);
 #endif
-	GREATEST_PASS();
 }
-
-GREATEST_SUITE(suite_calls)
-{
-	GREATEST_SET_SETUP_CB(test_setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(test_teardown, NULL);
-	GREATEST_RUN_TEST(test_calls_simple);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_options);
-	GREATEST_RUN_SUITE(suite_paths);
-	GREATEST_RUN_SUITE(suite_templates);
-	GREATEST_RUN_SUITE(suite_calls);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(test_options_set_get);
+	RUN_TEST(test_options_list);
+	RUN_TEST(test_paths_set_get);
+	RUN_TEST(test_paths_list);
+	RUN_TEST(test_templates_set_get);
+	RUN_TEST(test_templates_list);
+	RUN_TEST(test_calls_simple);
+
+	return UNITY_END();
 }
 
 /*

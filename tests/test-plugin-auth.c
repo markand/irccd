@@ -16,15 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
-
-#include "mock/server.c"
+#include <unity.h>
 
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
-#include <irccd/server.h>
-#include <irccd/util.h>
+
+#include "mock/server.h"
 
 /*
  * 0 -> nickserv without nickname
@@ -38,11 +35,9 @@ static struct {
 
 static struct irc_plugin *plugin;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	servers[0].server = irc_server_new("nickserv1");
 	servers[0].mock   = IRC_UTIL_CONTAINER_OF(servers[0].server, struct mock_server, parent);
 	servers[1].server = irc_server_new("nickserv2");
@@ -70,11 +65,9 @@ setup(void *udata)
 	irc_plugin_load(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 
 	irc_server_decref(servers[0].server);
@@ -82,7 +75,7 @@ teardown(void *udata)
 	irc_server_decref(servers[2].server);
 }
 
-GREATEST_TEST
+static void
 basics_nickserv1(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -90,11 +83,10 @@ basics_nickserv1(void)
 		.server = servers[0].server
 	});
 
-	GREATEST_ASSERT_STR_EQ("message NickServ identify plopation", servers[0].mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message NickServ identify plopation", servers[0].mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_nickserv2(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -102,11 +94,10 @@ basics_nickserv2(void)
 		.server = servers[1].server
 	});
 
-	GREATEST_ASSERT_STR_EQ("message NickServ identify jean something", servers[1].mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message NickServ identify jean something", servers[1].mock->out->line);
 }
 
-GREATEST_TEST
+static void
 basics_quakenet(void)
 {
 	irc_plugin_handle(plugin, &(const struct irc_event) {
@@ -114,27 +105,17 @@ basics_quakenet(void)
 		.server = servers[2].server
 	});
 
-	GREATEST_ASSERT_STR_EQ("message Q@CServe.quakenet.org AUTH mario hello", servers[2].mock->out->line);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message Q@CServe.quakenet.org AUTH mario hello", servers[2].mock->out->line);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_nickserv1);
-	GREATEST_RUN_TEST(basics_nickserv2);
-	GREATEST_RUN_TEST(basics_quakenet);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_nickserv1);
+	RUN_TEST(basics_nickserv2);
+	RUN_TEST(basics_quakenet);
+
+	return UNITY_END();
 }

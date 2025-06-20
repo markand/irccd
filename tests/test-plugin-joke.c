@@ -16,15 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <utlist.h>
 
-#include "mock/server.c"
+#include <unity.h>
 
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
-#include <irccd/server.h>
-#include <irccd/util.h>
+
+#include "mock/server.h"
 
 #define CALL() do {                                                     \
         irc_plugin_handle(plugin, &(const struct irc_event) {           \
@@ -42,11 +41,9 @@ static struct irc_server *server;
 static struct mock_server *mock;
 static struct irc_plugin *plugin;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	server = irc_server_new("test");
 	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 	plugin = js_plugin_open("joke", TOP "/plugins/joke/joke.js");
@@ -60,16 +57,14 @@ setup(void *udata)
 	irc_plugin_load(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 	irc_server_decref(server);
 }
 
-GREATEST_TEST
+static void
 basics_simple(void)
 {
 	/*
@@ -95,13 +90,11 @@ basics_simple(void)
 			bbbb = 1;
 	}
 
-	GREATEST_ASSERT(aaa);
-	GREATEST_ASSERT(bbbb);
-
-	GREATEST_PASS();
+	TEST_ASSERT(aaa);
+	TEST_ASSERT(bbbb);
 }
 
-GREATEST_TEST
+static void
 errors_toobig(void)
 {
 	/*
@@ -113,13 +106,11 @@ errors_toobig(void)
 
 	for (int i = 0; i < 64; ++i) {
 		CALL();
-		GREATEST_ASSERT_STR_EQ("message #joke a", mock->out->line);
+		TEST_ASSERT_EQUAL_STRING("message #joke a", mock->out->line);
 	}
-
-	GREATEST_PASS();
 }
 
-GREATEST_TEST
+static void
 errors_invalid(void)
 {
 	/* Only a is the valid joke in this file. */
@@ -128,72 +119,49 @@ errors_invalid(void)
 
 	for (int i = 0; i < 64; ++i) {
 		CALL();
-		GREATEST_ASSERT_STR_EQ("message #joke a", mock->out->line);
+		TEST_ASSERT_EQUAL_STRING("message #joke a", mock->out->line);
 	}
-
-	GREATEST_PASS();
 }
 
-GREATEST_TEST
+static void
 errors_not_found(void)
 {
 	irc_plugin_set_option(plugin, "file", "doesnotexist.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 errors_not_array(void)
 {
 	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-not-array.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
 }
 
-GREATEST_TEST
+static void
 errors_empty(void)
 {
 	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-empty.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING("message #joke error=joke:!joke:test:#joke:jean!jean@localhost:jean", mock->out->line);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_simple);
-}
-
-GREATEST_SUITE(suite_errors)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(errors_toobig);
-	GREATEST_RUN_TEST(errors_invalid);
-	GREATEST_RUN_TEST(errors_not_found);
-	GREATEST_RUN_TEST(errors_not_array);
-	GREATEST_RUN_TEST(errors_empty);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_RUN_SUITE(suite_errors);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_simple);
+
+	RUN_TEST(errors_toobig);
+	RUN_TEST(errors_invalid);
+	RUN_TEST(errors_not_found);
+	RUN_TEST(errors_not_array);
+	RUN_TEST(errors_empty);
+
+	return UNITY_END();
 }

@@ -18,8 +18,7 @@
 
 #include <errno.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/config.h>
 #include <irccd/js-plugin.h>
@@ -29,20 +28,16 @@
 static struct irc_plugin *plugin;
 static duk_context *ctx;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	plugin = js_plugin_open("example", TOP "/tests/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
@@ -58,7 +53,7 @@ throw(duk_context *ctx)
 	return 0;
 }
 
-GREATEST_TEST
+static void
 basics_version(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -68,19 +63,17 @@ basics_version(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "major"));
-	GREATEST_ASSERT_EQ(IRCCD_VERSION_MAJOR, duk_get_int(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "minor"));
-	GREATEST_ASSERT_EQ(IRCCD_VERSION_MINOR, duk_get_int(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "patch"));
-	GREATEST_ASSERT_EQ(IRCCD_VERSION_PATCH, duk_get_int(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "major"));
+	TEST_ASSERT_EQUAL_INT(IRCCD_VERSION_MAJOR, duk_get_int(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "minor"));
+	TEST_ASSERT_EQUAL_INT(IRCCD_VERSION_MINOR, duk_get_int(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "patch"));
+	TEST_ASSERT_EQUAL_INT(IRCCD_VERSION_PATCH, duk_get_int(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 basics_system_error_from_js(void)
 {
 	const int ret = duk_peval_string(ctx,
@@ -96,23 +89,21 @@ basics_system_error_from_js(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "errno"));
-	GREATEST_ASSERT_EQ(1, duk_get_int(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "message"));
-	GREATEST_ASSERT_STR_EQ("test", duk_get_string(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "v1"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "v2"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "errno"));
+	TEST_ASSERT_EQUAL_INT(1, duk_get_int(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "name"));
+	TEST_ASSERT_EQUAL_STRING("SystemError", duk_get_string(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "message"));
+	TEST_ASSERT_EQUAL_STRING("test", duk_get_string(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "v1"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "v2"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 basics_system_error_from_c(void)
 {
 	duk_push_c_function(ctx, throw, 0);
@@ -130,37 +121,26 @@ basics_system_error_from_c(void)
 	);
 
 	if (ret != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "errno"));
-	GREATEST_ASSERT_EQ(EINVAL, duk_get_int(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "v1"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(ctx, "v2"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "errno"));
+	TEST_ASSERT_EQUAL_INT(EINVAL, duk_get_int(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "name"));
+	TEST_ASSERT_EQUAL_STRING("SystemError", duk_get_string(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "v1"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "v2"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_version);
-	GREATEST_RUN_TEST(basics_system_error_from_js);
-	GREATEST_RUN_TEST(basics_system_error_from_c);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_version);
+	RUN_TEST(basics_system_error_from_js);
+	RUN_TEST(basics_system_error_from_c);
+
+	return UNITY_END();
 }

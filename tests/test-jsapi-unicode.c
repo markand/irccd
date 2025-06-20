@@ -20,8 +20,7 @@
  * /!\ Be sure that this file is kept saved in UTF-8 /!\
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/config.h>
 #include <irccd/js-plugin.h>
@@ -30,85 +29,66 @@
 static struct irc_plugin *plugin;
 static duk_context *ctx;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	plugin = js_plugin_open("example", TOP "/tests/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
 	ctx = NULL;
 }
 
-GREATEST_TEST
+static void
 basics_is_letter(void)
 {
 	duk_peval_string_noresult(ctx, "result = Irccd.Unicode.isLetter(String('é').charCodeAt(0));");
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
 
 	duk_peval_string_noresult(ctx, "result = Irccd.Unicode.isLetter(String('€').charCodeAt(0));");
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(!duk_get_boolean(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(!duk_get_boolean(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 basics_is_lower(void)
 {
 	duk_peval_string_noresult(ctx, "result = Irccd.Unicode.isLower(String('é').charCodeAt(0));");
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
 
 	duk_peval_string_noresult(ctx, "result = Irccd.Unicode.isLower(String('É').charCodeAt(0));");
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(!duk_get_boolean(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(!duk_get_boolean(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 basics_is_upper(void)
 {
 	duk_peval_string_noresult(ctx, "result = Irccd.Unicode.isUpper(String('É').charCodeAt(0));");
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(duk_get_boolean(ctx, -1));
 
 	duk_peval_string_noresult(ctx, "result = Irccd.Unicode.isUpper(String('é').charCodeAt(0));");
-	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
-	GREATEST_ASSERT(!duk_get_boolean(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "result"));
+	TEST_ASSERT(!duk_get_boolean(ctx, -1));
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_is_letter);
-	GREATEST_RUN_TEST(basics_is_lower);
-	GREATEST_RUN_TEST(basics_is_upper);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_is_letter);
+	RUN_TEST(basics_is_lower);
+	RUN_TEST(basics_is_upper);
+
+	return UNITY_END();
 }

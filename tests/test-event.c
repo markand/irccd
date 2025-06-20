@@ -16,12 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/event.h>
 
-GREATEST_TEST
+void
+setUp(void)
+{
+}
+
+void
+tearDown(void)
+{
+}
+
+static void
 basics_parse_simple(void)
 {
 #if 0
@@ -33,17 +42,15 @@ basics_parse_simple(void)
 
 	irc__conn_poll(&conn, &msg);
 
-	GREATEST_ASSERT_STR_EQ("malikania.fr", msg.prefix);
-	GREATEST_ASSERT_STR_EQ("332", msg.cmd);
-	GREATEST_ASSERT_STR_EQ("boris", msg.args[0]);
-	GREATEST_ASSERT_STR_EQ("#test", msg.args[1]);
-	GREATEST_ASSERT_STR_EQ("Welcome to #test :: a testing channel", msg.args[2]);
-
+	TEST_ASSERT_EQUAL_STRING("malikania.fr", msg.prefix);
+	TEST_ASSERT_EQUAL_STRING("332", msg.cmd);
+	TEST_ASSERT_EQUAL_STRING("boris", msg.args[0]);
+	TEST_ASSERT_EQUAL_STRING("#test", msg.args[1]);
+	TEST_ASSERT_EQUAL_STRING("Welcome to #test :: a testing channel", msg.args[2]);
 #endif
-	GREATEST_PASS();
 }
 
-GREATEST_TEST
+static void
 basics_parse_noprefix(void)
 {
 #if 0
@@ -56,27 +63,19 @@ basics_parse_noprefix(void)
 	irc__conn_poll(&conn, &msg);
 
 	GREATEST_ASSERT(!msg.prefix);
-	GREATEST_ASSERT_STR_EQ("PING", msg.cmd);
-	GREATEST_ASSERT_STR_EQ("malikania.fr", msg.args[0]);
+	TEST_ASSERT_EQUAL_STRING("PING", msg.cmd);
+	TEST_ASSERT_EQUAL_STRING("malikania.fr", msg.args[0]);
 
 #endif
-	GREATEST_PASS();
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_RUN_TEST(basics_parse_simple);
-	GREATEST_RUN_TEST(basics_parse_noprefix);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_parse_simple);
+	RUN_TEST(basics_parse_noprefix);
+
+	return UNITY_END();
 }

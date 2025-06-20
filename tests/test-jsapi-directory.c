@@ -18,8 +18,7 @@
 
 #include <sys/stat.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
@@ -27,11 +26,9 @@
 static struct irc_plugin *plugin;
 static duk_context *ctx;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	plugin = js_plugin_open("example", TOP "/tests/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 
@@ -39,11 +36,9 @@ setup(void *udata)
 	duk_put_global_string(ctx, "TOP");
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	remove(TOP "/tests/1/2");
 	remove(TOP "/tests/1");
 
@@ -53,7 +48,7 @@ teardown(void *udata)
 	ctx = NULL;
 }
 
-GREATEST_TEST
+static void
 object_constructor(void)
 {
 	const char *script =
@@ -62,56 +57,52 @@ object_constructor(void)
 		"l = d.entries.length;";
 
 	if (duk_peval_string(ctx, script) != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "l");
-	GREATEST_ASSERT_EQ(3U, duk_get_uint(ctx, -1));
+	TEST_ASSERT_EQUAL_INT(3U, duk_get_uint(ctx, -1));
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT(duk_is_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_is_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_find(void)
 {
 	const char *script = "d = new Irccd.Directory(TOP + '/tests/data/root');";
 
 	if (duk_peval_string(ctx, script) != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	/* Find "lines.txt" not recursively. */
 	if (duk_peval_string(ctx, "p = d.find('lines.txt');") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT_STR_EQ(TOP "/tests/data/root/lines.txt", duk_get_string(ctx, -1));
+	TEST_ASSERT_EQUAL_STRING(TOP "/tests/data/root/lines.txt", duk_get_string(ctx, -1));
 
 	/* Find "unknown.txt" not recursively (not found). */
 	if (duk_peval_string(ctx, "p = d.find('unknown.txt');") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT(duk_is_null(ctx, -1));
+	TEST_ASSERT(duk_is_null(ctx, -1));
 
 	/* Find "file-2.txt" not recursively (exists but in sub directory). */
 	if (duk_peval_string(ctx, "p = d.find('file-2.txt');") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT(duk_is_null(ctx, -1));
+	TEST_ASSERT(duk_is_null(ctx, -1));
 
 	/* Find "file-2.txt" recursively. */
 	if (duk_peval_string(ctx, "p = d.find('file-2.txt', true);") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT_STR_EQ(TOP "/tests/data/root/level-1/level-2/file-2.txt", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING(TOP "/tests/data/root/level-1/level-2/file-2.txt", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 object_remove(void)
 {
 	struct stat st;
@@ -120,75 +111,62 @@ object_remove(void)
 	mkdir(TOP "/tests/empty", 0700);
 
 	if (duk_peval_string(ctx, "d = new Irccd.Directory(TOP + '/tests/empty')") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	/* Not recursive. */
 	if (duk_peval_string(ctx, "d.remove()") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT_EQ(-1, stat(TOP "/tests/empty", &st));
+	TEST_ASSERT_EQUAL_INT(-1, stat(TOP "/tests/empty", &st));
 
 	mkdir(TOP "/tests/notempty", 0700);
 	mkdir(TOP "/tests/notempty/empty", 0700);
 
 	if (duk_peval_string(ctx, "d = new Irccd.Directory(TOP + '/tests/notempty')") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	/* Not recursive. */
 	if (duk_peval_string(ctx, "d.remove(true)") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT_EQ(-1, stat(TOP "/tests/notempty", &st));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_INT(-1, stat(TOP "/tests/notempty", &st));
 }
 
-GREATEST_SUITE(suite_object)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(object_constructor);
-	GREATEST_RUN_TEST(object_find);
-	GREATEST_RUN_TEST(object_remove);
-}
-
-GREATEST_TEST
+static void
 free_find(void)
 {
 	/* Find "lines.txt" not recursively. */
 	if (duk_peval_string(ctx, "p = Irccd.Directory.find(TOP + '/tests/data/root', 'lines.txt');") != 0) {
 		puts(duk_to_string(ctx, -1));
-		GREATEST_FAIL();
+		TEST_FAIL();
 	}
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT_STR_EQ(TOP "/tests/data/root/lines.txt", duk_get_string(ctx, -1));
+	TEST_ASSERT_EQUAL_STRING(TOP "/tests/data/root/lines.txt", duk_get_string(ctx, -1));
 
 	/* Find "unknown.txt" not recursively (not found). */
 	if (duk_peval_string(ctx, "p = Irccd.Directory.find(TOP + '/tests/data/root', 'unknown.txt');") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT(duk_is_null(ctx, -1));
+	TEST_ASSERT(duk_is_null(ctx, -1));
 
 	/* Find "file-2.txt" not recursively (exists but in sub directory). */
 	if (duk_peval_string(ctx, "p = Irccd.Directory.find(TOP + '/tests/data/root', 'file-2.txt');") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT(duk_is_null(ctx, -1));
+	TEST_ASSERT(duk_is_null(ctx, -1));
 
 	/* Find "file-2.txt" recursively. */
 	if (duk_peval_string(ctx, "p = Irccd.Directory.find(TOP + '/tests/data/root', 'file-2.txt', true);") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
 	duk_get_global_string(ctx, "p");
-	GREATEST_ASSERT_STR_EQ(TOP "/tests/data/root/level-1/level-2/file-2.txt", duk_get_string(ctx, -1));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_STRING(TOP "/tests/data/root/level-1/level-2/file-2.txt", duk_get_string(ctx, -1));
 }
 
-GREATEST_TEST
+static void
 free_remove(void)
 {
 	struct stat st;
@@ -199,24 +177,22 @@ free_remove(void)
 	/* Not recursive. */
 	if (duk_peval_string(ctx, "Irccd.Directory.remove(TOP + '/tests/empty')") != 0) {
 		puts(duk_to_string(ctx, -1));
-		GREATEST_FAIL();
+		TEST_FAIL();
 	}
 
-	GREATEST_ASSERT_EQ(-1, stat(TOP "/tests/empty", &st));
+	TEST_ASSERT_EQUAL_INT(-1, stat(TOP "/tests/empty", &st));
 
 	mkdir(TOP "/tests/notempty", 0700);
 	mkdir(TOP "/tests/notempty/empty", 0700);
 
 	/* Not recursive. */
 	if (duk_peval_string(ctx, "Irccd.Directory.remove(TOP + '/tests/notempty', true)") != 0)
-		GREATEST_FAIL();
+		TEST_FAIL();
 
-	GREATEST_ASSERT_EQ(-1, stat(TOP "/tests/notempty", &st));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_INT(-1, stat(TOP "/tests/notempty", &st));
 }
 
-GREATEST_TEST
+static void
 free_mkdir(void)
 {
 	struct stat st;
@@ -226,32 +202,23 @@ free_mkdir(void)
 
 	if (duk_peval_string(ctx, "Irccd.Directory.mkdir(TOP + '/tests/1/2')") != 0) {
 		puts(duk_to_string(ctx, -1));
-		GREATEST_FAIL();
+		TEST_FAIL();
 	}
 
-	GREATEST_ASSERT_EQ(0, stat(TOP "/tests/1/2", &st));
-
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL_INT(0, stat(TOP "/tests/1/2", &st));
 }
-
-GREATEST_SUITE(suite_free)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(free_find);
-	GREATEST_RUN_TEST(free_remove);
-	GREATEST_RUN_TEST(free_mkdir);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_object);
-	GREATEST_RUN_SUITE(suite_free);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(object_constructor);
+	RUN_TEST(object_find);
+	RUN_TEST(object_remove);
+	RUN_TEST(free_find);
+	RUN_TEST(free_remove);
+	RUN_TEST(free_mkdir);
+
+	return UNITY_END();
 }

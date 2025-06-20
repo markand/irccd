@@ -1,3 +1,6 @@
+# project configuration.
+^config\.mk$
+
 # vim/emacs specific.
 ^tags$
 ^tags\.lock$
@@ -25,3 +28,28 @@
 
 # macOS specific.
 \.DS_Store$
+
+# test files
+^tests/test-bot$
+^tests/test-channel$
+^tests/test-dl-plugin$
+^tests/test-event$
+^tests/test-jsapi-chrono$
+^tests/test-jsapi-directory$
+^tests/test-jsapi-file$
+^tests/test-jsapi-irccd$
+^tests/test-jsapi-system$
+^tests/test-jsapi-timer$
+^tests/test-jsapi-unicode$
+^tests/test-jsapi-util$
+^tests/test-plugin-ask$
+^tests/test-plugin-auth$
+^tests/test-plugin-hangman$
+^tests/test-plugin-history$
+^tests/test-plugin-joke$
+^tests/test-plugin-logger$
+^tests/test-plugin-plugin$
+^tests/test-plugin-tictactoe$
+^tests/test-rule$
+^tests/test-subst$
+^tests/test-util$

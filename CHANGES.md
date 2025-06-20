@@ -9,6 +9,12 @@ This is a major release. See MIGRATING.md file for more information.
 The key highlight of this release is the integration of libev as the main loop
 making the code slightly more portable, performant and simpler.
 
+Build system
+------------
+
+The build system has been changed from CMake to GNU Make, this is because CMake
+makes simple things complicated.
+
 C API
 -----
 

@@ -18,8 +18,7 @@
 
 #include <ev.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
@@ -28,20 +27,16 @@
 static struct irc_plugin *plugin;
 static duk_context *ctx;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	plugin = js_plugin_open("timer", TOP "/tests/data/timer.js");
 	ctx = js_plugin_get_context(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
@@ -60,7 +55,7 @@ set_type(const char *name)
 	irc_plugin_load(plugin);
 }
 
-GREATEST_TEST
+static void
 basics_single(void)
 {
 	time_t start = time(NULL);
@@ -70,13 +65,11 @@ basics_single(void)
 	while (difftime(time(NULL), start) < 3)
 		ev_run(irc_bot_loop(), EVRUN_ONCE);
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "count"));
-	GREATEST_ASSERT_EQ(duk_get_int(ctx, -1), 1);
-
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "count"));
+	TEST_ASSERT_EQUAL_INT(duk_get_int(ctx, -1), 1);
 }
 
-GREATEST_TEST
+static void
 basics_repeat(void)
 {
 	time_t start = time(NULL);
@@ -86,29 +79,17 @@ basics_repeat(void)
 	while (difftime(time(NULL), start) < 3)
 		ev_run(irc_bot_loop(), EVRUN_ONCE);
 
-	GREATEST_ASSERT(duk_get_global_string(ctx, "count"));
-	GREATEST_ASSERT(duk_get_int(ctx, -1) >= 5);
-	GREATEST_PASS();
+	TEST_ASSERT(duk_get_global_string(ctx, "count"));
+	TEST_ASSERT(duk_get_int(ctx, -1) >= 5);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_single);
-	GREATEST_RUN_TEST(basics_repeat);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	irc_bot_init(NULL);
+	UNITY_BEGIN();
 
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	RUN_TEST(basics_single);
+	RUN_TEST(basics_repeat);
 
-	return 0;
+	return UNITY_END();
 }

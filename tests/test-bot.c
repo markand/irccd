@@ -18,18 +18,20 @@
 
 #include <string.h>
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
+#include <unity.h>
 
 #include <irccd/irccd.h>
 #include <irccd/server.h>
 #include <irccd/util.h>
 
-static void
-clean(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
+}
 
+void
+tearDown(void)
+{
 	irc_bot_server_clear();
 }
 
@@ -45,7 +47,7 @@ server_new(const char *name)
 	return s;
 }
 
-GREATEST_TEST
+static void
 servers_add(void)
 {
 	struct irc_server *s, *s1, *s2, *s3;
@@ -57,37 +59,35 @@ servers_add(void)
 	/* irc.servers -> s1 */
 	irc_bot_server_add(s1);
 	s = irccd->servers;
-	GREATEST_ASSERT_EQ(1, s->refc);
-	GREATEST_ASSERT_EQ(s, s1);
+	TEST_ASSERT_EQUAL(1, s->refc);
+	TEST_ASSERT_EQUAL(s, s1);
 	s = s->next;
-	GREATEST_ASSERT(!s);
+	TEST_ASSERT(!s);
 
 	/* irc.servers -> s1 -> s2 */
 	irc_bot_server_add(s2);
 	s = irccd->servers;
-	GREATEST_ASSERT_EQ(1, s->refc);
-	GREATEST_ASSERT_EQ(s, s1);
+	TEST_ASSERT_EQUAL(1, s->refc);
+	TEST_ASSERT_EQUAL(s, s1);
 	s = s->next;
-	GREATEST_ASSERT_EQ(s, s2);
+	TEST_ASSERT_EQUAL(s, s2);
 	s = s->next;
-	GREATEST_ASSERT(!s);
+	TEST_ASSERT(!s);
 
 	/* irc.servers -> s1 -> s2 -> s3 */
 	irc_bot_server_add(s3);
 	s = irccd->servers;
-	GREATEST_ASSERT_EQ(1, s->refc);
-	GREATEST_ASSERT_EQ(s, s1);
+	TEST_ASSERT_EQUAL(1, s->refc);
+	TEST_ASSERT_EQUAL(s, s1);
 	s = s->next;
-	GREATEST_ASSERT_EQ(s, s2);
+	TEST_ASSERT_EQUAL(s, s2);
 	s = s->next;
-	GREATEST_ASSERT_EQ(s, s3);
+	TEST_ASSERT_EQUAL(s, s3);
 	s = s->next;
-	GREATEST_ASSERT(!s);
-
-	GREATEST_PASS();
+	TEST_ASSERT(!s);
 }
 
-GREATEST_TEST
+static void
 servers_remove(void)
 {
 	struct irc_server *s, *s1, *s2, *s3;
@@ -109,44 +109,42 @@ servers_remove(void)
 	/* irc.servers -> s3 -> [s2] -> s1 */
 	/* irc.servers -> s3 -> s1 */
 	irc_bot_server_remove(s2->name);
-	GREATEST_ASSERT_EQ(2, s1->refc);
-	GREATEST_ASSERT_EQ(1, s2->refc);
-	GREATEST_ASSERT_EQ(2, s3->refc);
+	TEST_ASSERT_EQUAL(2, s1->refc);
+	TEST_ASSERT_EQUAL(1, s2->refc);
+	TEST_ASSERT_EQUAL(2, s3->refc);
 	s = irccd->servers;
-	GREATEST_ASSERT_EQ(s, s1);
+	TEST_ASSERT_EQUAL(s, s1);
 	s = s->next;
-	GREATEST_ASSERT_EQ(s, s3);
+	TEST_ASSERT_EQUAL(s, s3);
 	s = s->next;
-	GREATEST_ASSERT(!s);
+	TEST_ASSERT(!s);
 
 	/* irc.servers -> s3 -> [s1] */
 	/* irc.servers -> s3 */
 	irc_bot_server_remove(s1->name);
-	GREATEST_ASSERT_EQ(1, s1->refc);
-	GREATEST_ASSERT_EQ(1, s2->refc);
-	GREATEST_ASSERT_EQ(2, s3->refc);
+	TEST_ASSERT_EQUAL(1, s1->refc);
+	TEST_ASSERT_EQUAL(1, s2->refc);
+	TEST_ASSERT_EQUAL(2, s3->refc);
 	s = irccd->servers;
-	GREATEST_ASSERT_EQ(s, s3);
+	TEST_ASSERT_EQUAL(s, s3);
 	s = s->next;
-	GREATEST_ASSERT(!s);
+	TEST_ASSERT(!s);
 
 	/* irc.servers -> [s3] */
 	/* irc.servers -> NULL */
 	irc_bot_server_remove(s3->name);
-	GREATEST_ASSERT_EQ(1, s1->refc);
-	GREATEST_ASSERT_EQ(1, s2->refc);
-	GREATEST_ASSERT_EQ(1, s3->refc);
+	TEST_ASSERT_EQUAL(1, s1->refc);
+	TEST_ASSERT_EQUAL(1, s2->refc);
+	TEST_ASSERT_EQUAL(1, s3->refc);
 	s = irccd->servers;
-	GREATEST_ASSERT(!s);
+	TEST_ASSERT(!s);
 
 	irc_server_decref(s1);
 	irc_server_decref(s2);
 	irc_server_decref(s3);
-
-	GREATEST_PASS();
 }
 
-GREATEST_TEST
+static void
 servers_clear(void)
 {
 	struct irc_server *s1, *s2, *s3;
@@ -165,32 +163,22 @@ servers_clear(void)
 	irc_bot_server_add(s3);
 	irc_bot_server_clear();
 
-	GREATEST_ASSERT_EQ(1, s1->refc);
-	GREATEST_ASSERT_EQ(1, s2->refc);
-	GREATEST_ASSERT_EQ(1, s3->refc);
-	GREATEST_ASSERT(!irccd->servers);
-	GREATEST_PASS();
+	TEST_ASSERT_EQUAL(1, s1->refc);
+	TEST_ASSERT_EQUAL(1, s2->refc);
+	TEST_ASSERT_EQUAL(1, s3->refc);
+	TEST_ASSERT(!irccd->servers);
 }
-
-GREATEST_SUITE(suite_servers)
-{
-	GREATEST_SET_SETUP_CB(clean, NULL);
-	GREATEST_SET_TEARDOWN_CB(clean, NULL);
-	GREATEST_RUN_TEST(servers_add);
-	GREATEST_RUN_TEST(servers_remove);
-	GREATEST_RUN_TEST(servers_clear);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
 	irc_bot_init(NULL);
 
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_servers);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(servers_add);
+	RUN_TEST(servers_remove);
+	RUN_TEST(servers_clear);
+
+	return UNITY_END();
 }

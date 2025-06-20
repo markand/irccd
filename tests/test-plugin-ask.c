@@ -16,24 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define GREATEST_USE_ABBREVS 0
-#include <greatest.h>
-
-#include "mock/server.c"
+#include <unity.h>
 
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
+
+#include "mock/server.h"
 
 static struct irc_server *server;
 static struct irc_plugin *plugin;
 
 static struct mock_server *mock;
 
-static void
-setup(void *udata)
+void
+setUp(void)
 {
-	(void)udata;
-
 	server = irc_server_new("test");
 	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
 
@@ -47,16 +44,14 @@ setup(void *udata)
 	irc_plugin_load(plugin);
 }
 
-static void
-teardown(void *udata)
+void
+tearDown(void)
 {
-	(void)udata;
-
 	irc_plugin_finish(plugin);
 	irc_server_decref(server);
 }
 
-GREATEST_TEST
+static void
 basics_simple(void)
 {
 	int no = 0, yes = 0;
@@ -82,27 +77,16 @@ basics_simple(void)
 			no = 1;
 	}
 
-	GREATEST_ASSERT(no);
-	GREATEST_ASSERT(yes);
-
-	GREATEST_PASS();
+	TEST_ASSERT(no);
+	TEST_ASSERT(yes);
 }
-
-GREATEST_SUITE(suite_basics)
-{
-	GREATEST_SET_SETUP_CB(setup, NULL);
-	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
-	GREATEST_RUN_TEST(basics_simple);
-}
-
-GREATEST_MAIN_DEFS();
 
 int
-main(int argc, char **argv)
+main(void)
 {
-	GREATEST_MAIN_BEGIN();
-	GREATEST_RUN_SUITE(suite_basics);
-	GREATEST_MAIN_END();
+	UNITY_BEGIN();
 
-	return 0;
+	RUN_TEST(basics_simple);
+
+	return UNITY_END();
 }

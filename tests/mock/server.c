@@ -3,18 +3,7 @@
 
 #include <utlist.h>
 
-#include <irccd/server.h>
-#include <irccd/util.h>
-
-struct mock_server_msg {
-	char *line;
-	struct mock_server_msg *next;
-};
-
-struct mock_server {
-	struct irc_server parent;
-	struct mock_server_msg *out;
-};
+#include "server.h"
 
 IRC_ATTR_PRINTF(2, 3)
 static int
@@ -46,37 +35,6 @@ channels_find(struct irc_server *s, const char *name)
 			return ch;
 
 	return NULL;
-}
-
-/*
- * Clear what has been appended to the output queue.
- */
-static void
-mock_clear(struct irc_server *s)
-{
-	struct mock_server *mock;
-	struct mock_server_msg *msg, *tmp;
-
-	mock = IRC_UTIL_CONTAINER_OF(s, struct mock_server, parent);
-
-	LL_FOREACH_SAFE(mock->out, msg, tmp) {
-		free(msg->line);
-		free(msg);
-	}
-
-	mock->out = NULL;
-}
-
-static void
-mock_free(struct irc_server *s)
-{
-	struct mock_server *mock;
-
-	mock = IRC_UTIL_CONTAINER_OF(s, struct mock_server, parent);
-	mock_clear(s);
-
-	free(mock->parent.name);
-	free(mock);
 }
 
 struct irc_server *
@@ -290,5 +248,36 @@ void
 irc_server_decref(struct irc_server *s)
 {
 	if (!--s->refc)
-		mock_free(s);
+		mock_server_free(s);
+}
+
+/*
+ * Clear what has been appended to the output queue.
+ */
+void
+mock_server_clear(struct irc_server *s)
+{
+	struct mock_server *mock;
+	struct mock_server_msg *msg, *tmp;
+
+	mock = IRC_UTIL_CONTAINER_OF(s, struct mock_server, parent);
+
+	LL_FOREACH_SAFE(mock->out, msg, tmp) {
+		free(msg->line);
+		free(msg);
+	}
+
+	mock->out = NULL;
+}
+
+void
+mock_server_free(struct irc_server *s)
+{
+	struct mock_server *mock;
+
+	mock = IRC_UTIL_CONTAINER_OF(s, struct mock_server, parent);
+	mock_server_clear(s);
+
+	free(mock->parent.name);
+	free(mock);
 }
