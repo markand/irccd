@@ -72,6 +72,12 @@ To create a new server dynamically one should now:
 
 All of the server fields are now accessible as read-only for convenience.
 
+Build system
+------------
+
+CMake has been removed and no CMake configuration package is provided, use
+pkg-config files to build against libirccd which is unchanged.
+
 Migrating from 3.x to 4.x
 =========================
 

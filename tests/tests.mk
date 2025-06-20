@@ -115,7 +115,9 @@ $(TESTS): private CFLAGS += $(TESTS_CFLAGS)
 $(TESTS): private LDLIBS += $(TESTS_LDFLAGS)
 
 # special test file that export its own symbols.
+ifeq ($(OS), Linux)
 tests/test-dl-plugin: private LDFLAGS += -Wl,-E
+endif
 
 $(TESTS_LIB_OBJS): private CFLAGS += $(LIBIRCCD_CFLAGS)
 

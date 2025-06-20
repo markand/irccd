@@ -56,6 +56,7 @@ endif
 MAJOR := 5
 MINOR := 0
 PATCH := 0
+VERSION := $(MAJOR).$(MINOR).$(PATCH)
 
 OS := $(shell uname -s)
 
