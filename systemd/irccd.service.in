@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 ExecStart=@PATH@
-User=@IRCCD_WITH_UID@
-Group=@IRCCD_WITH_GID@
+User=@UID@
+Group=@GID@
 
 [Install]
 WantedBy=multi-user.target

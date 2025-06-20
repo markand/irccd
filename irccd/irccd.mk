@@ -63,11 +63,20 @@ $(IRCCD): private LDLIBS += $(LIBCURL_LDFLAGS)
 $(IRCCD_OBJS): private CFLAGS += $(LIBCURL_CFLAGS)
 endif
 
-irccd/conf.o irccd/lex.o: private CFLAGS += -D_POSIX_C_SOURCE=202405L -Wno-unused-function -Wno-unneeded-internal-declaration
+ifeq ($(SSL), 1)
+$(IRCCD): private LDLIBS += $(LIBSSL_LDFLAGS)
+$(IRCCD_OBJS): private CFLAGS += $(LIBSSL_CFLAGS)
+endif
+
+irccd/conf.o irccd/lex.o: private CFLAGS += -Wno-unused-function -Wno-unneeded-internal-declaration
 
 all:: $(IRCCD)
 
 clean::
 	rm -f $(IRCCD) $(IRCCD_DEPS) $(IRCCD_OBJS) irccd/conf.c irccd/conf.h irccd/lex.c
+
+install::
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp -p $(IRCCD) $(DESTDIR)$(BINDIR)
 
 -include $(IRCCD_DEPS)

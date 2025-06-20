@@ -18,7 +18,7 @@
 
 %{
 
-#define _POSIX_C_SOURCE 202405L
+#include <sys/types.h>
 #include <errno.h>
 #include <grp.h>
 #include <limits.h>

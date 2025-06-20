@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define _POSIX_C_SOURCE 202405L
+#include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>

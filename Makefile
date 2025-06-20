@@ -28,13 +28,17 @@ HTTP ?= 1
 SSL ?= 1
 TESTS ?= 1
 
+UID ?= irccd
+GID ?= irccd
+
 PREFIX ?= /usr/local
 BINDIR ?= $(PREFIX)/bin
-ETCDIR ?= $(PREFIX)/etc
+DATADIR ?= $(PREFIX)/share
+INCLUDEDIR ?= $(PREFIX)/include
 LIBDIR ?= $(PREFIX)/lib
+LOCALSTATEDIR ?= $(PREFIX)/var
 MANDIR ?= $(PREFIX)/share/man
-SHAREDIR ?= $(PREFIX)/share
-VARDIR ?= $(PREFIX)/var
+SYSCONFDIR ?= $(PREFIX)/etc
 
 LIBBSD_CFLAGS ?= $(shell $(PKGCONF) --cflags libbsd-overlay)
 LIBBSD_LDFLAGS ?= $(shell $(PKGCONF) --libs libbsd-overlay)
@@ -45,13 +49,15 @@ LIBCURL_LDFLAGS ?= $(shell $(PKGCONF) --libs libcurl)
 endif
 
 ifeq ($(SSL), 1)
-LIBSLS_CFLAGS ?= $(shell $(PKGCONF) --cflags openssl)
-LIBSLS_LDFLAGS ?= $(shell $(PKGCONF) --libs openssl)
+LIBSSL_CFLAGS ?= $(shell $(PKGCONF) --cflags openssl)
+LIBSSL_LDFLAGS ?= $(shell $(PKGCONF) --libs openssl)
 endif
 
 MAJOR := 5
 MINOR := 0
 PATCH := 0
+
+OS := $(shell uname -s)
 
 override CFLAGS += -Wall -Wextra -MMD
 
@@ -62,13 +68,18 @@ override CFLAGS += -Wall -Wextra -MMD
 	$(LEX) -o $@ $<
 
 %.c: %.y
-	$(YACC) --header=$*.h --output=$*.c $<
+	$(YACC) -b tmp -d $<
+	mv -f tmp.tab.c $*.c
+	mv -f tmp.tab.h $*.h
 
 .PHONY: all
 all::
 
 .PHONY: clean
 clean::
+
+.PHONY: install
+install::
 
 ifeq ($(JS), 1)
 include extern/libduktape/libduktape.mk
@@ -84,6 +95,12 @@ endif
 include lib/lib.mk
 include irccd/irccd.mk
 include irccdctl/irccdctl.mk
+
+include plugins/plugins.mk
+
+include examples/examples.mk
+include man/man.mk
+include systemd/systemd.mk
 
 ifeq ($(TESTS), 1)
 include tests/tests.mk

@@ -27,4 +27,8 @@ all:: $(IRCCDCTL)
 clean::
 	rm -f $(IRCCDCTL) $(IRCCDCTL_DEPS) $(IRCCDCTL_OBJS)
 
+install::
+	mkdir -p $(DESTDIR)$(BINDIR)
+	cp -p $(IRCCD) $(DESTDIR)$(BINDIR)
+
 -include $(IRCCDCTL_DEPS)
