@@ -163,7 +163,7 @@ sig_cb(struct ev_loop *loop, struct ev_signal *self, int revents)
 static void
 init(void)
 {
-	loop = ev_default_loop(0);
+	loop = ev_loop_new(0);
 
 	irc_bot_init(loop);
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
