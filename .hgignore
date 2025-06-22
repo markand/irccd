@@ -28,6 +28,7 @@
 
 # macOS specific.
 \.DS_Store$
+\.dSYM
 
 # test files
 ^tests/test-bot$
