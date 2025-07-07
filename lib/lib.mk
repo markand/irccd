@@ -48,16 +48,16 @@ endif
 
 lib/irccd/config.h: lib/irccd/config.h.in
 	sed \
+		-e "s,@HTTP@,$(HTTP),g" \
+		-e "s,@JS@,$(JS),g" \
+		-e "s,@LIBDIR@,$(LIBDIR),g" \
 		-e "s,@MAJOR@,$(MAJOR),g" \
 		-e "s,@MINOR@,$(MINOR),g" \
 		-e "s,@PATCH@,$(PATCH),g" \
-		-e "s,@VARDIR@,$(VARDIR),g" \
-		-e "s,@ETCDIR@,$(ETCDIR),g" \
-		-e "s,@LIBDIR@,$(LIBDIR),g" \
 		-e "s,@SHAREDIR@,$(SHAREDIR),g" \
-		-e "s,@JS@,$(JS),g" \
 		-e "s,@SSL@,$(SSL),g" \
-		-e "s,@HTTP@,$(HTTP),g" \
+		-e "s,@SYSCONFDIR@,$(SYSCONFDIR),g" \
+		-e "s,@VARDIR@,$(VARDIR),g" \
 		< $< > $@
 
 $(LIBIRCCD): $(LIBIRCCD_OBJS) | $(LIBEV)

@@ -19,9 +19,7 @@
 #ifndef IRCCD_ATTRS_H
 #define IRCCD_ATTRS_H
 
-#include "config.h"
-
-#if defined(IRCCD_SYS_HAS_ATTRIBUTE_FORMAT_PRINTF)
+#if defined(__GNUC__) || defined(__clang__)
 #       define IRC_ATTR_PRINTF(x, y) __attribute__ ((format(printf, x, y)))
 #else
 #       define IRC_ATTR_PRINTF(x, y)

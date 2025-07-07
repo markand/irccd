@@ -47,7 +47,7 @@
 /**
  * \brief Default system-wide location for configuration files.
  */
-#define IRCCD_SYSCONFDIR "@ETCDIR@"
+#define IRCCD_SYSCONFDIR "@SYSCONFDIR@"
 
 /**
  * \brief Default system-wide location for plugins.
