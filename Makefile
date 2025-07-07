@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+OS := $(shell uname -s)
+
 CC := clang
 PKGCONF := pkg-config
 LEX := flex
@@ -58,8 +60,6 @@ MINOR := 0
 PATCH := 0
 VERSION := $(MAJOR).$(MINOR).$(PATCH)
 
-OS := $(shell uname -s)
-
 override CFLAGS += -Wall -Wextra -MMD
 
 %.a:
@@ -69,9 +69,7 @@ override CFLAGS += -Wall -Wextra -MMD
 	$(LEX) -o $@ $<
 
 %.c: %.y
-	$(YACC) -b tmp -d $<
-	mv -f tmp.tab.c $*.c
-	mv -f tmp.tab.h $*.h
+	$(YACC) --output=$*.c --header=$*.h $<
 
 .PHONY: all
 all::
