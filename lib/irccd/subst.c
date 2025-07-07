@@ -116,7 +116,7 @@ scat(char **out, size_t *outsz, const char *value)
 	size_t written;
 
 	if ((written = irc_util_strlcpy(*out, value, *outsz)) >= *outsz)
-		return errno = ENOMEM, -1;
+		return -ENOMEM;
 
 	*out += written;
 	*outsz -= written;
@@ -128,7 +128,7 @@ static inline int
 ccat(char **out, size_t *outsz, char c)
 {
 	if (*outsz == 0)
-		return -1;
+		return -ENOMEM;
 
 	*(*out)++ = c;
 	*(outsz) -= 1;
@@ -172,10 +172,8 @@ subst_date(char *out, size_t outsz, const char *input, const struct irc_subst *s
 {
 	struct tm *tm = tm = localtime(&subst->time);
 
-	if (strftime(out, outsz, input, tm) == 0) {
-		errno = ENOMEM;
-		return -1;
-	}
+	if (strftime(out, outsz, input, tm) == 0)
+		return -ENOMEM;
 
 	return 0;
 }
@@ -244,6 +242,7 @@ subst_irc_attrs(const char *key, char **out, size_t *outsz)
 {
 	const char *value;
 	struct attributes attrs;
+	int rc;
 
 	if (!key[0])
 		return ccat(out, outsz, '\x03');
@@ -252,25 +251,25 @@ subst_irc_attrs(const char *key, char **out, size_t *outsz)
 
 	/* At least a foreground or a font attribute is present. */
 	if (attrs.fg[0] || attrs.attrs[0][0]) {
-		if (ccat(out, outsz, '\x03') < 0)
-			return -1;
+		if ((rc = ccat(out, outsz, '\x03')) < 0)
+			return rc;
 
 		/* Foreground. */
-		if ((value = find(irc_colors, attrs.fg)) && scat(out, outsz, value) < 0)
-			return -1;
+		if ((value = find(irc_colors, attrs.fg)) && (rc = scat(out, outsz, value)) < 0)
+			return rc;
 
 		/* Background. */
 		if (attrs.bg[0]) {
-			if (ccat(out, outsz, ',') < 0)
-				return -1;
-			if ((value = find(irc_colors, attrs.bg)) && scat(out, outsz, value) < 0)
-				return -1;
+			if ((rc = ccat(out, outsz, ',')) < 0)
+				return rc;
+			if ((value = find(irc_colors, attrs.bg)) && (rc = scat(out, outsz, value)) < 0)
+				return rc;
 		}
 
 		/* Attributes. */
 		for (size_t i = 0; i < attrs.attrsz; ++i)
-			if ((value = find(irc_attrs, attrs.attrs[i])) && scat(out, outsz, value) < 0)
-				return -1;
+			if ((value = find(irc_attrs, attrs.attrs[i])) && (rc = scat(out, outsz, value)) < 0)
+				return rc;
 	}
 
 	return 0;
@@ -281,6 +280,7 @@ subst_shell_attrs(char *key, char **out, size_t *outsz)
 {
 	const char *value;
 	struct attributes attrs;
+	int rc;
 
 	/* Empty attributes means reset: @{}. */
 	if (!key[0])
@@ -288,31 +288,31 @@ subst_shell_attrs(char *key, char **out, size_t *outsz)
 
 	attributes_parse(key, &attrs);
 
-	if (scat(out, outsz, "\033[") < 0)
-		return -1;
+	if ((rc = scat(out, outsz, "\033[")) < 0)
+		return rc;
 
 	/* Attributes first. */
 	for (size_t i = 0; i < attrs.attrsz; ++i) {
-		if ((value = find(shell_attrs, attrs.attrs[i])) && scat(out, outsz, value) < 0)
-			return -1;
+		if ((value = find(shell_attrs, attrs.attrs[i])) && (rc = scat(out, outsz, value)) < 0)
+			return rc;
 
 		/* Need to append ; if we have still more attributes or colors next. */
-		if ((i < attrs.attrsz || attrs.fg[0] || attrs.bg[0]) && ccat(out, outsz, ';') < 0)
-			return -1;
+		if ((i < attrs.attrsz || attrs.fg[0] || attrs.bg[0]) && (rc = ccat(out, outsz, ';')) < 0)
+			return rc;
 	}
 
 	/* Foreground. */
 	if (attrs.fg[0]) {
-		if ((value = find(shell_fg, attrs.fg)) && scat(out, outsz, value) < 0)
-			return -1;
-		if (attrs.bg[0] && ccat(out, outsz, ';') < 0)
-			return -1;
+		if ((value = find(shell_fg, attrs.fg)) && (rc = scat(out, outsz, value)) < 0)
+			return rc;
+		if (attrs.bg[0] && (rc = ccat(out, outsz, ';')) < 0)
+			return rc;
 	}
 
 	/* Background. */
 	if (attrs.bg[0]) {
-		if ((value = find(shell_bg, attrs.bg)) && scat(out, outsz, value) < 0)
-			return -1;
+		if ((value = find(shell_bg, attrs.bg)) && (rc = scat(out, outsz, value)) < 0)
+			return rc;
 	}
 
 	return ccat(out, outsz, 'm');
@@ -321,29 +321,37 @@ subst_shell_attrs(char *key, char **out, size_t *outsz)
 static int
 subst_default(const char **p, char **out, size_t *outsz, const char *key)
 {
-	return ccat(out, outsz, (*p)[-2]) == 0 &&
-	       ccat(out, outsz, '{') == 0 &&
-	       scat(out, outsz, key) == 0 &&
-	       ccat(out, outsz, '}') == 0;
+	int rc;
+
+	if ((rc = ccat(out, outsz, (*p)[-2])) < 0)
+		return rc;
+	if ((rc = ccat(out, outsz, '{')) < 0)
+		return rc;
+	if ((rc = scat(out, outsz, key)) < 0)
+		return rc;
+	if ((rc = ccat(out, outsz, '}')) < 0)
+		return rc;
+
+	return 0;
 }
 
 static int
 substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *subst)
 {
-	char key[64] = {0}, *end;
+	char key[64] = {}, *end;
 	size_t keysz;
-	int replaced = 1;
+	int rc, replaced = 1;
 
 	if (!**p)
 		return 0;
 
 	/* Find end of construction. */
 	if (!(end = strchr(*p, '}')))
-		return errno = EINVAL, -1;
+		return -EINVAL;
 
 	/* Copy key. */
 	if ((keysz = end - *p) >= sizeof (key))
-		return errno = ENOMEM, -1;
+		return -ENOMEM;
 
 	memcpy(key, *p, keysz);
 
@@ -351,27 +359,27 @@ substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *su
 	case '@':
 		/* attributes */
 		if (subst->flags & IRC_SUBST_IRC_ATTRS) {
-			if (subst_irc_attrs(key, out, outsz) < 0)
-				return -1;
+			if ((rc = subst_irc_attrs(key, out, outsz)) < 0)
+				return rc;
 		} else if (subst->flags & IRC_SUBST_SHELL_ATTRS) {
-			if (subst_shell_attrs(key, out, outsz) < 0)
-				return -1;
+			if ((rc = subst_shell_attrs(key, out, outsz)) < 0)
+				return rc;
 		} else
 			replaced = 0;
 		break;
 	case '#':
 		/* keyword */
 		if (subst->flags & IRC_SUBST_KEYWORDS) {
-			if (subst_keyword(key, out, outsz, subst) < 0)
-				return -1;
+			if ((rc = subst_keyword(key, out, outsz, subst)) < 0)
+				return rc;
 		} else
 			replaced = 0;
 		break;
 	case '$':
 		/* environment variable */
 		if (subst->flags & IRC_SUBST_ENV) {
-			if (subst_env(key, out, outsz) < 0)
-				return -1;
+			if ((rc = subst_env(key, out, outsz)) < 0)
+				return rc;
 		} else
 			replaced = 0;
 		break;
@@ -387,8 +395,8 @@ substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *su
 	}
 
 	/* If substitution was disabled, put the token verbatim. */
-	if (!replaced && subst_default(p, out, outsz, key) < 0)
-		return -1;
+	if (!replaced && (rc = subst_default(p, out, outsz, key)) < 0)
+		return rc;
 
 	/* Move after '}' */
 	*p = end + 1;
@@ -404,6 +412,7 @@ irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst
 	assert(subst);
 
 	char *o = out, *inalloc = NULL;
+	ssize_t rc;
 
 	if (!outsz)
 		return 0;
@@ -417,7 +426,7 @@ irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst
 	if (subst->flags & IRC_SUBST_DATE) {
 		inalloc = irc_util_calloc(1, outsz + 1);
 
-		if (subst_date(inalloc, outsz, in, subst) < 0)
+		if ((rc = subst_date(inalloc, outsz, in, subst)) < 0)
 			goto err;
 
 		in = inalloc;
@@ -433,7 +442,7 @@ irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst
 		 *   "abc #"  -> keyword sequence interrupted, kept as-is.
 		 */
 		if (!is_reserved(*i)) {
-			if (ccat(&o, &outsz, *i++) < 0)
+			if ((rc = ccat(&o, &outsz, *i++)) < 0)
 				goto err;
 
 			continue;
@@ -457,18 +466,18 @@ irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst
 			/* Skip '{'. */
 			++i;
 
-			if (substitute(&i, &o, &outsz, subst) < 0)
+			if ((rc = substitute(&i, &o, &outsz, subst)) < 0)
 				goto err;
 		} else {
 			if (*i == i[-1])
 				++i;
-			if (ccat(&o, &outsz, i[-1]) < 0)
+			if ((rc = ccat(&o, &outsz, i[-1])) < 0)
 				goto err;
 		}
 	}
 
 	if (outsz < 1) {
-		errno = ENOMEM;
+		rc = -ENOMEM;
 		goto err;
 	}
 
@@ -481,5 +490,5 @@ err:
 	free(inalloc);
 	out[0] = '\0';
 
-	return -1;
+	return rc;
 }

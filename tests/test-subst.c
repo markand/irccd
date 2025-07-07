@@ -94,8 +94,7 @@ basics_escape(void)
 	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "abc###xyz", &params), 8);
 	TEST_ASSERT_EQUAL_STRING("abc##xyz", buf);
 
-	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "#{failure", &params), -1);
-	TEST_ASSERT_EQUAL_INT(errno, EINVAL);
+	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "#{failure", &params), -EINVAL);
 	TEST_ASSERT_EQUAL_STRING("", buf);
 }
 
@@ -222,8 +221,7 @@ keywords_enomem(void)
 	};
 	char buf[10] = {};
 
-	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "hello #{target}!", &params), -1);
-	TEST_ASSERT_EQUAL_INT(ENOMEM, errno);
+	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "hello #{target}!", &params), -ENOMEM);
 	TEST_ASSERT_EQUAL_STRING("", buf);
 }
 
@@ -240,8 +238,7 @@ keywords_einval(void)
 	};
 	char buf[1024] = {};
 
-	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "hello #{target!", &params), -1);
-	TEST_ASSERT_EQUAL_INT(EINVAL, errno);
+	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "hello #{target!", &params), -EINVAL);
 	TEST_ASSERT_EQUAL_STRING("", buf);
 }
 
@@ -287,8 +284,7 @@ env_enomem(void)
 		};
 		char buf[10];
 
-		TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "value is ${HOME}", &params), -1);
-		TEST_ASSERT_EQUAL_INT(ENOMEM, errno);
+		TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "value is ${HOME}", &params), -ENOMEM);
 		TEST_ASSERT_EQUAL_STRING("", buf);
 	}
 }
@@ -349,8 +345,7 @@ shattrs_enomem(void)
 	};
 	char buf[10] = {};
 
-	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "@{red}hello world in red@{}", &params), -1);
-	TEST_ASSERT_EQUAL_INT(ENOMEM, errno);
+	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "@{red}hello world in red@{}", &params), -ENOMEM);
 	TEST_ASSERT_EQUAL_STRING("", buf);
 }
 
@@ -393,8 +388,7 @@ ircattrs_enomem(void)
 	};
 	char buf[10] = {};
 
-	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "@{red}hello world in red@{}", &params), -1);
-	TEST_ASSERT_EQUAL_INT(ENOMEM, errno);
+	TEST_ASSERT_EQUAL_INT(irc_subst(buf, sizeof (buf), "@{red}hello world in red@{}", &params), -ENOMEM);
 	TEST_ASSERT_EQUAL_STRING("", buf);
 }
 

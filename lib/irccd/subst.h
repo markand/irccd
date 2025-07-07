@@ -132,7 +132,9 @@ struct irc_subst {
  * \param outsz maximum number of bytes to write in out
  * \param in the template string
  * \param subst the substitution parameters
- * \return the number of bytes written (excluding NUL) or -1 on error
+ * \return the number of bytes written (excluding NUL) on success
+ * \return -ENOMEM if the output buffer was too small
+ * \return -EINVAL if the input string is invalid
  */
 ssize_t
 irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst);
