@@ -474,7 +474,9 @@ irc_server_channels_find(struct irc_server *s, const char *name);
  * \pre s != NULL
  * \param s the server
  * \param fmt the format string
- * \return 0 on success or -1 on error
+ * \return 0 on success
+ * \return -ENOTCONN if the server is not connected
+ * \return -ENOBUFS if the output buffer could not fit the message
  */
 IRC_ATTR_PRINTF(2, 3)
 int

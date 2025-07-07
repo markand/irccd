@@ -283,14 +283,10 @@ msg_parse(struct msg *msg, const char *line, size_t linesz)
 			msg_scan(&ptr, &msg->args[a]);
 	}
 
-	if (a >= IRC_UTIL_SIZE(msg->args)) {
-		errno = EMSGSIZE;
-		return -1;
-	}
-	if (msg->cmd == NULL) {
-		errno = EBADMSG;
-		return -1;
-	}
+	if (a >= IRC_UTIL_SIZE(msg->args))
+		return -EMSGSIZE;
+	if (msg->cmd == NULL)
+		return -EBADMSG;
 
 	return 0;
 }
@@ -619,13 +615,13 @@ conn__socket(struct conn *conn)
 
 	if ((conn->fd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol)) < 0) {
 		irc_log_warn("server %s: socket: %s", conn->parent->name, strerror(errno));
-		return -1;
+		return -errno;
 	}
 	if ((flags = fcntl(conn->fd, F_GETFL)) < 0 || fcntl(conn->fd, F_SETFL, flags | O_NONBLOCK) < 0) {
 		irc_log_warn("server %s: fcntl: %s", conn->parent->name, strerror(errno));
 		close(conn->fd);
 		conn->fd = -1;
-		return -1;
+		return -errno;
 	}
 
 	return 0;
@@ -1114,7 +1110,7 @@ conn_push(struct conn *conn, const char *data, size_t datasz)
 	assert(data);
 
 	if (datasz + 2 >= sizeof (conn->out) - conn->outsz)
-		return -1;
+		return -ENOBUFS;
 
 	memcpy(&conn->out[conn->outsz], data, datasz);
 	conn->outsz += datasz;
@@ -1993,10 +1989,8 @@ irc_server_send_va(struct irc_server *s, const char *fmt, va_list ap)
 	struct conn *conn = s->conn;
 	char buf[IRC_BUF_LEN];
 
-	if (conn->state != CONN_STATE_READY) {
-		errno = ENOTCONN;
-		return -1;
-	}
+	if (conn->state != CONN_STATE_READY)
+		return -ENOTCONN;
 
 	vsnprintf(buf, sizeof (buf), fmt, ap);
 
