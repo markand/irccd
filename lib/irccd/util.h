@@ -225,9 +225,6 @@ irc_util_die(const char *, ...);
 int
 irc_util_stoi(const char *, long long *);
 
-int
-irc_util_stou(const char *, unsigned long long *);
-
 void *
 irc_util_reallocarray(void *, size_t, size_t);
 

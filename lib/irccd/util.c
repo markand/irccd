@@ -208,22 +208,14 @@ irc_util_stoi(const char *s, long long *i)
 	assert(s);
 	assert(i);
 
-	errno = 0;
-	*i = strtoll(s, NULL, 10);
+	const char *errstr;
 
-	return errno == 0 ? 0 : -1;
-}
+	*i = strtonum(s, LLONG_MIN, LLONG_MAX, &errstr);
 
-int
-irc_util_stou(const char *s, unsigned long long *u)
-{
-	assert(s);
-	assert(u);
+	if (errstr)
+		return -errno;
 
-	errno = 0;
-	*u = strtoull(s, NULL, 10);
-
-	return errno == 0 ? 0 : -1;
+	return 0;
 }
 
 void *
