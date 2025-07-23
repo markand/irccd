@@ -1,28 +1,25 @@
-IRC Client Daemon CONTRIBUTING GUIDE
-====================================
+irccd CONTRIBUTING GUIDE
+========================
 
 Read this guide if you want to contribute to irccd. The purpose of this
 document is to describe the steps to submit a patch.
 
-You may submit a patch when:
+First, make sure to follow the project coding style in the [STYLE.md][] file if
+present.
 
-- You want to fix a bug / typo,
-- You want to add a new feature,
-- You want to change something.
+Note to AI powerusers
+---------------------
 
-There a lot of steps before submitting a patch. First, be sure to respect the
-style defined in the STYLE.md file. We never accept patches that do not match
-the rules.
+This project does not accept anything that is produced by an AI agent which
+includes code content, commit message or mail body or any kind of assets.
 
-Subscribe to the mailing list
------------------------------
+If you still do so keep in mind that your submitted content will be ignored
+without any response.
 
-Discussion and patches are sent to the *irccd@malikania.fr* mailing list.
-You need to subscribe by dropping a mail to
-*irccd+subscribe@malikania.fr* first.
+Use your brain.
 
-Enable patchbomb extension
---------------------------
+Optional: enable patchbomb extension
+------------------------------------
 
 While this step is optional, it brings the `hg email` command which makes most
 of your submission for you.
@@ -33,12 +30,12 @@ from the repository in .hg/hgrc).
     [extensions]
     patchbomb =
 
-Then, you need to specify a mail server, if you want to use smtp, you can use
+Then, you need to specify a mail server. If you want to use smtp, you can use
 something like this:
 
     [email]
     from = Your Name <youraddress@yourdomain.tld>
-    to = irccd@malikania.fr
+    to = markand@malikania.fr
 
     [smtp]
     host = yourdomain.tld
@@ -79,11 +76,8 @@ Use the following settings:
 Create your patch
 -----------------
 
-Usually, when you create a patch, you should have your own copy of irccd
-in your directory.
-
-The following steps assumes that you have already cloned the irccd
-repository somewhere.
+When you create a patch, you should have your own copy of the repository in your
+directory.
 
 Note: the recommended way is to create one unique revision.
 
@@ -97,14 +91,15 @@ Commit messages are written using the following syntax:
 
 Replace `topic` with one of the following:
 
-- **cmake**: for the build system,
-- **doc**: for the documentation,
-- **irccd**: irccd libraries and frontend,
-- **irccdctl**: irccd libraries and frontend.
-- **misc**: for miscellaneous files,
-- **plugin xyz**: plugin named xyz.
-- **release**: release management,
-- **tests**: for the unit tests,
+- **make**: for the build system
+- **cmake**: for the build system
+- **doc**: for the documentation
+- **misc**: for miscellaneous files
+- **project**: for general project messages
+- **tests**: for the unit tests
+
+More topics may be used within the project. Check existing commit logs for an
+overview.
 
 ### Quick way
 
@@ -120,12 +115,10 @@ use the following way by disabling the @ bookmark to avoid moving it.
 
 ### Bookmark way
 
-We use Mercurial bookmarks as our workflow but we do share only @ bookmark
-except when a long feature is being developed in parallel. Otherwise bookmarks
-stay locally most of the time.
+You can use Mercurial bookmarks to create a divergent marker from the upstream
+`@` bookmark pointing at the current default branch revision.
 
-When you start working on a new feature, you **must** always start from the @
-bookmark.
+You **must** always start from the @ bookmark.
 
 You can use this workflow if you plan to create a patch that consists of
 multiple revisions.
@@ -139,35 +132,7 @@ Example:
     $ hg commit
     (work)
     $ hg commit
-    $ hg email -r first:last
-
-Here, you must specify **first** and **last** as the initial and last revisions
-respectively. You can check these revisions using `hg log` (also try `hg log -G`
-or the nice TortoiseHg interface).
-
-Example, I've started to work on an a feature named **feature-xyz**, the log
-looks like this:
-
-    changeset:   22:3fb15d8fc454
-    bookmark:    feature-xyz
-    tag:         tip
-    user:        François Jean <fj@gmail.com>
-    date:        Thu Dec 08 16:08:40 2016 +0100
-    summary:     topic: some other changes
-
-    changeset:   21:f27e577c5504
-    user:        François Jean <fj@gmail.com>
-    date:        Thu Dec 08 16:03:06 2016 +0100
-    summary:     topic: some changes
-
-    changeset:   20:777023816ff9
-    bookmark:    @
-    user:        David Demelier <markand@malikania.fr>
-    date:        Thu Dec 08 16:02:26 2016 +0100
-    summary:     misc: fix a bug
-
-The two revisions I want to export are 21 and 22, so I use `hg email -r 21:22`,
-once done, see the section below.
+    $ hg email -B feature-xyz
 
 Additional topics
 -----------------
@@ -177,20 +142,9 @@ Additional topics
 The safest choice is to just pull from the central repository and update to the
 @ bookmark.
 
-    $ hg pull
-    $ hg up @
-
-You can also call `hg rebase` (from rebase extension) to move your revisions on
-top of upstream. If the patches were incorporated verbatim, they will be safely
-discarded automatically.
-
-    $ hg pull
-    $ hg up @
-    $ hg rebase -b feature-xyz -d @
-    $ hg book -d feature-xyz
-
-If you didn't created a bookmark replace **feature-xyz** with your revision
-number.
+    $ hg pull           # pull everything
+    $ hg pull -B @      # bring back @ bookmark (optional but recommended)
+    $ hg up @           # update to the last revision
 
 Finally, if you prefer to remove the revisions you have created, use `hg strip`
 like explained in the see section below.
@@ -205,17 +159,9 @@ the strip extension).
 
 Warning: it will **remove** the revisions from history so use with care.
 
-    $ hg strip -r 21:22         # using the example above
-    $ hg book -d feature-xyz    # delete the bookmark
+    $ hg strip -B feature-xyz   # using the example above
 
-Newer versions of Mercurial support `-B` argument:
-
-    $ hg strip -B feature-xyz   # shortcut
-
-You can just go back on the @ bookmark as it's the safest choice.
-
-    $ hg pull                   # fetch changesets
-    $ hg up @                   # update to @
+You can just go back on the @ bookmark as explained in previous section.
 
 ### How to merge upstream code to continue my patch
 
