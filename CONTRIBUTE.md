@@ -11,7 +11,7 @@ Note to AI powerusers
 ---------------------
 
 This project does not accept anything that is produced by an AI agent which
-includes code content, commit message or mail body or any kind of assets.
+includes code content, commit message, mail body or any kind of assets.
 
 If you still do so keep in mind that your submitted content will be ignored
 without any response.
