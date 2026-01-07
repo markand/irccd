@@ -38,7 +38,7 @@ project(irccd
 	LANGUAGES C
 	DESCRIPTION "IRC Client Daemon"
 	HOMEPAGE_URL "http://projects.malikania.fr/irccd"
-	VERSION 4.1.0
+	VERSION 4.1.1
 )
 
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
@@ -63,7 +63,7 @@ option(IRCCD_WITH_PKGCONFIG "Enable installation of pkg-config file" On)
 option(IRCCD_WITH_SSL "Enable SSL (requires OpenSSL)" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" On)
 
-set(IRCCD_MAN_DATE "April 23, 2025")
+set(IRCCD_MAN_DATE "January 7, 2026")
 set(IRCCD_WITH_UID "irccd" CACHE STRING "Default uid to run irccd as")
 set(IRCCD_WITH_GID "irccd" CACHE STRING "Default gid to run irccd as")
 set(IRCCD_WITH_PKGCONFIGDIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig"

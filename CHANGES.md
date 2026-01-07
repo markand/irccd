@@ -1,6 +1,12 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 4.1.1 2026-01-07
+======================
+
+- Fix minor issue in Irccd.Http API when `curl_multi_fdset` can return `-1` file
+  descriptor.
+
 irccd 4.1.0 2025-04-23
 ======================
 

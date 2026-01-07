@@ -274,9 +274,9 @@ pollable_want(int *frecv, int *fsend, void *data)
 
 	curl_multi_fdset(op->multi, &in, &out, &exc, &maxfd);
 
-	if (FD_ISSET(maxfd, &in))
+	if (maxfd != -1 && FD_ISSET(maxfd, &in))
 		*frecv = 1;
-	if (FD_ISSET(maxfd, &out))
+	if (maxfd != -1 && FD_ISSET(maxfd, &out))
 		*fsend = 1;
 }
 
