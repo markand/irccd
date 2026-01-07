@@ -149,9 +149,9 @@ request_set_events(struct request *req)
 
 	curl_multi_fdset(req->multi, &in, &out, &except, &fd);
 
-	if (FD_ISSET(fd, &in))
+	if (fd != -1 && FD_ISSET(fd, &in))
 		flags |= EV_READ;
-	if (FD_ISSET(fd, &out))
+	if (fd != -1 && FD_ISSET(fd, &out))
 		flags |= EV_WRITE;
 
 	if (req->io.events != flags) {
