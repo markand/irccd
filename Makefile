@@ -30,7 +30,7 @@ HTTP ?= 1
 JS ?= 1
 MAN ?= 1
 SSL ?= 1
-TESTS ?= 0
+TESTS ?= 1
 UID ?= irccd
 
 ifeq ($(OS), Linux)
@@ -146,6 +146,7 @@ LIBEV_OBJS := $(LIBEV_SRCS:.c=.o)
 LIBEV_DEPS := $(LIBEV_SRCS:.c=.d)
 
 LIBEV_CFLAGS += -DEV_CHECK_ENABLE=1
+LIBEV_CFLAGS += -DEV_CHILD_ENABLE=1
 LIBEV_CFLAGS += -DEV_EMBED_ENABLE=0
 LIBEV_CFLAGS += -DEV_IDLE_ENABLE=0
 LIBEV_CFLAGS += -DEV_IO_ENABLE=1
@@ -588,7 +589,7 @@ ifeq ($(JS), 1)
 	TESTS_LIB_SRCS += irccd/jsapi-file.c
 	TESTS_LIB_SRCS += irccd/jsapi-hook.c
 
-	ifeq ($(fdef HTTP), 1)
+	ifeq ($(HTTP), 1)
 		TESTS_LIB_SRCS += irccd/jsapi-http.c
 	endif
 
@@ -645,7 +646,7 @@ TESTS_CFLAGS += -I.
 
 TESTS_LDFLAGS := $(LIBIRCCD_LDFLAGS)
 
-$(TESTS): $(TESTS_LIB_OBJS) $(LIBUNITY) | $(IRCCD)
+$(TESTS): $(TESTS_LIB_OBJS) $(LIBUNITY) $(LIBEV_STATIC) | $(IRCCD)
 
 ifeq ($(JS), 1)
 TESTS_CFLAGS += $(LIBDUKTAPE_CFLAGS)

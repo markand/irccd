@@ -70,7 +70,7 @@ setUp(void)
 	irc_plugin_init(fake, "fake");
 	irc_plugin_set_info(fake, "BEER", "0.0.0.0.0.0.1", "David", "Fake White Beer 2000");
 
-	irc_bot_init(NULL);
+	irc_bot_init();
 	irc_bot_plugin_add(fake);
 	irc_plugin_set_template(plugin, "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}");
 	irc_plugin_set_template(plugin, "info", "info=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{author}:#{license}:#{name}:#{summary}:#{version}");

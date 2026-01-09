@@ -63,7 +63,7 @@ setUp(void)
 	if (!plugin)
 		irc_util_die("could not load plugin\n");
 
-	irc_bot_init(NULL);
+	irc_bot_init();
 	irc_server_incref(server);
 	irc_plugin_set_template(plugin, "draw", "draw=#{channel}:#{command}:#{nickname}:#{plugin}:#{server}");
 	irc_plugin_set_template(plugin, "invalid", "invalid=#{channel}:#{command}:#{nickname}:#{origin}:#{plugin}:#{server}");

@@ -237,7 +237,7 @@ basics_case_insensitive(void)
 int
 main(void)
 {
-	irc_bot_init(NULL);
+	irc_bot_init();
 	irc_log_to_null();
 
 	UNITY_BEGIN();

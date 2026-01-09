@@ -172,7 +172,7 @@ servers_clear(void)
 int
 main(void)
 {
-	irc_bot_init(NULL);
+	irc_bot_init();
 
 	UNITY_BEGIN();
 

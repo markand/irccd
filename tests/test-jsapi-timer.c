@@ -63,7 +63,7 @@ basics_single(void)
 	set_type("Single");
 
 	while (difftime(time(NULL), start) < 3)
-		ev_run(irc_bot_loop(), EVRUN_ONCE);
+		ev_run(EVRUN_ONCE);
 
 	TEST_ASSERT(duk_get_global_string(ctx, "count"));
 	TEST_ASSERT_EQUAL_INT(duk_get_int(ctx, -1), 1);
@@ -77,7 +77,7 @@ basics_repeat(void)
 	set_type("Repeat");
 
 	while (difftime(time(NULL), start) < 3)
-		ev_run(irc_bot_loop(), EVRUN_ONCE);
+		ev_run(EVRUN_ONCE);
 
 	TEST_ASSERT(duk_get_global_string(ctx, "count"));
 	TEST_ASSERT(duk_get_int(ctx, -1) >= 5);
@@ -86,6 +86,8 @@ basics_repeat(void)
 int
 main(void)
 {
+	ev_default_loop(0);
+
 	UNITY_BEGIN();
 
 	RUN_TEST(basics_single);
