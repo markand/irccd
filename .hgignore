@@ -54,3 +54,5 @@
 ^tests/test-rule$
 ^tests/test-subst$
 ^tests/test-util$
+
+^\.cache$

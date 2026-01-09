@@ -1,0 +1,206 @@
+/*
+ * c@watcher@.c -- coroutine watcher support for ev_@watcher@
+ *
+ * Copyright (c) 2025-2026 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <ev.h>
+
+#include "c@watcher@.h"
+
+static void
+c@watcher@_cb(EV_P_ struct ev_@watcher@ *self, int revents)
+{
+	struct c@watcher@ *ev = C@WATCHER@(self, @watcher@);
+
+	if (revents & (@WATCHER_EVENTS@)) {
+#if !defined(NDEBUG)
+		/*
+		 * Make sure user fetched events through the c@watcher@_wait
+		 * function in the meantime.
+		 */
+		if (ev->revents) {
+			fprintf(stderr, "abort: pending events not cleared\n");
+			abort();
+		}
+#endif
+		ev->revents = revents;
+	}
+}
+
+static inline void
+c@watcher@_coro_finalizer(struct c@watcher@_coro *coro)
+{
+#if EV_MULTIPLICITY
+	if (coro->coro.loop)
+		c@watcher@_stop(coro->coro.loop, &coro->@watcher@);
+#else
+	c@watcher@_stop(&coro->@watcher@);
+#endif
+
+	c@watcher@_finish(&coro->@watcher@);
+}
+
+static void
+c@watcher@_coro_entry_cb(EV_P_ struct coro *self)
+{
+	struct c@watcher@_coro *coro = CORO_CONTAINER_OF(self, struct c@watcher@_coro, coro);
+
+	coro->entry(EV_A_ &coro->@watcher@);
+}
+
+static void
+c@watcher@_coro_finalizer_cb(EV_P_ struct coro *self)
+{
+	struct c@watcher@_coro *coro = CORO_CONTAINER_OF(self, struct c@watcher@_coro, coro);
+
+	c@watcher@_coro_finalizer(coro);
+}
+
+void
+c@watcher@_init(struct c@watcher@ *ev)
+{
+	assert(ev);
+
+	ev->revents = 0;
+	ev->@watcher@ = (const struct ev_@watcher@) {};
+	ev_init(&ev->@watcher@, c@watcher@_cb);
+@watcher-init@
+@user-init@
+}
+
+void
+c@watcher@_start(EV_P_ struct c@watcher@ *ev)
+{
+	assert(ev);
+
+	ev_@watcher@_start(EV_A_ &ev->@watcher@);
+}
+
+int
+c@watcher@_active(const struct c@watcher@ *ev)
+{
+	assert(ev);
+
+	return ev->@watcher@.active;
+}
+
+void
+c@watcher@_feed(EV_P_ struct c@watcher@ *ev, int events)
+{
+	assert(ev);
+
+	ev_feed_event(EV_A_ &ev->@watcher@, events);
+}
+
+void
+c@watcher@_stop(EV_P_ struct c@watcher@ *ev)
+{
+	assert(ev);
+
+	ev_@watcher@_stop(EV_A_ &ev->@watcher@);
+}
+
+int
+c@watcher@_ready(struct c@watcher@ *ev)
+{
+	assert(ev);
+
+	int rc = 0;
+
+	if (ev->revents & (@WATCHER_EVENTS@)) {
+		rc = ev->revents;
+		ev->revents = 0;
+	}
+
+	return rc;
+}
+
+int
+c@watcher@_wait(EV_P_ struct c@watcher@ *ev)
+{
+	assert(ev);
+
+	int rc = 0;
+
+	while (!(rc = c@watcher@_ready(ev)))
+		coro_yield();
+
+	return rc;
+}
+@watcher-funcs@
+@user-funcs@
+void
+c@watcher@_finish(struct c@watcher@ *ev)
+{
+	assert(ev);
+	assert(ev->@watcher@.active == 0);
+
+	ev->revents = 0;
+@watcher-finish@
+@user-finish@
+}
+
+int
+c@watcher@_coro_spawn(EV_P_ struct c@watcher@_coro *coro, const struct c@watcher@_coro_def *def)
+{
+	assert(coro);
+	assert(def);
+
+	int rc;
+
+	coro->entry = def->entry;
+	c@watcher@_init(&coro->@watcher@);
+
+	/*
+	 * Watchers should be executed before attached coroutines to allow
+	 * resuming them if an event happened.
+	 */
+	ev_set_priority(&coro->@watcher@.@watcher@, CORO_PRI_MAX - 1);
+@watcher-coro-spawn@
+@user-coro-spawn@
+
+	/* Automatically start the watcher unless disabled. */
+	if (!(def->flags & CORO_INACTIVE))
+		c@watcher@_start(EV_A_ &coro->@watcher@);
+
+	coro_init(&coro->coro);
+
+	/* All other fields are available for customization. */
+	coro_set_name(&coro->coro, def->name);
+	coro_set_stack_size(&coro->coro, def->stack_size);
+	coro_set_flags(&coro->coro, def->flags);
+	coro_set_entry(&coro->coro, c@watcher@_coro_entry_cb);
+
+	/*
+	 * Use a default finalizer if NULL to conveniently stop and destroy the
+	 * underlying watcher.
+	 */
+	if (!def->finalizer)
+		coro_set_finalizer(&coro->coro, c@watcher@_coro_finalizer_cb);
+	else
+		coro_set_finalizer(&coro->coro, def->finalizer);
+
+	if ((rc = coro_create(EV_A_ &coro->coro)) < 0)
+		c@watcher@_stop(EV_A_ &coro->@watcher@);
+	else
+		coro_resume(&coro->coro);
+
+	return rc;
+}

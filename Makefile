@@ -55,8 +55,8 @@ LIBCURL_LDFLAGS ?= $(shell $(PKGCONF) --libs libcurl)
 endif
 
 ifeq ($(SSL), 1)
-LIBSSL_CFLAGS ?= $(shell $(PKGCONF) --cflags openssl)
-LIBSSL_LDFLAGS ?= $(shell $(PKGCONF) --libs openssl)
+LIBSSL_CFLAGS ?= $(shell $(PKGCONF) --cflags libtls)
+LIBSSL_LDFLAGS ?= $(shell $(PKGCONF) --libs libtls)
 endif
 
 MAJOR := 5

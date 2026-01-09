@@ -62,16 +62,16 @@
 /**
  * \brief Set to 1 if HTTP is enabled, 0 otherwise
  */
-#define HTTP @HTTP@
+#define IRCCD_WITH_HTTP @HTTP@
 
 /**
  * \brief Set to 1 if Javascript is enabled, 0 otherwise
  */
-#define JS @JS@
+#define IRCCD_WITH_JS @JS@
 
 /**
  * \brief Set to 1 if OpenSSL is enabled, 0 otherwise
  */
-#define SSL @SSL@
+#define IRCCD_WITH_SSL @SSL@
 
 #endif /* !IRCCD_CONFIG_H */
