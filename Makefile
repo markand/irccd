@@ -34,7 +34,7 @@ TESTS ?= 1
 UID ?= irccd
 
 ifeq ($(OS), Linux)
-	SYSTEMD ?= 1
+SYSTEMD ?= 1
 endif
 
 PREFIX ?= /usr/local
@@ -65,8 +65,8 @@ PATCH := 0
 VERSION := $(MAJOR).$(MINOR).$(PATCH)
 
 # Determine gcc/clang.
-CC_IS_GCC        := $(shell $(CC) --version | head -n1 | grep -qE '(gcc|gnu)' && echo 1)
-CC_IS_CLANG      := $(shell $(CC) -E -dM -xc /dev/null | grep -qE '^#define __clang__ 1' && echo 1)
+CC_IS_GCC   := $(shell $(CC) --version | head -n1 | grep -qE '(gcc|gnu)' && echo 1)
+CC_IS_CLANG := $(shell $(CC) -E -dM -xc /dev/null | grep -qE '^#define __clang__ 1' && echo 1)
 
 # Some warnings.
 ifeq ($(CC_IS_GCC), 1)
@@ -114,17 +114,21 @@ compile_commands.json: out-of-date
 
 ifeq ($(JS), 1)
 
-LIBDUKTAPE := extern/libduktape/libduktape.a
+LIBDUKTAPE_DIR = extern/libduktape
 
-LIBDUKTAPE_SRCS := extern/libduktape/duktape.c
-LIBDUKTAPE_OBJS := $(LIBDUKTAPE_SRCS:.c=.o)
-LIBDUKTAPE_DEPS := $(LIBDUKTAPE_SRCS:.c=.d)
+LIBDUKTAPE_SRCS = $(LIBDUKTAPE_DIR)/duktape.c
+LIBDUKTAPE_OBJS = $(LIBDUKTAPE_SRCS:.c=.o)
+LIBDUKTAPE_DEPS = $(LIBDUKTAPE_SRCS:.c=.d)
 
-LIBDUKTAPE_CFLAGS += -Iextern/libduktape
+LIBDUKTAPE_CFLAGS += -I$(LIBDUKTAPE_DIR)
 LIBDUKTAPE_LDFLAGS += -lm
 
+LIBDUKTAPE = $(LIBDUKTAPE_DIR)/libduktape.a
+LIBDUKTAPE_STATIC = $(LIBDUKTAPE)
+
 $(LIBDUKTAPE): $(LIBDUKTAPE_OBJS)
-$(LIBDUKTAPE_OBJS): private override CFLAGS := $(LIBDUKTAPE_CFLAGS)
+$(LIBDUKTAPE_OBJS): private override CFLAGS += $(LIBDUKTAPE_CFLAGS)
+$(LIBDUKTAPE_OBJS): private override CFLAGS += -Wno-unused-but-set-variable
 
 all:: $(LIBDUKTAPE)
 
@@ -141,9 +145,9 @@ endif
 
 LIBEV_DIR = extern/libev
 
-LIBEV_SRCS += extern/libev/ev.c
-LIBEV_OBJS := $(LIBEV_SRCS:.c=.o)
-LIBEV_DEPS := $(LIBEV_SRCS:.c=.d)
+LIBEV_SRCS = $(LIBEV_DIR)/ev.c
+LIBEV_OBJS = $(LIBEV_SRCS:.c=.o)
+LIBEV_DEPS = $(LIBEV_SRCS:.c=.d)
 
 LIBEV_CFLAGS += -DEV_CHECK_ENABLE=1
 LIBEV_CFLAGS += -DEV_CHILD_ENABLE=1
@@ -181,7 +185,11 @@ LIBEV = $(LIBEV_DIR)/libev.a
 LIBEV_STATIC = $(LIBEV)
 
 $(LIBEV): $(LIBEV_OBJS)
-$(LIBEV_OBJS): private override CFLAGS := $(LIBEV_CFLAGS) -Wno-unused-value
+$(LIBEV_OBJS): private override CFLAGS += $(LIBEV_CFLAGS)
+$(LIBEV_OBJS): private override CFLAGS += -Wno-unused-function
+$(LIBEV_OBJS): private override CFLAGS += -Wno-unused-parameter
+$(LIBEV_OBJS): private override CFLAGS += -Wno-unused-value
+$(LIBEV_OBJS): private override CFLAGS += -Wno-sign-compare
 
 all:: $(LIBEV)
 
@@ -198,7 +206,6 @@ LIBMINICORO_DIR = extern/libminicoro
 LIBMINICORO = $(LIBMINICORO_DIR)/libminicoro.a
 
 LIBMINICORO_SRCS = $(LIBMINICORO_DIR)/minicoro.c
-
 LIBMINICORO_OBJS = $(LIBMINICORO_SRCS:.c=.o)
 LIBMINICORO_DEPS = $(LIBMINICORO_SRCS:.c=.d)
 
@@ -226,13 +233,16 @@ LIBUTLIST_CFLAGS := -Iextern/libutlist
 
 # {{{ libunity
 
-LIBUNITY := extern/libunity/libunity.a
+LIBUNITY_DIR = extern/libunity
 
-LIBUNITY_SRCS := extern/libunity/unity.c
-LIBUNITY_OBJS := $(LIBUNITY_SRCS:.c=.o)
-LIBUNITY_DEPS := $(LIBUNITY_SRCS:.c=.d)
+LIBUNITY_SRCS = $(LIBUNITY_DIR)/unity.c
+LIBUNITY_OBJS = $(LIBUNITY_SRCS:.c=.o)
+LIBUNITY_DEPS = $(LIBUNITY_SRCS:.c=.d)
 
-LIBUNITY_CFLAGS += -Iextern/libunity
+LIBUNITY_CFLAGS += -I$(LIBUNITY_DIR)
+
+LIBUNITY = $(LIBUNITY_DIR)/libunity.a
+LIBUNITY_STATIC = $(LIBUNITY)
 
 $(LIBUNITY): $(LIBUNITY_OBJS)
 $(LIBUNITY_OBJS): private override CFLAGS := $(LIBUNITY_CFLAGS)
@@ -265,7 +275,7 @@ LIBCORO_LDFLAGS += $(LIBMINICORO_LDFLAGS)
 LIBCORO_LDFLAGS += $(LIBEV_LDFLAGS)
 
 LIBCORO = $(LIBCORO_DIR)/libcoro.a
-LIBCORO_STATIC = $(LIBCORO) $(LIBEV_STATIC) $(LIBMINICORO_STATIC)
+LIBCORO_STATIC = $(LIBCORO) $(LIBMINICORO_STATIC) $(LIBEV_STATIC)
 
 $(LIBCORO): $(LIBCORO_OBJS)
 $(LIBCORO_OBJS): private override CFLAGS += $(LIBCORO_CFLAGS)
@@ -380,8 +390,8 @@ ifeq ($(JS), 1)
 	IRCCD_SRCS += irccd/unicode.c
 endif
 
-IRCCD_OBJS := $(IRCCD_SRCS:.c=.o)
-IRCCD_DEPS := $(IRCCD_SRCS:.c=.d)
+IRCCD_OBJS = $(IRCCD_SRCS:.c=.o)
+IRCCD_DEPS = $(IRCCD_SRCS:.c=.d)
 
 $(IRCCD): $(IRCCD_OBJS) $(LIBIRCCD_STATIC)
 $(IRCCD): private override LDLIBS += $(LIBIRCCD_LDFLAGS)
@@ -422,7 +432,7 @@ install::
 
 # {{{ irccdctl
 
-IRCCDCTL := irccdctl/irccdctl
+IRCCDCTL = irccdctl/irccdctl
 
 $(IRCCDCTL): $(LIBIRCCD)
 $(IRCCDCTL): private override CFLAGS += $(LIBIRCCD_CFLAGS)
@@ -509,9 +519,9 @@ endif
 
 # {{{ examples
 
-CONFIGS := examples/irccd.conf.sample
+CONFIGS = examples/irccd.conf.sample
 
-ASSETS := examples/sample-hook.sh
+ASSETS += examples/sample-hook.sh
 ASSETS += examples/sample-plugin.c
 
 ifeq ($(JS), 1)
@@ -530,8 +540,8 @@ install::
 
 ifeq ($(MAN), 1)
 
-MAN_DATE := June 18, 2025
-MAN_SUBST := sed -e "s|@IRCCD_MAN_DATE@|$(MAN_DATE)|g"
+MAN_DATE = June 18, 2025
+MAN_SUBST = sed -e "s|@IRCCD_MAN_DATE@|$(MAN_DATE)|g"
 
 install::
 	mkdir -p $(DESTDIR)$(MANDIR)/man1
@@ -570,7 +580,7 @@ ifeq ($(TESTS), 1)
 # for the tests.
 #
 
-TESTS_LIB_SRCS := lib/irccd/channel.c
+TESTS_LIB_SRCS += lib/irccd/channel.c
 TESTS_LIB_SRCS += lib/irccd/hook.c
 TESTS_LIB_SRCS += lib/irccd/irccd.c
 TESTS_LIB_SRCS += lib/irccd/log.c
@@ -606,10 +616,10 @@ endif
 
 TESTS_LIB_SRCS += tests/mock/server.c
 
-TESTS_LIB_OBJS := $(TESTS_LIB_SRCS:.c=.o)
-TESTS_LIB_DEPS := $(TESTS_LIB_SRCS:.c=.d)
+TESTS_LIB_OBJS = $(TESTS_LIB_SRCS:.c=.o)
+TESTS_LIB_DEPS = $(TESTS_LIB_SRCS:.c=.d)
 
-TESTS := tests/test-bot
+TESTS += tests/test-bot
 TESTS += tests/test-channel
 TESTS += tests/test-dl-plugin
 TESTS += tests/test-event
@@ -636,15 +646,15 @@ ifeq ($(JS), 1)
 	TESTS += tests/test-plugin-tictactoe
 endif
 
-TESTS_DEPS := $(addsuffix .d,$(TESTS))
+TESTS_DEPS = $(addsuffix .d,$(TESTS))
 
-TESTS_CFLAGS := $(LIBUNITY_CFLAGS)
+TESTS_CFLAGS += $(LIBUNITY_CFLAGS)
 TESTS_CFLAGS += $(LIBIRCCD_CFLAGS)
 TESTS_CFLAGS += -DTOP=\"$(CURDIR)\"
 TESTS_CFLAGS += -DIRCCD_EXECUTABLE=\"$(IRCCD)\"
 TESTS_CFLAGS += -I.
 
-TESTS_LDFLAGS := $(LIBIRCCD_LDFLAGS)
+TESTS_LDFLAGS += $(LIBIRCCD_LDFLAGS)
 
 $(TESTS): $(TESTS_LIB_OBJS) $(LIBUNITY) $(LIBEV_STATIC) | $(IRCCD)
 
@@ -652,7 +662,7 @@ ifeq ($(JS), 1)
 TESTS_CFLAGS += $(LIBDUKTAPE_CFLAGS)
 TESTS_LDFLAGS += $(LIBDUKTAPE_LDFLAGS)
 
-$(TESTS): $(LIBDUKTAPE)
+$(TESTS): $(LIBDUKTAPE_STATIC)
 endif
 
 ifeq ($(HTTP), 1)
