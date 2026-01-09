@@ -1,7 +1,7 @@
 /*
  * server.h -- an IRC server
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -56,6 +56,7 @@ extern "C" {
 #define IRC_SERVER_DEFAULT_CTCP_SOURCE "http://hg.malikania.fr/irccd"
 
 struct irc_channel;
+struct irc_server_conn;
 
 /**
  * \brief IRC server options.

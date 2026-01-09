@@ -1,7 +1,7 @@
 /*
  * irccd.c -- main irccd object
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -37,11 +37,6 @@
 #include "rule.h"
 #include "server.h"
 #include "util.h"
-
-/* Private bot context. */
-static struct {
-	struct ev_loop *loop;
-} priv = {};
 
 /* Public bot context. */
 static struct irccd bot = {};
@@ -209,20 +204,15 @@ is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 }
 
 void
-irc_bot_init(struct ev_loop *loop)
+irc_bot_init(void *)
 {
 	irc_log_to_console();
-
-	if (!loop)
-		loop = ev_default_loop(0);
-
-	priv.loop = loop;
 }
 
-struct ev_loop *
+void *
 irc_bot_loop(void)
 {
-	return priv.loop;
+	return NULL;
 }
 
 int

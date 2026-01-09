@@ -1,7 +1,7 @@
 #
 # Makefile -- GNU makefile for irccd
 #
-# Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,7 @@ HTTP ?= 1
 JS ?= 1
 MAN ?= 1
 SSL ?= 1
-TESTS ?= 1
+TESTS ?= 0
 UID ?= irccd
 
 ifeq ($(OS), Linux)
@@ -64,6 +64,18 @@ MINOR := 0
 PATCH := 0
 VERSION := $(MAJOR).$(MINOR).$(PATCH)
 
+# Determine gcc/clang.
+CC_IS_GCC        := $(shell $(CC) --version | head -n1 | grep -qE '(gcc|gnu)' && echo 1)
+CC_IS_CLANG      := $(shell $(CC) -E -dM -xc /dev/null | grep -qE '^#define __clang__ 1' && echo 1)
+
+# Some warnings.
+ifeq ($(CC_IS_GCC), 1)
+override CFLAGS += -Wno-format-truncation
+endif
+ifeq ($(CC_IS_CLANG), 1)
+override CFLAGS += -Wno-c23-extensions -Wno-unused-function
+endif
+
 # {{{ default rules & targets
 
 override CFLAGS += -Wall -Wextra -MMD
@@ -85,6 +97,16 @@ clean::
 
 .PHONY: install
 install::
+
+.PHONY: out-of-date
+out-of-date:
+
+# Convenient target to regenerate compile_commands.json.
+compile_commands.json: out-of-date
+	@$(MAKE) --always-make --dry-run all \
+		| grep -wE -- "($(CC)|$(HOST_CC))" \
+		| jq -nR '[inputs|{directory:"$(CURDIR)", command:., file: match("[^ ]+[.]c").string[0:]}]' \
+		> $@
 
 # }}}
 
@@ -117,21 +139,24 @@ endif
 
 # {{{ libev
 
-LIBEV := extern/libev/libev.a
+LIBEV_DIR = extern/libev
 
 LIBEV_SRCS += extern/libev/ev.c
 LIBEV_OBJS := $(LIBEV_SRCS:.c=.o)
 LIBEV_DEPS := $(LIBEV_SRCS:.c=.d)
 
-LIBEV_CFLAGS := -DEV_CHECK_ENABLE=0
+LIBEV_CFLAGS += -DEV_CHECK_ENABLE=1
 LIBEV_CFLAGS += -DEV_EMBED_ENABLE=0
 LIBEV_CFLAGS += -DEV_IDLE_ENABLE=0
+LIBEV_CFLAGS += -DEV_IO_ENABLE=1
+LIBEV_CFLAGS += -DEV_MULTIPLICITY=0
 LIBEV_CFLAGS += -DEV_NO_SMP=1
 LIBEV_CFLAGS += -DEV_NO_THREADS=1
 LIBEV_CFLAGS += -DEV_PERIODIC_ENABLE=0
-LIBEV_CFLAGS += -DEV_PREPARE_ENABLE=0
+LIBEV_CFLAGS += -DEV_PREPARE_ENABLE=1
 LIBEV_CFLAGS += -DEV_STANDALONE=1
 LIBEV_CFLAGS += -DEV_STAT_ENABLE=0
+LIBEV_CFLAGS += -DEV_TIMER_ENABLE=1
 LIBEV_CFLAGS += -DEV_USE_CLOCK_SYSCALL=1
 LIBEV_CFLAGS += -DEV_USE_FLOOR=1
 LIBEV_CFLAGS += -DEV_USE_IOURING=0
@@ -149,7 +174,10 @@ LIBEV_CFLAGS += -DEV_USE_SIGNALFD=1
 LIBEV_CFLAGS += -DEV_USE_TIMERFD=1
 endif
 
-LIBEV_CFLAGS += -Iextern/libev
+LIBEV_CFLAGS += -I$(LIBEV_DIR)
+
+LIBEV = $(LIBEV_DIR)/libev.a
+LIBEV_STATIC = $(LIBEV)
 
 $(LIBEV): $(LIBEV_OBJS)
 $(LIBEV_OBJS): private override CFLAGS := $(LIBEV_CFLAGS) -Wno-unused-value
@@ -160,6 +188,32 @@ clean::
 	rm -f $(LIBEV) $(LIBEV_DEPS) $(LIBEV_OBJS)
 
 -include $(LIBEV_DEPS)
+
+# }}}
+
+# {{{ libminicoro
+
+LIBMINICORO_DIR = extern/libminicoro
+LIBMINICORO = $(LIBMINICORO_DIR)/libminicoro.a
+
+LIBMINICORO_SRCS = $(LIBMINICORO_DIR)/minicoro.c
+
+LIBMINICORO_OBJS = $(LIBMINICORO_SRCS:.c=.o)
+LIBMINICORO_DEPS = $(LIBMINICORO_SRCS:.c=.d)
+
+LIBMINICORO_CFLAGS += -I$(LIBMINICORO_DIR)
+
+LIBMINICORO_STATIC = $(LIBMINICORO)
+
+$(LIBMINICORO): $(LIBMINICORO_OBJS)
+$(LIBMINICORO_OBJS): private override CFLAGS += $(LIBMINICORO_CFLAGS)
+
+all:: $(LIBMINICORO)
+
+clean::
+	rm -f $(LIBMINICORO) $(LIBMINICORO_DEPS) $(LIBMINICORO_OBJS)
+
+-include $(LIBMINICORO_DEPS)
 
 # }}}
 
@@ -191,39 +245,72 @@ clean::
 
 # }}}
 
+# {{{ libcoro
+
+LIBCORO_DIR = extern/libcoro
+
+LIBCORO_SRCS += $(LIBCORO_DIR)/coro/cio.c
+LIBCORO_SRCS += $(LIBCORO_DIR)/coro/coro.c
+LIBCORO_SRCS += $(LIBCORO_DIR)/coro/ctimer.c
+
+LIBCORO_OBJS = $(LIBCORO_SRCS:.c=.o)
+LIBCORO_DEPS = $(LIBCORO_SRCS:.c=.d)
+
+LIBCORO_CFLAGS += $(LIBMINICORO_CFLAGS)
+LIBCORO_CFLAGS += $(LIBEV_CFLAGS)
+LIBCORO_CFLAGS += -I$(LIBCORO_DIR)
+
+LIBCORO_LDFLAGS += $(LIBMINICORO_LDFLAGS)
+LIBCORO_LDFLAGS += $(LIBEV_LDFLAGS)
+
+LIBCORO = $(LIBCORO_DIR)/libcoro.a
+LIBCORO_STATIC = $(LIBCORO) $(LIBEV_STATIC) $(LIBMINICORO_STATIC)
+
+$(LIBCORO): $(LIBCORO_OBJS)
+$(LIBCORO_OBJS): private override CFLAGS += $(LIBCORO_CFLAGS)
+
+all:: $(LIBCORO)
+
+clean::
+	rm -f $(LIBCORO) $(LIBCORO_DEPS) $(LIBCORO_OBJS)
+
+-include $(LIBCORO_DEPS)
+
+# }}}
+
 # {{{ libirccd
 
-LIBIRCCD = lib/libirccd.a
+LIBIRCCD_DIR = lib
 
-LIBIRCCD_SRCS += lib/irccd/channel.c
-LIBIRCCD_SRCS += lib/irccd/event.c
-LIBIRCCD_SRCS += lib/irccd/hook.c
-LIBIRCCD_SRCS += lib/irccd/irccd.c
-LIBIRCCD_SRCS += lib/irccd/log.c
-LIBIRCCD_SRCS += lib/irccd/plugin.c
-LIBIRCCD_SRCS += lib/irccd/rule.c
-LIBIRCCD_SRCS += lib/irccd/server.c
-LIBIRCCD_SRCS += lib/irccd/subst.c
-LIBIRCCD_SRCS += lib/irccd/util.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/channel.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/event.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/hook.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/irccd.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/log.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/plugin.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/rule.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/server.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/subst.c
+LIBIRCCD_SRCS += $(LIBIRCCD_DIR)/irccd/util.c
 
 LIBIRCCD_OBJS = $(LIBIRCCD_SRCS:.c=.o)
 LIBIRCCD_DEPS = $(LIBIRCCD_SRCS:.c=.d)
 
-LIBIRCCD_CFLAGS += $(LIBEV_CFLAGS)
-LIBIRCCD_CFLAGS += $(LIBUTLIST_CFLAGS)
 LIBIRCCD_CFLAGS += $(LIBBSD_CFLAGS)
-LIBIRCCD_CFLAGS += -Ilib
+LIBIRCCD_CFLAGS += $(LIBUTLIST_CFLAGS)
+LIBIRCCD_CFLAGS += $(LIBCORO_CFLAGS)
+LIBIRCCD_CFLAGS += -I$(LIBIRCCD_DIR)
 
-LIBIRCCD_LDFLAGS += $(LIBEV)
-LIBIRCCD_LDFLAGS += $(LIBUTLIST_LDFLAGS)
 LIBIRCCD_LDFLAGS += $(LIBBSD_LDFLAGS)
+LIBIRCCD_LDFLAGS += $(LIBUTLIST_LDFLAGS)
+LIBIRCCD_LDFLAGS += $(LIBCORO_LDFLAGS)
 
 ifeq ($(SSL), 1)
 LIBIRCCD_CFLAGS += $(LIBSSL_CFLAGS)
 LIBIRCCD_LDFLAGS += $(LIBSSL_LDFLAGS)
 endif
 
-lib/irccd/config.h: lib/irccd/config.h.in
+$(LIBIRCCD_DIR)/irccd/config.h: $(LIBIRCCD_DIR)/irccd/config.h.in
 	sed \
 		-e "s,@HTTP@,$(HTTP),g" \
 		-e "s,@JS@,$(JS),g" \
@@ -237,9 +324,12 @@ lib/irccd/config.h: lib/irccd/config.h.in
 		-e "s,@VARDIR@,$(VARDIR),g" \
 		< $< > $@
 
-$(LIBIRCCD): $(LIBIRCCD_OBJS) | $(LIBEV)
-$(LIBIRCCD_SRCS): lib/irccd/config.h
-$(LIBIRCCD_OBJS): private override CFLAGS += $(LIBBSD_CFLAGS) $(LIBEV_CFLAGS) $(LIBUTLIST_CFLAGS)
+LIBIRCCD = $(LIBIRCCD_DIR)/libirccd.a
+LIBIRCCD_STATIC = $(LIBIRCCD) $(LIBCORO_STATIC)
+
+$(LIBIRCCD): $(LIBIRCCD_OBJS)
+$(LIBIRCCD_SRCS): $(LIBIRCCD_DIR)/irccd/config.h
+$(LIBIRCCD_OBJS): private override CFLAGS += $(LIBIRCCD_CFLAGS)
 
 all:: $(LIBIRCCD)
 
@@ -248,7 +338,7 @@ clean::
 
 install::
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)/irccd
-	cp lib/irccd/*.h $(DESTDIR)$(INCLUDEDIR)/irccd
+	cp $(LIBIRCCD_DIR)/irccd/*.h $(DESTDIR)$(INCLUDEDIR)/irccd
 	mkdir -p $(DESTDIR)$(LIBDIR)/share/pkgconfig
 	sed \
 		-e "s,@INCLUDEDIR@,$(INCLUDEDIR),g" \
@@ -292,7 +382,7 @@ endif
 IRCCD_OBJS := $(IRCCD_SRCS:.c=.o)
 IRCCD_DEPS := $(IRCCD_SRCS:.c=.d)
 
-$(IRCCD): $(IRCCD_OBJS) $(LIBIRCCD)
+$(IRCCD): $(IRCCD_OBJS) $(LIBIRCCD_STATIC)
 $(IRCCD): private override LDLIBS += $(LIBIRCCD_LDFLAGS)
 
 $(IRCCD_OBJS): | $(LIBIRCCD)

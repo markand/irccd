@@ -7,7 +7,7 @@ irccd 5.0.0 ????-??-??
 This is a major release. See MIGRATING.md file for more information.
 
 The key highlight of this release is the integration of libev as the main loop
-making the code slightly more portable, performant and simpler.
+and coroutines, making the code simpler and more expressive.
 
 Build system
 ------------
@@ -32,6 +32,8 @@ irccd
   longer an option. As an IRC bot, it make sense that a server should be
   reconnected permanently.
 - All deferred functions have been removed.
+- The server connection procedure is now implemented using coroutines for a
+  more readable code logic.
 
 misc
 ----

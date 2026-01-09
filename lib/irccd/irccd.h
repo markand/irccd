@@ -1,7 +1,7 @@
 /*
  * irccd.h -- main irccd object
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -53,14 +53,14 @@ extern const struct irccd *irccd;
  * \param loop the libev event loop to pass (maybe NULL)
  */
 void
-irc_bot_init(struct ev_loop *loop);
+irc_bot_init(void *loop);
 
 /**
  * Return the event loop associated with the bot.
  *
  * \return the event loop
  */
-struct ev_loop *
+void *
 irc_bot_loop(void);
 
 /**

@@ -1,7 +1,7 @@
 /*
  * peer.c -- client connected to irccd
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -1112,7 +1112,7 @@ output(struct peer *p)
 }
 
 static void
-io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
+io_cb(struct ev_io *self, int revents)
 {
 	struct peer *peer;
 	int rc = 0;
@@ -1125,7 +1125,7 @@ io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
 		rc = output(peer);
 
 	if (rc < 0) {
-		ev_io_stop(loop, &peer->io_fd);
+		ev_io_stop(&peer->io_fd);
 		peer->on_close(peer);
 	}
 }
@@ -1139,7 +1139,7 @@ peer_new(int fd)
 	p->fd = fd;
 
 	ev_io_init(&p->io_fd, io_cb, fd, EV_READ);
-	ev_io_start(irc_bot_loop(), &p->io_fd);
+	ev_io_start(&p->io_fd);
 
 	return p;
 }
@@ -1169,9 +1169,9 @@ peer_push(struct peer *p, const char *fmt, ...)
 	memcpy(&p->out[p->outsz], buf, len);
 	p->outsz += len;
 
-	ev_io_stop(irc_bot_loop(), &p->io_fd);
+	ev_io_stop(&p->io_fd);
 	ev_io_modify(&p->io_fd, EV_READ | EV_WRITE);
-	ev_io_start(irc_bot_loop(), &p->io_fd);
+	ev_io_start(&p->io_fd);
 
 	return 0;
 }
@@ -1181,7 +1181,7 @@ peer_free(struct peer *p)
 {
 	assert(p);
 
-	ev_io_stop(irc_bot_loop(), &p->io_fd);
+	ev_io_stop(&p->io_fd);
 
 	if (p->fd != -1) {
 		close(p->fd);

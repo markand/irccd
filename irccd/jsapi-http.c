@@ -1,7 +1,7 @@
 /*
  * jsapi-http.c -- Irccd.Http API
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -69,7 +69,7 @@ request_free(struct request *req)
 	if (!req)
 		return;
 
-	ev_io_stop(irc_bot_loop(), &req->io);
+	ev_io_stop(&req->io);
 
 	if (req->curl) {
 		if (req->multi)
@@ -155,9 +155,9 @@ request_set_events(struct request *req)
 		flags |= EV_WRITE;
 
 	if (req->io.events != flags) {
-		ev_io_stop(irc_bot_loop(), &req->io);
+		ev_io_stop(&req->io);
 		ev_io_set(&req->io, fd, flags);
-		ev_io_start(irc_bot_loop(), &req->io);
+		ev_io_start(&req->io);
 	}
 }
 
@@ -210,9 +210,8 @@ request_complete(struct request *req)
 }
 
 static void
-request_io_cb(struct ev_loop *loop, struct ev_io *self, int revents)
+request_io_cb(struct ev_io *self, int revents)
 {
-	(void)loop;
 	(void)revents;
 
 	struct request *req;

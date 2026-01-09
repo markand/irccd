@@ -1,7 +1,7 @@
 /*
  * irccd.c -- irccd(1) main file
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -151,21 +151,19 @@ run(int argc, char **argv)
 }
 
 static void
-sig_cb(struct ev_loop *loop, struct ev_signal *self, int revents)
+sig_cb(struct ev_signal *self, int revents)
 {
 	(void)loop;
 	(void)revents;
 
 	irc_log_info("irccd: stopping on signal %d", self->signum);
-	ev_break(loop, EVBREAK_ALL);
+	ev_break(EVBREAK_ALL);
 }
 
 static void
 init(void)
 {
-	loop = ev_loop_new(0);
-
-	irc_bot_init(loop);
+	irc_bot_init(NULL);
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
 
 #if IRCCD_WITH_JS == 1
@@ -174,8 +172,8 @@ init(void)
 
 	ev_signal_init(&sig_int, sig_cb, SIGINT);
 	ev_signal_init(&sig_term, sig_cb, SIGTERM);
-	ev_signal_start(loop, &sig_int);
-	ev_signal_start(loop, &sig_term);
+	ev_signal_start(&sig_int);
+	ev_signal_start(&sig_term);
 }
 
 static inline void
@@ -211,6 +209,8 @@ main(int argc, char **argv)
 {
 	int ch, verbose = 0;
 
+	ev_default_loop(0);
+
 	while ((ch = getopt(argc, argv, "c:v")) != -1) {
 		switch (ch) {
 		case 'c':
@@ -240,6 +240,6 @@ main(int argc, char **argv)
 	if (verbose)
 		irc_log_set_verbose(1);
 
-	ev_loop(loop, 0);
+	ev_loop(0);
 	finish();
 }

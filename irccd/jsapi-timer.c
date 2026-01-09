@@ -1,7 +1,7 @@
 /*
  * jsapi-timer.c -- Irccd.Timer API
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -44,9 +44,8 @@ struct stimer {
 };
 
 static void
-stimer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
+stimer_cb(struct ev_timer *self, int revents)
 {
-	(void)loop;
 	(void)revents;
 
 	const struct irc_plugin *plg;
@@ -78,19 +77,19 @@ stimer_init(struct stimer *st, enum stimer_type type, unsigned int duration)
 static inline void
 stimer_start(struct stimer *st)
 {
-	ev_timer_start(irc_bot_loop(), &st->timer);
+	ev_timer_start(&st->timer);
 }
 
 static inline void
 stimer_restart(struct stimer *st)
 {
-	ev_timer_again(irc_bot_loop(), &st->timer);
+	ev_timer_again(&st->timer);
 }
 
 static inline void
 stimer_stop(struct stimer *st)
 {
-	ev_timer_stop(irc_bot_loop(), &st->timer);
+	ev_timer_stop(&st->timer);
 }
 
 static struct stimer *

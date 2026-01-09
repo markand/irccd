@@ -1,7 +1,7 @@
 /*
  * hook.c -- irccd hooks
  *
- * Copyright (c) 2013-2025 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -132,7 +132,7 @@ make_args(const struct irc_hook *h, const struct irc_event *ev)
 }
 
 static void
-child_cb(struct ev_loop *loop, struct ev_child *self, int revents)
+child_cb(struct ev_child *self, int revents)
 {
 	(void)revents;
 
@@ -147,8 +147,8 @@ child_cb(struct ev_loop *loop, struct ev_child *self, int revents)
 	else if (WIFSIGNALED(self->rstatus))
 		irc_log_debug("hook %s: terminated on signal %d", parent->name, WTERMSIG(self->rstatus));
 
-	ev_child_stop(loop, self);
-	ev_timer_stop(loop, &child->timer);
+	ev_child_stop(self);
+	ev_timer_stop(&child->timer);
 
 	LL_DELETE(child->parent->children, child);
 	free(child);
@@ -164,15 +164,14 @@ append(struct irc_hook *h, pid_t pid)
 	child->parent = h;
 
 	ev_child_init(&child->child, child_cb, child->pid, 0);
-	ev_child_start(irc_bot_loop(), &child->child);
+	ev_child_start(&child->child);
 
 	LL_APPEND(h->children, child);
 }
 
 static void
-timer_cb(struct ev_loop *loop, struct ev_timer *self, int revents)
+timer_cb(struct ev_timer *self, int revents)
 {
-	(void)loop;
 	(void)revents;
 
 	struct irc_hook_child *child;
@@ -202,7 +201,7 @@ stop(struct irc_hook *hook, struct irc_hook_child *child)
 
 	/* Start a timer in case it wouldn't stop on SIGTERM. */
 	ev_timer_init(&child->timer, timer_cb, 5.0, 0.0);
-	ev_timer_start(irc_bot_loop(), &child->timer);
+	ev_timer_start(&child->timer);
 
 	/*
 	 * Note: the child_cb removes the child from the parent hook so we have
@@ -210,7 +209,7 @@ stop(struct irc_hook *hook, struct irc_hook_child *child)
 	 * pointer itself.
 	 */
 	while (child_exists(hook, child))
-		ev_run(irc_bot_loop(), EVRUN_ONCE);
+		ev_run(EVRUN_ONCE);
 }
 
 struct irc_hook *
