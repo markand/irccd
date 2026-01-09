@@ -21,8 +21,6 @@
 
 #include <stddef.h>
 
-struct ev_loop;
-
 struct irc_event;
 struct irc_hook;
 struct irc_plugin;
@@ -48,20 +46,10 @@ struct irccd {
 extern const struct irccd *irccd;
 
 /**
- * Initialize the bot with the event loop.
- *
- * \param loop the libev event loop to pass (maybe NULL)
+ * Initialize the bot.
  */
 void
-irc_bot_init(void *loop);
-
-/**
- * Return the event loop associated with the bot.
- *
- * \return the event loop
- */
-void *
-irc_bot_loop(void);
+irc_bot_init(void);
 
 /**
  * Add a new server to the bot.

@@ -70,13 +70,13 @@ Unicode_isUpper(duk_context *ctx)
 }
 
 static const duk_function_list_entry functions[] = {
-	{ "isDigit",            Unicode_isDigit,        1 },
-	{ "isLetter",           Unicode_isLetter,       1 },
-	{ "isLower",            Unicode_isLower,        1 },
-	{ "isSpace",            Unicode_isSpace,        1 },
-	{ "isTitle",            Unicode_isTitle,        1 },
-	{ "isUpper",            Unicode_isUpper,        1 },
-	{ NULL,                 NULL,                   0 }
+	{ "isDigit",  Unicode_isDigit,  1 },
+	{ "isLetter", Unicode_isLetter, 1 },
+	{ "isLower",  Unicode_isLower,  1 },
+	{ "isSpace",  Unicode_isSpace,  1 },
+	{ "isTitle",  Unicode_isTitle,  1 },
+	{ "isUpper",  Unicode_isUpper,  1 },
+	{ NULL,       NULL,             0 }
 };
 
 void

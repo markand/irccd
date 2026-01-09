@@ -163,7 +163,7 @@ sig_cb(struct ev_signal *self, int revents)
 static void
 init(void)
 {
-	irc_bot_init(NULL);
+	irc_bot_init();
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
 
 #if IRCCD_WITH_JS == 1

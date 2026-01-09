@@ -204,7 +204,7 @@ is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 }
 
 void
-irc_bot_init(void *)
+irc_bot_init(void)
 {
 	irc_log_to_console();
 }

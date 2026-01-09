@@ -44,10 +44,8 @@ struct stimer {
 };
 
 static void
-stimer_cb(struct ev_timer *self, int revents)
+stimer_cb(struct ev_timer *self, int)
 {
-	(void)revents;
-
 	const struct irc_plugin *plg;
 	struct stimer *st;
 
@@ -192,16 +190,16 @@ Timer_constructor(duk_context *ctx)
 }
 
 static const duk_function_list_entry methods[] = {
-	{ "restart",    Timer_prototype_restart, 0               },
-	{ "start",      Timer_prototype_start,   0               },
-	{ "stop",       Timer_prototype_stop,    0               },
-	{ NULL,         NULL,                    0               }
+	{ "restart", Timer_prototype_restart, 0 },
+	{ "start",   Timer_prototype_start,   0 },
+	{ "stop",    Timer_prototype_stop,    0 },
+	{ NULL,      NULL,                    0 }
 };
 
 static const duk_number_list_entry constants[] = {
-	{ "Single",     STIMER_TYPE_ONESHOT                     },
-	{ "Repeat",     STIMER_TYPE_REPEAT                      },
-	{ NULL,         0                                       }
+	{ "Single", STIMER_TYPE_ONESHOT },
+	{ "Repeat", STIMER_TYPE_REPEAT  },
+	{ NULL,     0                   }
 };
 
 void
