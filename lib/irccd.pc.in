@@ -1,4 +1,4 @@
 Name: irccd
 Description: Native C interface for irccd plugins
 Version: @VERSION@
-Cflags: -I@INCLUDEDIR@
+Cflags: -I@INCLUDEDIR@ -shared

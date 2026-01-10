@@ -350,11 +350,11 @@ clean::
 install::
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)/irccd
 	cp $(LIBIRCCD_DIR)/irccd/*.h $(DESTDIR)$(INCLUDEDIR)/irccd
-	mkdir -p $(DESTDIR)$(LIBDIR)/share/pkgconfig
+	mkdir -p $(DESTDIR)$(LIBDIR)/pkgconfig
 	sed \
 		-e "s,@INCLUDEDIR@,$(INCLUDEDIR),g" \
 		-e "s,@VERSION@,$(VERSION),g" \
-		< lib/irccd.pc.in > $(DESTDIR)$(LIBDIR)/share/pkgconfig/irccd.pc
+		< lib/irccd.pc.in > $(DESTDIR)$(LIBDIR)/pkgconfig/irccd.pc
 
 -include $(LIBIRCCD_DEPS)
 
@@ -414,6 +414,9 @@ ifeq ($(SSL), 1)
 $(IRCCD): private override LDLIBS += $(LIBSSL_LDFLAGS)
 $(IRCCD_OBJS): private override CFLAGS += $(LIBSSL_CFLAGS)
 endif
+
+# Export symbols for plugins to find them.
+$(IRCCD): private override LDFLAGS += -Wl,-E
 
 irccd/conf.o irccd/lex.o: private override CFLAGS += -Wno-unused-function -Wno-unneeded-internal-declaration
 
