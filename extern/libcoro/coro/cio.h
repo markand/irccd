@@ -47,8 +47,18 @@ struct cio_coro_def;
 
 /**
  * \brief Coroutine entrypoint for io.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*cio_coro_entry_t)(EV_P_ struct cio *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*cio_coro_finalizer_t)(EV_P_ struct cio *self);
 
 /**
  * \struct cio
@@ -84,9 +94,19 @@ struct cio_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	cio_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	cio_coro_finalizer_t finalizer;
+
+	/**
+	 * (private)
+	 */
+	int close;
 };
 
 /**
@@ -121,12 +141,10 @@ struct cio_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	cio_coro_finalizer_t finalizer;
 
 	/**
 	 * File descriptor to monitor.
@@ -134,10 +152,16 @@ struct cio_coro_def {
 	int fd;
 
 	/**
-	 * Events to monitor (usually EV_READ or EV_WRITE)
+	 * Events to monitor when the watcher coroutine is started.
+	 *
+	 * This has no effect if ::cio_coro_def::flags has ::CORO_INACTIVE set.
 	 */
 	int events;
 
+	/**
+	 * Close the file descriptor when the coroutine is destroyed.
+	 */
+	int close;
 };
 
 /**
@@ -257,6 +281,14 @@ void
 cio_finish(struct cio *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::cio_init followed by ::coro_init.
+ */
+void
+cio_coro_init(struct cio_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -266,6 +298,14 @@ cio_finish(struct cio *ev);
  * \return same as ::coro_create
  */
 int
-cio_coro_spawn(EV_P_ struct cio_coro *coro, const struct cio_coro_def *def);
+cio_coro_spawn(EV_P_ struct cio_coro *evco, const struct cio_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::cio_coro_def::finalizer callback.
+ */
+void
+cio_coro_finish(struct cio_coro *evco);
 
 #endif /* !LIBCORO_CIO_H */

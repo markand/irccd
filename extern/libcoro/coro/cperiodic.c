@@ -44,33 +44,26 @@ cperiodic_cb(EV_P_ struct ev_periodic *self, int revents)
 	}
 }
 
-static inline void
-cperiodic_coro_finalizer(struct cperiodic_coro *coro)
-{
-#if EV_MULTIPLICITY
-	if (coro->coro.loop)
-		cperiodic_stop(coro->coro.loop, &coro->periodic);
-#else
-	cperiodic_stop(&coro->periodic);
-#endif
-
-	cperiodic_finish(&coro->periodic);
-}
-
 static void
 cperiodic_coro_entry_cb(EV_P_ struct coro *self)
 {
-	struct cperiodic_coro *coro = CORO_CONTAINER_OF(self, struct cperiodic_coro, coro);
+	struct cperiodic_coro *evco = CORO_CONTAINER_OF(self, struct cperiodic_coro, coro);
 
-	coro->entry(EV_A_ &coro->periodic);
+	evco->entry(EV_A_ &evco->periodic);
 }
 
 static void
 cperiodic_coro_finalizer_cb(EV_P_ struct coro *self)
 {
-	struct cperiodic_coro *coro = CORO_CONTAINER_OF(self, struct cperiodic_coro, coro);
+	struct cperiodic_coro *evco = CORO_CONTAINER_OF(self, struct cperiodic_coro, coro);
 
-	cperiodic_coro_finalizer(coro);
+	/* Stop the watcher for convenience. */
+	cperiodic_stop(EV_A_ &evco->periodic);
+	cperiodic_finish(&evco->periodic);
+
+	/* Call user as very last function. */
+	if (evco->finalizer)
+		evco->finalizer(EV_A_ &evco->periodic);
 }
 
 void
@@ -180,49 +173,65 @@ cperiodic_finish(struct cperiodic *ev)
 	ev->rescheduler = NULL;
 }
 
-int
-cperiodic_coro_spawn(EV_P_ struct cperiodic_coro *coro, const struct cperiodic_coro_def *def)
+void
+cperiodic_coro_init(struct cperiodic_coro *evco)
 {
-	assert(coro);
+	assert(evco);
+
+	cperiodic_init(&evco->periodic);
+
+	coro_init(&evco->coro);
+	coro_set_entry(&evco->coro, cperiodic_coro_entry_cb);
+	coro_set_finalizer(&evco->coro, cperiodic_coro_finalizer_cb);
+
+	evco->entry = NULL;
+	evco->finalizer = NULL;
+}
+
+int
+cperiodic_coro_spawn(EV_P_ struct cperiodic_coro *evco, const struct cperiodic_coro_def *def)
+{
+	assert(evco);
 	assert(def);
+	assert(def->entry);
 
 	int rc;
 
-	coro->entry = def->entry;
-	cperiodic_init(&coro->periodic);
+	cperiodic_coro_init(evco);
+
+	evco->entry = def->entry;
+	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
-	ev_set_priority(&coro->periodic.periodic, CORO_PRI_MAX - 1);
-	cperiodic_set(&coro->periodic, def->offset, def->interval, def->rescheduler);
+	ev_set_priority(&evco->periodic.periodic, CORO_PRI_MAX - 1);
+	cperiodic_set(&evco->periodic, def->offset, def->interval, def->rescheduler);
 
 	/* Automatically start the watcher unless disabled. */
 	if (!(def->flags & CORO_INACTIVE))
-		cperiodic_start(EV_A_ &coro->periodic);
-
-	coro_init(&coro->coro);
+		cperiodic_start(EV_A_ &evco->periodic);
 
 	/* All other fields are available for customization. */
-	coro_set_name(&coro->coro, def->name);
-	coro_set_stack_size(&coro->coro, def->stack_size);
-	coro_set_flags(&coro->coro, def->flags);
-	coro_set_entry(&coro->coro, cperiodic_coro_entry_cb);
+	coro_set_name(&evco->coro, def->name);
+	coro_set_stack_size(&evco->coro, def->stack_size);
+	coro_set_flags(&evco->coro, def->flags);
 
-	/*
-	 * Use a default finalizer if NULL to conveniently stop and destroy the
-	 * underlying watcher.
-	 */
-	if (!def->finalizer)
-		coro_set_finalizer(&coro->coro, cperiodic_coro_finalizer_cb);
+	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
+		cperiodic_stop(EV_A_ &evco->periodic);
 	else
-		coro_set_finalizer(&coro->coro, def->finalizer);
-
-	if ((rc = coro_create(EV_A_ &coro->coro)) < 0)
-		cperiodic_stop(EV_A_ &coro->periodic);
-	else
-		coro_resume(&coro->coro);
+		coro_resume(&evco->coro);
 
 	return rc;
 }
+
+void
+cperiodic_coro_finish(struct cperiodic_coro *evco)
+{
+	assert(evco);
+
+	/* Will call cperiodic_coro_finalizer_cb */
+	coro_finish(&evco->coro);
+}
+

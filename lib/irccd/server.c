@@ -1397,12 +1397,9 @@ conn_io_entry(struct cio *self)
 }
 
 static void
-conn_io_finalizer(struct coro *self)
+conn_io_finalizer(struct cio *self)
 {
-	struct conn *conn = CONN(self, io_fd.coro);
-
-	cio_stop(&conn->io_fd.io);
-	cio_finish(&conn->io_fd.io);
+	struct conn *conn = CONN(self, io_fd.io);
 
 	if (conn->ai_list) {
 		freeaddrinfo(conn->ai_list);

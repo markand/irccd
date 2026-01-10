@@ -47,8 +47,18 @@ struct cprepare_coro_def;
 
 /**
  * \brief Coroutine entrypoint for prepare.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*cprepare_coro_entry_t)(EV_P_ struct cprepare *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*cprepare_coro_finalizer_t)(EV_P_ struct cprepare *self);
 
 /**
  * \struct cprepare
@@ -84,9 +94,14 @@ struct cprepare_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	cprepare_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	cprepare_coro_finalizer_t finalizer;
 };
 
 /**
@@ -121,12 +136,10 @@ struct cprepare_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	cprepare_coro_finalizer_t finalizer;
 };
 
 /**
@@ -230,6 +243,14 @@ void
 cprepare_finish(struct cprepare *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::cprepare_init followed by ::coro_init.
+ */
+void
+cprepare_coro_init(struct cprepare_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -239,6 +260,14 @@ cprepare_finish(struct cprepare *ev);
  * \return same as ::coro_create
  */
 int
-cprepare_coro_spawn(EV_P_ struct cprepare_coro *coro, const struct cprepare_coro_def *def);
+cprepare_coro_spawn(EV_P_ struct cprepare_coro *evco, const struct cprepare_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::cprepare_coro_def::finalizer callback.
+ */
+void
+cprepare_coro_finish(struct cprepare_coro *evco);
 
 #endif /* !LIBCORO_CPREPARE_H */

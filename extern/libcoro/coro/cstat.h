@@ -47,8 +47,18 @@ struct cstat_coro_def;
 
 /**
  * \brief Coroutine entrypoint for stat.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*cstat_coro_entry_t)(EV_P_ struct cstat *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*cstat_coro_finalizer_t)(EV_P_ struct cstat *self);
 
 /**
  * \struct cstat
@@ -84,9 +94,14 @@ struct cstat_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	cstat_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	cstat_coro_finalizer_t finalizer;
 };
 
 /**
@@ -121,12 +136,10 @@ struct cstat_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	cstat_coro_finalizer_t finalizer;
 
 	/**
 	 * Path to monitor.
@@ -256,6 +269,14 @@ void
 cstat_finish(struct cstat *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::cstat_init followed by ::coro_init.
+ */
+void
+cstat_coro_init(struct cstat_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -265,6 +286,14 @@ cstat_finish(struct cstat *ev);
  * \return same as ::coro_create
  */
 int
-cstat_coro_spawn(EV_P_ struct cstat_coro *coro, const struct cstat_coro_def *def);
+cstat_coro_spawn(EV_P_ struct cstat_coro *evco, const struct cstat_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::cstat_coro_def::finalizer callback.
+ */
+void
+cstat_coro_finish(struct cstat_coro *evco);
 
 #endif /* !LIBCORO_CSTAT_H */

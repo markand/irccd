@@ -47,8 +47,18 @@ struct ctimer_coro_def;
 
 /**
  * \brief Coroutine entrypoint for timer.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*ctimer_coro_entry_t)(EV_P_ struct ctimer *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*ctimer_coro_finalizer_t)(EV_P_ struct ctimer *self);
 
 /**
  * \struct ctimer
@@ -84,9 +94,14 @@ struct ctimer_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	ctimer_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	ctimer_coro_finalizer_t finalizer;
 };
 
 /**
@@ -121,12 +136,10 @@ struct ctimer_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	ctimer_coro_finalizer_t finalizer;
 	ev_tstamp after;
 	ev_tstamp repeat;
 };
@@ -256,6 +269,14 @@ void
 ctimer_finish(struct ctimer *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::ctimer_init followed by ::coro_init.
+ */
+void
+ctimer_coro_init(struct ctimer_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -265,6 +286,14 @@ ctimer_finish(struct ctimer *ev);
  * \return same as ::coro_create
  */
 int
-ctimer_coro_spawn(EV_P_ struct ctimer_coro *coro, const struct ctimer_coro_def *def);
+ctimer_coro_spawn(EV_P_ struct ctimer_coro *evco, const struct ctimer_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::ctimer_coro_def::finalizer callback.
+ */
+void
+ctimer_coro_finish(struct ctimer_coro *evco);
 
 #endif /* !LIBCORO_CTIMER_H */

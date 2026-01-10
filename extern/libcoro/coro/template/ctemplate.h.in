@@ -47,8 +47,18 @@ struct c@watcher@_coro_def;
 
 /**
  * \brief Coroutine entrypoint for @watcher@.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*c@watcher@_coro_entry_t)(EV_P_ struct c@watcher@ *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*c@watcher@_coro_finalizer_t)(EV_P_ struct c@watcher@ *self);
 @watcher-types@
 @user-types@
 /**
@@ -87,9 +97,15 @@ struct c@watcher@_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	c@watcher@_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	c@watcher@_coro_finalizer_t finalizer;
+@watcher-coro-fields@
 };
 
 /**
@@ -124,12 +140,10 @@ struct c@watcher@_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	c@watcher@_coro_finalizer_t finalizer;
 @watcher-coro-def-fields@
 @user-coro-def-fields@
 };
@@ -236,6 +250,14 @@ void
 c@watcher@_finish(struct c@watcher@ *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::c@watcher@_init followed by ::coro_init.
+ */
+void
+c@watcher@_coro_init(struct c@watcher@_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -245,6 +267,14 @@ c@watcher@_finish(struct c@watcher@ *ev);
  * \return same as ::coro_create
  */
 int
-c@watcher@_coro_spawn(EV_P_ struct c@watcher@_coro *coro, const struct c@watcher@_coro_def *def);
+c@watcher@_coro_spawn(EV_P_ struct c@watcher@_coro *evco, const struct c@watcher@_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::c@watcher@_coro_def::finalizer callback.
+ */
+void
+c@watcher@_coro_finish(struct c@watcher@_coro *evco);
 
 #endif /* !LIBCORO_C@WATCHER@_H */

@@ -44,33 +44,26 @@ cidle_cb(EV_P_ struct ev_idle *self, int revents)
 	}
 }
 
-static inline void
-cidle_coro_finalizer(struct cidle_coro *coro)
-{
-#if EV_MULTIPLICITY
-	if (coro->coro.loop)
-		cidle_stop(coro->coro.loop, &coro->idle);
-#else
-	cidle_stop(&coro->idle);
-#endif
-
-	cidle_finish(&coro->idle);
-}
-
 static void
 cidle_coro_entry_cb(EV_P_ struct coro *self)
 {
-	struct cidle_coro *coro = CORO_CONTAINER_OF(self, struct cidle_coro, coro);
+	struct cidle_coro *evco = CORO_CONTAINER_OF(self, struct cidle_coro, coro);
 
-	coro->entry(EV_A_ &coro->idle);
+	evco->entry(EV_A_ &evco->idle);
 }
 
 static void
 cidle_coro_finalizer_cb(EV_P_ struct coro *self)
 {
-	struct cidle_coro *coro = CORO_CONTAINER_OF(self, struct cidle_coro, coro);
+	struct cidle_coro *evco = CORO_CONTAINER_OF(self, struct cidle_coro, coro);
 
-	cidle_coro_finalizer(coro);
+	/* Stop the watcher for convenience. */
+	cidle_stop(EV_A_ &evco->idle);
+	cidle_finish(&evco->idle);
+
+	/* Call user as very last function. */
+	if (evco->finalizer)
+		evco->finalizer(EV_A_ &evco->idle);
 }
 
 void
@@ -152,48 +145,64 @@ cidle_finish(struct cidle *ev)
 	ev->revents = 0;
 }
 
-int
-cidle_coro_spawn(EV_P_ struct cidle_coro *coro, const struct cidle_coro_def *def)
+void
+cidle_coro_init(struct cidle_coro *evco)
 {
-	assert(coro);
+	assert(evco);
+
+	cidle_init(&evco->idle);
+
+	coro_init(&evco->coro);
+	coro_set_entry(&evco->coro, cidle_coro_entry_cb);
+	coro_set_finalizer(&evco->coro, cidle_coro_finalizer_cb);
+
+	evco->entry = NULL;
+	evco->finalizer = NULL;
+}
+
+int
+cidle_coro_spawn(EV_P_ struct cidle_coro *evco, const struct cidle_coro_def *def)
+{
+	assert(evco);
 	assert(def);
+	assert(def->entry);
 
 	int rc;
 
-	coro->entry = def->entry;
-	cidle_init(&coro->idle);
+	cidle_coro_init(evco);
+
+	evco->entry = def->entry;
+	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
-	ev_set_priority(&coro->idle.idle, CORO_PRI_MAX - 1);
+	ev_set_priority(&evco->idle.idle, CORO_PRI_MAX - 1);
 
 	/* Automatically start the watcher unless disabled. */
 	if (!(def->flags & CORO_INACTIVE))
-		cidle_start(EV_A_ &coro->idle);
-
-	coro_init(&coro->coro);
+		cidle_start(EV_A_ &evco->idle);
 
 	/* All other fields are available for customization. */
-	coro_set_name(&coro->coro, def->name);
-	coro_set_stack_size(&coro->coro, def->stack_size);
-	coro_set_flags(&coro->coro, def->flags);
-	coro_set_entry(&coro->coro, cidle_coro_entry_cb);
+	coro_set_name(&evco->coro, def->name);
+	coro_set_stack_size(&evco->coro, def->stack_size);
+	coro_set_flags(&evco->coro, def->flags);
 
-	/*
-	 * Use a default finalizer if NULL to conveniently stop and destroy the
-	 * underlying watcher.
-	 */
-	if (!def->finalizer)
-		coro_set_finalizer(&coro->coro, cidle_coro_finalizer_cb);
+	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
+		cidle_stop(EV_A_ &evco->idle);
 	else
-		coro_set_finalizer(&coro->coro, def->finalizer);
-
-	if ((rc = coro_create(EV_A_ &coro->coro)) < 0)
-		cidle_stop(EV_A_ &coro->idle);
-	else
-		coro_resume(&coro->coro);
+		coro_resume(&evco->coro);
 
 	return rc;
 }
+
+void
+cidle_coro_finish(struct cidle_coro *evco)
+{
+	assert(evco);
+
+	/* Will call cidle_coro_finalizer_cb */
+	coro_finish(&evco->coro);
+}
+

@@ -1,1 +1,1 @@
-	cstat_set(&coro->stat, def->path, def->interval);
+	cstat_set(&evco->stat, def->path, def->interval);

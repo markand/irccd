@@ -1,1 +1,1 @@
-	csignal_set(&coro->signal, def->signo);
+	csignal_set(&evco->signal, def->signo);

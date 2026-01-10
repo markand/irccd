@@ -47,8 +47,18 @@ struct csignal_coro_def;
 
 /**
  * \brief Coroutine entrypoint for signal.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*csignal_coro_entry_t)(EV_P_ struct csignal *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*csignal_coro_finalizer_t)(EV_P_ struct csignal *self);
 
 /**
  * \struct csignal
@@ -84,9 +94,14 @@ struct csignal_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	csignal_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	csignal_coro_finalizer_t finalizer;
 };
 
 /**
@@ -121,12 +136,10 @@ struct csignal_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	csignal_coro_finalizer_t finalizer;
 	/**
 	 * Signal number to watch on.
 	 */
@@ -237,6 +250,14 @@ void
 csignal_finish(struct csignal *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::csignal_init followed by ::coro_init.
+ */
+void
+csignal_coro_init(struct csignal_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -246,6 +267,14 @@ csignal_finish(struct csignal *ev);
  * \return same as ::coro_create
  */
 int
-csignal_coro_spawn(EV_P_ struct csignal_coro *coro, const struct csignal_coro_def *def);
+csignal_coro_spawn(EV_P_ struct csignal_coro *evco, const struct csignal_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::csignal_coro_def::finalizer callback.
+ */
+void
+csignal_coro_finish(struct csignal_coro *evco);
 
 #endif /* !LIBCORO_CSIGNAL_H */

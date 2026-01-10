@@ -1,1 +1,1 @@
-	cchild_set(&coro->child, def->pid, def->trace);
+	cchild_set(&evco->child, def->pid, def->trace);

@@ -44,33 +44,26 @@ csignal_cb(EV_P_ struct ev_signal *self, int revents)
 	}
 }
 
-static inline void
-csignal_coro_finalizer(struct csignal_coro *coro)
-{
-#if EV_MULTIPLICITY
-	if (coro->coro.loop)
-		csignal_stop(coro->coro.loop, &coro->signal);
-#else
-	csignal_stop(&coro->signal);
-#endif
-
-	csignal_finish(&coro->signal);
-}
-
 static void
 csignal_coro_entry_cb(EV_P_ struct coro *self)
 {
-	struct csignal_coro *coro = CORO_CONTAINER_OF(self, struct csignal_coro, coro);
+	struct csignal_coro *evco = CORO_CONTAINER_OF(self, struct csignal_coro, coro);
 
-	coro->entry(EV_A_ &coro->signal);
+	evco->entry(EV_A_ &evco->signal);
 }
 
 static void
 csignal_coro_finalizer_cb(EV_P_ struct coro *self)
 {
-	struct csignal_coro *coro = CORO_CONTAINER_OF(self, struct csignal_coro, coro);
+	struct csignal_coro *evco = CORO_CONTAINER_OF(self, struct csignal_coro, coro);
 
-	csignal_coro_finalizer(coro);
+	/* Stop the watcher for convenience. */
+	csignal_stop(EV_A_ &evco->signal);
+	csignal_finish(&evco->signal);
+
+	/* Call user as very last function. */
+	if (evco->finalizer)
+		evco->finalizer(EV_A_ &evco->signal);
 }
 
 void
@@ -161,49 +154,65 @@ csignal_finish(struct csignal *ev)
 	ev->revents = 0;
 }
 
-int
-csignal_coro_spawn(EV_P_ struct csignal_coro *coro, const struct csignal_coro_def *def)
+void
+csignal_coro_init(struct csignal_coro *evco)
 {
-	assert(coro);
+	assert(evco);
+
+	csignal_init(&evco->signal);
+
+	coro_init(&evco->coro);
+	coro_set_entry(&evco->coro, csignal_coro_entry_cb);
+	coro_set_finalizer(&evco->coro, csignal_coro_finalizer_cb);
+
+	evco->entry = NULL;
+	evco->finalizer = NULL;
+}
+
+int
+csignal_coro_spawn(EV_P_ struct csignal_coro *evco, const struct csignal_coro_def *def)
+{
+	assert(evco);
 	assert(def);
+	assert(def->entry);
 
 	int rc;
 
-	coro->entry = def->entry;
-	csignal_init(&coro->signal);
+	csignal_coro_init(evco);
+
+	evco->entry = def->entry;
+	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
-	ev_set_priority(&coro->signal.signal, CORO_PRI_MAX - 1);
-	csignal_set(&coro->signal, def->signo);
+	ev_set_priority(&evco->signal.signal, CORO_PRI_MAX - 1);
+	csignal_set(&evco->signal, def->signo);
 
 	/* Automatically start the watcher unless disabled. */
 	if (!(def->flags & CORO_INACTIVE))
-		csignal_start(EV_A_ &coro->signal);
-
-	coro_init(&coro->coro);
+		csignal_start(EV_A_ &evco->signal);
 
 	/* All other fields are available for customization. */
-	coro_set_name(&coro->coro, def->name);
-	coro_set_stack_size(&coro->coro, def->stack_size);
-	coro_set_flags(&coro->coro, def->flags);
-	coro_set_entry(&coro->coro, csignal_coro_entry_cb);
+	coro_set_name(&evco->coro, def->name);
+	coro_set_stack_size(&evco->coro, def->stack_size);
+	coro_set_flags(&evco->coro, def->flags);
 
-	/*
-	 * Use a default finalizer if NULL to conveniently stop and destroy the
-	 * underlying watcher.
-	 */
-	if (!def->finalizer)
-		coro_set_finalizer(&coro->coro, csignal_coro_finalizer_cb);
+	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
+		csignal_stop(EV_A_ &evco->signal);
 	else
-		coro_set_finalizer(&coro->coro, def->finalizer);
-
-	if ((rc = coro_create(EV_A_ &coro->coro)) < 0)
-		csignal_stop(EV_A_ &coro->signal);
-	else
-		coro_resume(&coro->coro);
+		coro_resume(&evco->coro);
 
 	return rc;
 }
+
+void
+csignal_coro_finish(struct csignal_coro *evco)
+{
+	assert(evco);
+
+	/* Will call csignal_coro_finalizer_cb */
+	coro_finish(&evco->coro);
+}
+

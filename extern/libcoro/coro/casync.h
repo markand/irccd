@@ -47,8 +47,18 @@ struct casync_coro_def;
 
 /**
  * \brief Coroutine entrypoint for async.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*casync_coro_entry_t)(EV_P_ struct casync *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*casync_coro_finalizer_t)(EV_P_ struct casync *self);
 
 /**
  * \struct casync
@@ -84,9 +94,14 @@ struct casync_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	casync_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	casync_coro_finalizer_t finalizer;
 };
 
 /**
@@ -121,12 +136,10 @@ struct casync_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	casync_coro_finalizer_t finalizer;
 };
 
 /**
@@ -230,6 +243,14 @@ void
 casync_finish(struct casync *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::casync_init followed by ::coro_init.
+ */
+void
+casync_coro_init(struct casync_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -239,6 +260,14 @@ casync_finish(struct casync *ev);
  * \return same as ::coro_create
  */
 int
-casync_coro_spawn(EV_P_ struct casync_coro *coro, const struct casync_coro_def *def);
+casync_coro_spawn(EV_P_ struct casync_coro *evco, const struct casync_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::casync_coro_def::finalizer callback.
+ */
+void
+casync_coro_finish(struct casync_coro *evco);
 
 #endif /* !LIBCORO_CASYNC_H */

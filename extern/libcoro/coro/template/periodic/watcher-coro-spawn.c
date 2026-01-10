@@ -1,1 +1,1 @@
-	cperiodic_set(&coro->periodic, def->offset, def->interval, def->rescheduler);
+	cperiodic_set(&evco->periodic, def->offset, def->interval, def->rescheduler);

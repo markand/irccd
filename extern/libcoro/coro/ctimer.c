@@ -44,33 +44,26 @@ ctimer_cb(EV_P_ struct ev_timer *self, int revents)
 	}
 }
 
-static inline void
-ctimer_coro_finalizer(struct ctimer_coro *coro)
-{
-#if EV_MULTIPLICITY
-	if (coro->coro.loop)
-		ctimer_stop(coro->coro.loop, &coro->timer);
-#else
-	ctimer_stop(&coro->timer);
-#endif
-
-	ctimer_finish(&coro->timer);
-}
-
 static void
 ctimer_coro_entry_cb(EV_P_ struct coro *self)
 {
-	struct ctimer_coro *coro = CORO_CONTAINER_OF(self, struct ctimer_coro, coro);
+	struct ctimer_coro *evco = CORO_CONTAINER_OF(self, struct ctimer_coro, coro);
 
-	coro->entry(EV_A_ &coro->timer);
+	evco->entry(EV_A_ &evco->timer);
 }
 
 static void
 ctimer_coro_finalizer_cb(EV_P_ struct coro *self)
 {
-	struct ctimer_coro *coro = CORO_CONTAINER_OF(self, struct ctimer_coro, coro);
+	struct ctimer_coro *evco = CORO_CONTAINER_OF(self, struct ctimer_coro, coro);
 
-	ctimer_coro_finalizer(coro);
+	/* Stop the watcher for convenience. */
+	ctimer_stop(EV_A_ &evco->timer);
+	ctimer_finish(&evco->timer);
+
+	/* Call user as very last function. */
+	if (evco->finalizer)
+		evco->finalizer(EV_A_ &evco->timer);
 }
 
 void
@@ -179,49 +172,65 @@ ctimer_finish(struct ctimer *ev)
 	ev->revents = 0;
 }
 
-int
-ctimer_coro_spawn(EV_P_ struct ctimer_coro *coro, const struct ctimer_coro_def *def)
+void
+ctimer_coro_init(struct ctimer_coro *evco)
 {
-	assert(coro);
+	assert(evco);
+
+	ctimer_init(&evco->timer);
+
+	coro_init(&evco->coro);
+	coro_set_entry(&evco->coro, ctimer_coro_entry_cb);
+	coro_set_finalizer(&evco->coro, ctimer_coro_finalizer_cb);
+
+	evco->entry = NULL;
+	evco->finalizer = NULL;
+}
+
+int
+ctimer_coro_spawn(EV_P_ struct ctimer_coro *evco, const struct ctimer_coro_def *def)
+{
+	assert(evco);
 	assert(def);
+	assert(def->entry);
 
 	int rc;
 
-	coro->entry = def->entry;
-	ctimer_init(&coro->timer);
+	ctimer_coro_init(evco);
+
+	evco->entry = def->entry;
+	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
-	ev_set_priority(&coro->timer.timer, CORO_PRI_MAX - 1);
-	ctimer_set(&coro->timer, def->after, def->repeat);
+	ev_set_priority(&evco->timer.timer, CORO_PRI_MAX - 1);
+	ctimer_set(&evco->timer, def->after, def->repeat);
 
 	/* Automatically start the watcher unless disabled. */
 	if (!(def->flags & CORO_INACTIVE))
-		ctimer_start(EV_A_ &coro->timer);
-
-	coro_init(&coro->coro);
+		ctimer_start(EV_A_ &evco->timer);
 
 	/* All other fields are available for customization. */
-	coro_set_name(&coro->coro, def->name);
-	coro_set_stack_size(&coro->coro, def->stack_size);
-	coro_set_flags(&coro->coro, def->flags);
-	coro_set_entry(&coro->coro, ctimer_coro_entry_cb);
+	coro_set_name(&evco->coro, def->name);
+	coro_set_stack_size(&evco->coro, def->stack_size);
+	coro_set_flags(&evco->coro, def->flags);
 
-	/*
-	 * Use a default finalizer if NULL to conveniently stop and destroy the
-	 * underlying watcher.
-	 */
-	if (!def->finalizer)
-		coro_set_finalizer(&coro->coro, ctimer_coro_finalizer_cb);
+	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
+		ctimer_stop(EV_A_ &evco->timer);
 	else
-		coro_set_finalizer(&coro->coro, def->finalizer);
-
-	if ((rc = coro_create(EV_A_ &coro->coro)) < 0)
-		ctimer_stop(EV_A_ &coro->timer);
-	else
-		coro_resume(&coro->coro);
+		coro_resume(&evco->coro);
 
 	return rc;
 }
+
+void
+ctimer_coro_finish(struct ctimer_coro *evco)
+{
+	assert(evco);
+
+	/* Will call ctimer_coro_finalizer_cb */
+	coro_finish(&evco->coro);
+}
+

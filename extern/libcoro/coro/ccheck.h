@@ -47,8 +47,18 @@ struct ccheck_coro_def;
 
 /**
  * \brief Coroutine entrypoint for check.
+ *
+ * Similar to ::coro_entry_t but it receives its watcher as argument.
  */
 typedef void (*ccheck_coro_entry_t)(EV_P_ struct ccheck *self);
+
+/**
+ * \brief Finalizer function.
+ *
+ * Similar to ::coro_finalizer_t but let the user perform extra step on a
+ * coroutine watcher.
+ */
+typedef void (*ccheck_coro_finalizer_t)(EV_P_ struct ccheck *self);
 
 /**
  * \struct ccheck
@@ -84,9 +94,14 @@ struct ccheck_coro {
 	struct coro coro;
 
 	/**
-	 * Watcher coroutine entrypoint.
+	 * (private)
 	 */
 	ccheck_coro_entry_t entry;
+
+	/**
+	 * (private)
+	 */
+	ccheck_coro_finalizer_t finalizer;
 };
 
 /**
@@ -121,12 +136,10 @@ struct ccheck_coro_def {
 	 *
 	 * Coroutine finalizer.
 	 *
-	 * If this function is NULL, a default will be provided so that calling
-	 * calling ::coro_finish actually resolves to an internal handler
-	 * stopping and destroying the watcher making possible to create
-	 * coroutines entirely driven by the event loop
+	 * This user function is called after the coroutine watcher has been
+	 * cleanup itself.
 	 */
-	coro_finalizer_t finalizer;
+	ccheck_coro_finalizer_t finalizer;
 };
 
 /**
@@ -230,6 +243,14 @@ void
 ccheck_finish(struct ccheck *ev);
 
 /**
+ * Initialize watcher and its coroutine.
+ *
+ * This is equivalent to calling ::ccheck_init followed by ::coro_init.
+ */
+void
+ccheck_coro_init(struct ccheck_coro *evco);
+
+/**
  * This all in one function initialize, set and optionnally start the watcher
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
@@ -239,6 +260,14 @@ ccheck_finish(struct ccheck *ev);
  * \return same as ::coro_create
  */
 int
-ccheck_coro_spawn(EV_P_ struct ccheck_coro *coro, const struct ccheck_coro_def *def);
+ccheck_coro_spawn(EV_P_ struct ccheck_coro *evco, const struct ccheck_coro_def *def);
+
+/**
+ * Stop the internal watcher and destroy it along with its dedicated coroutine.
+ *
+ * Do not call this function within a ::ccheck_coro_def::finalizer callback.
+ */
+void
+ccheck_coro_finish(struct ccheck_coro *evco);
 
 #endif /* !LIBCORO_CCHECK_H */
