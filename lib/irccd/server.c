@@ -1431,12 +1431,14 @@ conn_io_finalizer(struct cio *self)
 static void
 conn_io_spawn(struct conn *conn)
 {
-	cio_coro_spawn(&conn->io_fd, &(const struct cio_coro_def) {
-		.name      = "irc_server.io",
-		.flags     = CORO_ATTACHED | CORO_INACTIVE,
-		.entry     = conn_io_entry,
-		.finalizer = conn_io_finalizer
-	});
+	conn->io_fd = (const struct cio_coro) {
+		.coro.name  = "irc_server.io",
+		.coro.flags = CORO_ATTACHED | CORO_INACTIVE,
+		.entry      = conn_io_entry,
+		.finalizer  = conn_io_finalizer
+	};
+
+	cio_coro_spawn(&conn->io_fd, NULL);
 }
 
 static void
@@ -1483,10 +1485,13 @@ conn_timer_entry(struct ctimer *self)
 static void
 conn_timer_spawn(struct conn *conn)
 {
-	ctimer_coro_spawn(&conn->timer, &(const struct ctimer_coro_def) {
-		.name   = "irc_server.timer",
-		.flags  = CORO_ATTACHED,
-		.entry  = conn_timer_entry,
+	conn->timer = (const struct ctimer_coro) {
+		.coro.name  = "irc_server.timer",
+		.coro.flags = CORO_ATTACHED,
+		.entry      = conn_timer_entry
+	};
+
+	ctimer_coro_spawn(&conn->timer, &(const struct ctimer_coro_ops) {
 		.after  = 60.0,
 		.repeat = 60.0
 	});

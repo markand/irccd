@@ -71,9 +71,8 @@ ccheck_init(struct ccheck *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->check = (const struct ev_check) {};
 	ev_init(&ev->check, ccheck_cb);
+	ev->revents = 0;
 }
 
 void
@@ -151,43 +150,32 @@ ccheck_coro_init(struct ccheck_coro *evco)
 	assert(evco);
 
 	ccheck_init(&evco->check);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, ccheck_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, ccheck_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
+	evco->coro.entry = ccheck_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = ccheck_coro_finalizer_cb;
 }
 
 int
-ccheck_coro_spawn(EV_P_ struct ccheck_coro *evco, const struct ccheck_coro_def *def)
+ccheck_coro_spawn(EV_P_ struct ccheck_coro *evco, const struct ccheck_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	ccheck_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->check.check, CORO_PRI_MAX - 1);
-
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		ccheck_start(EV_A_ &evco->check);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		ccheck_stop(EV_A_ &evco->check);

@@ -71,9 +71,8 @@ cidle_init(struct cidle *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->idle = (const struct ev_idle) {};
 	ev_init(&ev->idle, cidle_cb);
+	ev->revents = 0;
 }
 
 void
@@ -151,43 +150,32 @@ cidle_coro_init(struct cidle_coro *evco)
 	assert(evco);
 
 	cidle_init(&evco->idle);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, cidle_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, cidle_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
+	evco->coro.entry = cidle_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = cidle_coro_finalizer_cb;
 }
 
 int
-cidle_coro_spawn(EV_P_ struct cidle_coro *evco, const struct cidle_coro_def *def)
+cidle_coro_spawn(EV_P_ struct cidle_coro *evco, const struct cidle_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	cidle_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->idle.idle, CORO_PRI_MAX - 1);
-
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		cidle_start(EV_A_ &evco->idle);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		cidle_stop(EV_A_ &evco->idle);

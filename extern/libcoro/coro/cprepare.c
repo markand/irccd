@@ -71,9 +71,8 @@ cprepare_init(struct cprepare *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->prepare = (const struct ev_prepare) {};
 	ev_init(&ev->prepare, cprepare_cb);
+	ev->revents = 0;
 }
 
 void
@@ -151,43 +150,32 @@ cprepare_coro_init(struct cprepare_coro *evco)
 	assert(evco);
 
 	cprepare_init(&evco->prepare);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, cprepare_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, cprepare_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
+	evco->coro.entry = cprepare_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = cprepare_coro_finalizer_cb;
 }
 
 int
-cprepare_coro_spawn(EV_P_ struct cprepare_coro *evco, const struct cprepare_coro_def *def)
+cprepare_coro_spawn(EV_P_ struct cprepare_coro *evco, const struct cprepare_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	cprepare_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->prepare.prepare, CORO_PRI_MAX - 1);
-
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		cprepare_start(EV_A_ &evco->prepare);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		cprepare_stop(EV_A_ &evco->prepare);

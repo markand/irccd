@@ -18,28 +18,72 @@
 
 #include <minicoro.h>
 
-#if EV_PREPARE_ENABLE == 0
-#error "minicoro implementation requires ev_prepare"
-#endif
-
-#if EV_CHECK_ENABLE == 0
-#error "minicoro implementation requires ev_check"
-#endif
-
 struct coro {
-	struct coro_def def;
+	/**
+	 * (optional)
+	 *
+	 * Coroutine name.
+	 *
+	 * Mostly used for debugging purposes.
+	 */
+	const char *name;
+
+	/**
+	 * (init, optional)
+	 *
+	 * Change coroutine priority order.
+	 *
+	 * Only meaningful with attached coroutines.
+	 *
+	 * \sa ::CORO_ATTACHED
+	 * \sa ::CORO_ESSENTIAL
+	 * \sa ::CORO_FOREVER
+	 */
+	int priority;
+
+	/**
+	 * (init, optional)
+	 *
+	 * Optional coroutines flags.
+	 */
+	unsigned int flags;
+
+	/**
+	 * (init, optional)
+	 *
+	 * Optional stack size.
+	 *
+	 * A value of 0 will use a library default.
+	 */
+	size_t stack_size;
+
+	/**
+	 * (init)
+	 *
+	 * Coroutine entrypoint.
+	 */
+	coro_entry_t entry;
+
+	/**
+	 * (optional)
+	 *
+	 * Finalizer to be invoked by ::coro_finish before destroying it.
+	 */
+	coro_finalizer_t finalizer;
+
+	/* minicoro */
 	struct mco_desc mco_desc;
 	struct mco_coro *mco_coro;
+
+	/* loop iteration hooks */
 	struct ev_prepare prepare;
 	struct ev_check check;
+
+	/* non-zero if coroutine is in coro_off() */
 	int off;
 
 #if EV_MULTIPLICITY
-	/**
-	 * (private)
-	 *
-	 * Event loop attached.
-	 */
+	/* attached event loop */
 	struct ev_loop *loop;
 #endif
 };

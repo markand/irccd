@@ -1,5 +1,0 @@
-
-	/**
-	 * (private)
-	 */
-	int close;

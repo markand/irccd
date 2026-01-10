@@ -43,7 +43,7 @@
 
 struct cio;
 struct cio_coro;
-struct cio_coro_def;
+struct cio_coro_ops;
 
 /**
  * \brief Coroutine entrypoint for io.
@@ -89,87 +89,62 @@ struct cio_coro {
 	struct cio io;
 
 	/**
-	 * Underlying coroutine.
+	 * Coroutine attached to this watcher.
+	 *
+	 * Caller can set fields just like a normal coroutine however:
+	 *
+	 * The field ::coro::entry is replaced with an internal callback calling
+	 * ::cio_coro::entry instead.
+	 *
+	 * If ::coro::finalizer is NULL, an internal callback is set to stop and
+	 * destroy the associated watcher. This internal callback will call
+	 * ::cio_coro::finalizer and user is encouraged to use it
+	 * instead.
 	 */
 	struct coro coro;
 
 	/**
-	 * (private)
-	 */
-	cio_coro_entry_t entry;
-
-	/**
-	 * (private)
-	 */
-	cio_coro_finalizer_t finalizer;
-
-	/**
-	 * (private)
-	 */
-	int close;
-};
-
-/**
- * \struct cio_coro_def
- * \brief Watcher coroutine definition.
- *
- * This structure is used as a descriptor for ::cio_coro_spawn.
- */
-struct cio_coro_def {
-	/**
-	 * \copydoc ::coro_def::name.
-	 */
-	const char *name;
-
-	/**
-	 * \copydoc ::coro_def::stack_size.
-	 */
-	size_t stack_size;
-
-	/**
-	 * \copydoc ::coro_def::flags.
-	 */
-	unsigned int flags;
-
-	/**
-	 * Watcher coroutine entrypoint.
+	 * (init)
+	 *
+	 * Coroutine watcher entrypoint.
 	 */
 	cio_coro_entry_t entry;
 
 	/**
 	 * (optional)
 	 *
-	 * Coroutine finalizer.
-	 *
-	 * This user function is called after the coroutine watcher has been
-	 * cleanup itself.
+	 * Finalizer for the coroutine watcher.
 	 */
 	cio_coro_finalizer_t finalizer;
 
+	/**
+	 * If the watcher is still active, the file descriptor is closed using
+	 * POSIX `close()` after stopping the watcher.
+	 */
+	int close;
+};
+
+/**
+ * \struct cio_coro_ops
+ * \brief Options for ::cio_coro_spawn.
+ */
+struct cio_coro_ops {
 	/**
 	 * File descriptor to monitor.
 	 */
 	int fd;
 
 	/**
-	 * Events to monitor when the watcher coroutine is started.
+	 * Events to monitor for the file descriptor.
 	 *
-	 * This has no effect if ::cio_coro_def::flags has ::CORO_INACTIVE set.
+	 * If 0, coroutine starts with the ::cio unset. User will have to call
+	 * ::cio_set and ::cio_start manually.
 	 */
 	int events;
-
-	/**
-	 * Close the file descriptor when the coroutine is destroyed.
-	 */
-	int close;
 };
 
 /**
- * Initialize defaults.
- *
- * This function is not required if you directly use ::cio_use or
- * ::cio_create but is provided if you wish to call ::cio_finish
- * prematurly.
+ * Initialize private fields.
  */
 void
 cio_init(struct cio *ev);
@@ -293,17 +268,16 @@ cio_coro_init(struct cio_coro *evco);
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
  *
- * \pre def != NULL
- * \param def the coroutine and watcher description
- * \return same as ::coro_create
+ * \param ops additional watcher spawn options (maybe NULL)
+ * \return refer to ::coro_spawn
  */
 int
-cio_coro_spawn(EV_P_ struct cio_coro *evco, const struct cio_coro_def *def);
+cio_coro_spawn(EV_P_ struct cio_coro *evco, const struct cio_coro_ops *ops);
 
 /**
  * Stop the internal watcher and destroy it along with its dedicated coroutine.
  *
- * Do not call this function within a ::cio_coro_def::finalizer callback.
+ * Do not call this function within a ::cio_coro::finalizer callback.
  */
 void
 cio_coro_finish(struct cio_coro *evco);

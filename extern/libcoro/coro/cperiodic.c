@@ -71,9 +71,8 @@ cperiodic_init(struct cperiodic *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->periodic = (const struct ev_periodic) {};
 	ev_init(&ev->periodic, cperiodic_cb);
+	ev->revents = 0;
 	ev->rescheduler = NULL;
 }
 
@@ -179,44 +178,40 @@ cperiodic_coro_init(struct cperiodic_coro *evco)
 	assert(evco);
 
 	cperiodic_init(&evco->periodic);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, cperiodic_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, cperiodic_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
+	evco->coro.entry = cperiodic_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = cperiodic_coro_finalizer_cb;
 }
 
 int
-cperiodic_coro_spawn(EV_P_ struct cperiodic_coro *evco, const struct cperiodic_coro_def *def)
+cperiodic_coro_spawn(EV_P_ struct cperiodic_coro *evco, const struct cperiodic_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	cperiodic_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->periodic.periodic, CORO_PRI_MAX - 1);
-	cperiodic_set(&evco->periodic, def->offset, def->interval, def->rescheduler);
+	if (ops)
+		cperiodic_set(&evco->periodic,
+		               ops->offset,
+		               ops->interval,
+		               evco->periodic.rescheduler);
+	else
+		evco->coro.flags |= CORO_INACTIVE;
 
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		cperiodic_start(EV_A_ &evco->periodic);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		cperiodic_stop(EV_A_ &evco->periodic);

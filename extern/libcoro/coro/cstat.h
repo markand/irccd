@@ -43,7 +43,7 @@
 
 struct cstat;
 struct cstat_coro;
-struct cstat_coro_def;
+struct cstat_coro_ops;
 
 /**
  * \brief Coroutine entrypoint for stat.
@@ -89,58 +89,40 @@ struct cstat_coro {
 	struct cstat stat;
 
 	/**
-	 * Underlying coroutine.
+	 * Coroutine attached to this watcher.
+	 *
+	 * Caller can set fields just like a normal coroutine however:
+	 *
+	 * The field ::coro::entry is replaced with an internal callback calling
+	 * ::cstat_coro::entry instead.
+	 *
+	 * If ::coro::finalizer is NULL, an internal callback is set to stop and
+	 * destroy the associated watcher. This internal callback will call
+	 * ::cstat_coro::finalizer and user is encouraged to use it
+	 * instead.
 	 */
 	struct coro coro;
 
 	/**
-	 * (private)
-	 */
-	cstat_coro_entry_t entry;
-
-	/**
-	 * (private)
-	 */
-	cstat_coro_finalizer_t finalizer;
-};
-
-/**
- * \struct cstat_coro_def
- * \brief Watcher coroutine definition.
- *
- * This structure is used as a descriptor for ::cstat_coro_spawn.
- */
-struct cstat_coro_def {
-	/**
-	 * \copydoc ::coro_def::name.
-	 */
-	const char *name;
-
-	/**
-	 * \copydoc ::coro_def::stack_size.
-	 */
-	size_t stack_size;
-
-	/**
-	 * \copydoc ::coro_def::flags.
-	 */
-	unsigned int flags;
-
-	/**
-	 * Watcher coroutine entrypoint.
+	 * (init)
+	 *
+	 * Coroutine watcher entrypoint.
 	 */
 	cstat_coro_entry_t entry;
 
 	/**
 	 * (optional)
 	 *
-	 * Coroutine finalizer.
-	 *
-	 * This user function is called after the coroutine watcher has been
-	 * cleanup itself.
+	 * Finalizer for the coroutine watcher.
 	 */
 	cstat_coro_finalizer_t finalizer;
+};
 
+/**
+ * \struct cstat_coro_ops
+ * \brief Options for ::cstat_coro_spawn.
+ */
+struct cstat_coro_ops {
 	/**
 	 * Path to monitor.
 	 */
@@ -153,11 +135,7 @@ struct cstat_coro_def {
 };
 
 /**
- * Initialize defaults.
- *
- * This function is not required if you directly use ::cstat_use or
- * ::cstat_create but is provided if you wish to call ::cstat_finish
- * prematurly.
+ * Initialize private fields.
  */
 void
 cstat_init(struct cstat *ev);
@@ -250,7 +228,7 @@ cstat_wait(EV_P_ struct cstat *ev);
  * This function is equivalent to ev_stat_set.
  */
 void
-cstat_set(EV_P_ struct cstat *ev, const char *path, ev_tstamp interval);
+cstat_set(struct cstat *ev, const char *path, ev_tstamp interval);
 
 /**
  * Update internal stat values immediately.
@@ -281,17 +259,16 @@ cstat_coro_init(struct cstat_coro *evco);
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
  *
- * \pre def != NULL
- * \param def the coroutine and watcher description
- * \return same as ::coro_create
+ * \param ops additional watcher spawn options (maybe NULL)
+ * \return refer to ::coro_spawn
  */
 int
-cstat_coro_spawn(EV_P_ struct cstat_coro *evco, const struct cstat_coro_def *def);
+cstat_coro_spawn(EV_P_ struct cstat_coro *evco, const struct cstat_coro_ops *ops);
 
 /**
  * Stop the internal watcher and destroy it along with its dedicated coroutine.
  *
- * Do not call this function within a ::cstat_coro_def::finalizer callback.
+ * Do not call this function within a ::cstat_coro::finalizer callback.
  */
 void
 cstat_coro_finish(struct cstat_coro *evco);

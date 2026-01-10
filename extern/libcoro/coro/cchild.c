@@ -71,9 +71,8 @@ cchild_init(struct cchild *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->child = (const struct ev_child) {};
 	ev_init(&ev->child, cchild_cb);
+	ev->revents = 0;
 }
 
 void
@@ -159,44 +158,37 @@ cchild_coro_init(struct cchild_coro *evco)
 	assert(evco);
 
 	cchild_init(&evco->child);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, cchild_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, cchild_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
+	evco->coro.entry = cchild_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = cchild_coro_finalizer_cb;
 }
 
 int
-cchild_coro_spawn(EV_P_ struct cchild_coro *evco, const struct cchild_coro_def *def)
+cchild_coro_spawn(EV_P_ struct cchild_coro *evco, const struct cchild_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	cchild_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->child.child, CORO_PRI_MAX - 1);
-	cchild_set(&evco->child, def->pid, def->trace);
+	if (ops)
+		cchild_set(&evco->child, ops->pid, ops->trace);
+	else
+		evco->coro.flags |= CORO_INACTIVE;
 
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		cchild_start(EV_A_ &evco->child);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		cchild_stop(EV_A_ &evco->child);

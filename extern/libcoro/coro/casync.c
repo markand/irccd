@@ -71,9 +71,8 @@ casync_init(struct casync *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->async = (const struct ev_async) {};
 	ev_init(&ev->async, casync_cb);
+	ev->revents = 0;
 }
 
 void
@@ -151,43 +150,32 @@ casync_coro_init(struct casync_coro *evco)
 	assert(evco);
 
 	casync_init(&evco->async);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, casync_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, casync_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
+	evco->coro.entry = casync_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = casync_coro_finalizer_cb;
 }
 
 int
-casync_coro_spawn(EV_P_ struct casync_coro *evco, const struct casync_coro_def *def)
+casync_coro_spawn(EV_P_ struct casync_coro *evco, const struct casync_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	casync_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->async.async, CORO_PRI_MAX - 1);
-
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		casync_start(EV_A_ &evco->async);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		casync_stop(EV_A_ &evco->async);

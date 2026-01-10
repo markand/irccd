@@ -71,9 +71,8 @@ cstat_init(struct cstat *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->stat = (const struct ev_stat) {};
 	ev_init(&ev->stat, cstat_cb);
+	ev->revents = 0;
 }
 
 void
@@ -137,7 +136,7 @@ cstat_wait(EV_P_ struct cstat *ev)
 }
 
 void
-cstat_set(EV_P_ struct cstat *ev, const char *path, ev_tstamp interval)
+cstat_set(struct cstat *ev, const char *path, ev_tstamp interval)
 {
 	assert(ev);
 	assert(path);
@@ -150,7 +149,7 @@ cstat_stat(EV_P_ struct cstat *ev)
 {
 	assert(ev);
 
-	ev_stat_stat(&ev->stat);
+	ev_stat_stat(EV_A_ &ev->stat);
 }
 
 void
@@ -168,44 +167,37 @@ cstat_coro_init(struct cstat_coro *evco)
 	assert(evco);
 
 	cstat_init(&evco->stat);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, cstat_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, cstat_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
+	evco->coro.entry = cstat_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = cstat_coro_finalizer_cb;
 }
 
 int
-cstat_coro_spawn(EV_P_ struct cstat_coro *evco, const struct cstat_coro_def *def)
+cstat_coro_spawn(EV_P_ struct cstat_coro *evco, const struct cstat_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	cstat_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->stat.stat, CORO_PRI_MAX - 1);
-	cstat_set(&evco->stat, def->path, def->interval);
+	if (ops)
+		cstat_set(&evco->stat, ops->path, ops->interval);
+	else
+		evco->coro.flags |= CORO_INACTIVE;
 
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		cstat_start(EV_A_ &evco->stat);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		cstat_stop(EV_A_ &evco->stat);

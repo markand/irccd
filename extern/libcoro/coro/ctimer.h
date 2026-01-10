@@ -43,7 +43,7 @@
 
 struct ctimer;
 struct ctimer_coro;
-struct ctimer_coro_def;
+struct ctimer_coro_ops;
 
 /**
  * \brief Coroutine entrypoint for timer.
@@ -89,67 +89,53 @@ struct ctimer_coro {
 	struct ctimer timer;
 
 	/**
-	 * Underlying coroutine.
+	 * Coroutine attached to this watcher.
+	 *
+	 * Caller can set fields just like a normal coroutine however:
+	 *
+	 * The field ::coro::entry is replaced with an internal callback calling
+	 * ::ctimer_coro::entry instead.
+	 *
+	 * If ::coro::finalizer is NULL, an internal callback is set to stop and
+	 * destroy the associated watcher. This internal callback will call
+	 * ::ctimer_coro::finalizer and user is encouraged to use it
+	 * instead.
 	 */
 	struct coro coro;
 
 	/**
-	 * (private)
-	 */
-	ctimer_coro_entry_t entry;
-
-	/**
-	 * (private)
-	 */
-	ctimer_coro_finalizer_t finalizer;
-};
-
-/**
- * \struct ctimer_coro_def
- * \brief Watcher coroutine definition.
- *
- * This structure is used as a descriptor for ::ctimer_coro_spawn.
- */
-struct ctimer_coro_def {
-	/**
-	 * \copydoc ::coro_def::name.
-	 */
-	const char *name;
-
-	/**
-	 * \copydoc ::coro_def::stack_size.
-	 */
-	size_t stack_size;
-
-	/**
-	 * \copydoc ::coro_def::flags.
-	 */
-	unsigned int flags;
-
-	/**
-	 * Watcher coroutine entrypoint.
+	 * (init)
+	 *
+	 * Coroutine watcher entrypoint.
 	 */
 	ctimer_coro_entry_t entry;
 
 	/**
 	 * (optional)
 	 *
-	 * Coroutine finalizer.
-	 *
-	 * This user function is called after the coroutine watcher has been
-	 * cleanup itself.
+	 * Finalizer for the coroutine watcher.
 	 */
 	ctimer_coro_finalizer_t finalizer;
+};
+
+/**
+ * \struct ctimer_coro_ops
+ * \brief Options for ::ctimer_coro_spawn.
+ */
+struct ctimer_coro_ops {
+	/**
+	 * Refer to ::ctimer_set.
+	 */
 	ev_tstamp after;
+
+	/**
+	 * Refer to ::ctimer_set.
+	 */
 	ev_tstamp repeat;
 };
 
 /**
- * Initialize defaults.
- *
- * This function is not required if you directly use ::ctimer_use or
- * ::ctimer_create but is provided if you wish to call ::ctimer_finish
- * prematurly.
+ * Initialize private fields.
  */
 void
 ctimer_init(struct ctimer *ev);
@@ -281,17 +267,16 @@ ctimer_coro_init(struct ctimer_coro *evco);
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
  *
- * \pre def != NULL
- * \param def the coroutine and watcher description
- * \return same as ::coro_create
+ * \param ops additional watcher spawn options (maybe NULL)
+ * \return refer to ::coro_spawn
  */
 int
-ctimer_coro_spawn(EV_P_ struct ctimer_coro *evco, const struct ctimer_coro_def *def);
+ctimer_coro_spawn(EV_P_ struct ctimer_coro *evco, const struct ctimer_coro_ops *ops);
 
 /**
  * Stop the internal watcher and destroy it along with its dedicated coroutine.
  *
- * Do not call this function within a ::ctimer_coro_def::finalizer callback.
+ * Do not call this function within a ::ctimer_coro::finalizer callback.
  */
 void
 ctimer_coro_finish(struct ctimer_coro *evco);

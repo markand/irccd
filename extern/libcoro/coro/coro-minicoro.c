@@ -10,9 +10,9 @@
 #define CORO_A_
 #endif
 
-#define CORO_IS_ATTACHED(Co)  ((Co)->def.flags & CORO_ATTACHED)
-#define CORO_IS_ESSENTIAL(Co) ((Co)->def.flags & CORO_ESSENTIAL)
-#define CORO_IS_FOREVER(Co)   ((Co)->def.flags & CORO_FOREVER)
+#define CORO_IS_ATTACHED(Co)  ((Co)->flags & CORO_ATTACHED)
+#define CORO_IS_ESSENTIAL(Co) ((Co)->flags & CORO_ESSENTIAL)
+#define CORO_IS_FOREVER(Co)   ((Co)->flags & CORO_FOREVER)
 
 static const char * const statuses[] = {
 	[MCO_DEAD]      = "!",
@@ -31,7 +31,7 @@ coro_debug_printf(const struct coro *coro, const char *fmt, ...)
 	enum mco_state state = mco_status(coro->mco_coro);
 
 	va_start(ap, fmt);
-	fprintf(stderr, "[coro] <%s> (%s) ", statuses[state], coro->def.name);
+	fprintf(stderr, "[coro] <%s> (%s) ", statuses[state], coro->name);
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	va_end(ap);
@@ -54,7 +54,13 @@ coro_debug_printf(const struct coro *coro, const char *fmt, ...)
 do {                                                                            \
         enum mco_state state = mco_status((Coro)->mco_coro);                    \
                                                                                 \
-        fprintf(stderr, "[coro] (%s %s) ", (Coro)->def.name, statuses[state]);  \
+        if (!(Coro)->name)                                                      \
+                fprintf(stderr, "[coro] (%p %s) ",                              \
+                    (const void *)(Coro), statuses[state]);                     \
+        else                                                                    \
+                fprintf(stderr, "[coro] (%s %s) ",                              \
+                    (Coro)->name, statuses[state]);                             \
+                                                                                \
         fprintf(stderr, __VA_ARGS__);                                           \
         fprintf(stderr, "\n");                                                  \
         abort();                                                                \
@@ -173,13 +179,13 @@ do {                                                                            
 #endif
 
 /*
- * CORO_PUSH(Self, Into, Data, Size)
+ * CORO_PUSH(Into, Data, Size)
  *
  * Push data into the coroutine `Into`
  */
 #if !defined(NDEBUG)
 
-#define CORO_PUSH(Self, Into, Data, Size)                                       \
+#define CORO_PUSH(Into, Data, Size)                                             \
 do {                                                                            \
         enum mco_result rc;                                                     \
                                                                                 \
@@ -188,12 +194,12 @@ do {                                                                            
          * ooooh.                                                               \
          */                                                                     \
         if ((rc = mco_push((Into)->mco_coro, (Data), (Size))) != MCO_SUCCESS)   \
-                CORO_ABORT((Self), "push: storage error: %d", rc);              \
+                CORO_ABORT((Into), "push: storage error: %d", rc);              \
 } while (0)
 
 #else
 
-#define CORO_PUSH(Self, Into, Data, Size)                                       \
+#define CORO_PUSH(Into, Data, Size)                                             \
 do {                                                                            \
         mco_push((Into)->mco_coro, (Data), (Size));                             \
 } while (0)
@@ -201,14 +207,14 @@ do {                                                                            
 #endif
 
 /*
- * CORO_PULL(Self, From, Data, Size)
+ * CORO_PULL(From, Data, Size)
  *
  * Pull data from coroutine `From`.
  */
 
 #if !defined(NDEBUG)
 
-#define CORO_PULL(Self, From, Data, Size)                                       \
+#define CORO_PULL(From, Data, Size)                                             \
 do {                                                                            \
         enum mco_result rc;                                                     \
                                                                                 \
@@ -216,12 +222,12 @@ do {                                                                            
          * Should not happen now unless user really broke the trophy twice.     \
          */                                                                     \
         if ((rc = mco_pop((From)->mco_coro, (Data), (Size))) != MCO_SUCCESS)    \
-                CORO_ABORT((Self), "pull: storage error: %d", rc);              \
+                CORO_ABORT((From), "pull: storage error: %d", rc);              \
 } while (0)
 
 #else
 
-#define CORO_PULL(Self, From, Data, Size)                                       \
+#define CORO_PULL(From, Data, Size)                                             \
 do {                                                                            \
         mco_pop((From)->mco_coro, (Data), (Size));                              \
 } while (0)
@@ -236,7 +242,7 @@ coro_entry_cb(struct mco_coro *self)
 {
 	struct coro *coro = self->user_data;
 
-	coro->def.entry(CORO_A_ coro);
+	coro->entry(CORO_A_ coro);
 }
 
 /*
@@ -300,9 +306,10 @@ coro_check_forever_cb(EV_P_ struct ev_check *self, int)
 static inline void
 coro_reset(struct coro *coro)
 {
-	coro->def = (const struct coro_def) {};
 	coro->mco_desc = (const struct mco_desc) {};
 	coro->mco_coro = NULL;
+	coro->prepare = (const struct ev_prepare) {};
+	coro->check = (const struct ev_check) {};
 	coro->off = 0;
 #if EV_MULTIPLICITY
 	coro->loop = NULL;
@@ -315,69 +322,13 @@ coro_init(struct coro *coro)
 	assert(coro);
 
 	coro_reset(coro);
-
-	coro->prepare = (const struct ev_prepare) {};
-	coro->check = (const struct ev_check) {};
-}
-
-void
-coro_set_name(struct coro *coro, const char *name)
-{
-	assert(coro);
-
-	if (name)
-		coro->def.name = name;
-	else
-		coro->def.name = CORO_DEFAULT_NAME;
-}
-
-void
-coro_set_priority(struct coro *coro, int priority)
-{
-	assert(coro);
-
-	coro->def.priority = priority;
-}
-
-void
-coro_set_flags(struct coro *coro, unsigned int flags)
-{
-	assert(coro);
-
-	coro->def.flags = flags;
-}
-
-void
-coro_set_stack_size(struct coro *coro, size_t stack_size)
-{
-	assert(coro);
-
-	coro->def.stack_size = stack_size;
-}
-
-void
-coro_set_entry(struct coro *coro, coro_entry_t entry)
-{
-	assert(coro);
-	assert(entry);
-
-	coro->def.entry = entry;
-}
-
-void
-coro_set_finalizer(struct coro *coro, coro_finalizer_t finalizer)
-{
-	assert(coro);
-	assert(finalizer);
-
-	coro->def.finalizer = finalizer;
 }
 
 int
 coro_create(EV_P_ struct coro *coro)
 {
 	assert(coro);
-	assert(coro->def.entry);
+	assert(coro->entry);
 
 	enum mco_result rc;
 	void (*prepare_cb)(EV_P_ struct ev_prepare *, int);
@@ -389,7 +340,7 @@ coro_create(EV_P_ struct coro *coro)
 		CORO_ABORT(coro, "essential and forever coroutines are mutually exclusive");
 #endif
 
-	coro->mco_desc = mco_desc_init(coro_entry_cb, coro->def.stack_size);
+	coro->mco_desc = mco_desc_init(coro_entry_cb, coro->stack_size);
 	coro->mco_desc.user_data = coro;
 
 #if EV_MULTIPLICITY
@@ -398,7 +349,7 @@ coro_create(EV_P_ struct coro *coro)
 
 	if ((rc = mco_create(&coro->mco_coro, &coro->mco_desc)) != MCO_SUCCESS)
 		rc = -ENOMEM;
-	else if (coro->def.flags & (CORO_ATTACHED | CORO_ESSENTIAL | CORO_FOREVER)) {
+	else if (coro->flags & (CORO_ATTACHED | CORO_ESSENTIAL | CORO_FOREVER)) {
 		/* Select prepare/check callbacks depending on the flags. */
 		if (CORO_IS_ATTACHED(coro)) {
 			CORO_DEBUG(coro, "of type attached");
@@ -416,11 +367,11 @@ coro_create(EV_P_ struct coro *coro)
 
 		/* Add pre/post loop resumer. */
 		ev_prepare_init(&coro->prepare, prepare_cb);
-		ev_set_priority(&coro->prepare, coro->def.priority);
+		ev_set_priority(&coro->prepare, coro->priority);
 		ev_prepare_start(EV_A_ &coro->prepare);
 
 		ev_check_init(&coro->check, check_cb);
-		ev_set_priority(&coro->check, coro->def.priority);
+		ev_set_priority(&coro->check, coro->priority);
 		ev_check_start(EV_A_ &coro->check);
 	}
 
@@ -428,22 +379,13 @@ coro_create(EV_P_ struct coro *coro)
 }
 
 int
-coro_spawn(EV_P_ struct coro *coro, const struct coro_def *def)
+coro_spawn(EV_P_ struct coro *coro)
 {
 	assert(coro);
-	assert(def);
 
 	int rc;
 
 	coro_init(coro);
-	coro_set_name(coro, def->name);
-	coro_set_priority(coro, def->priority);
-	coro_set_stack_size(coro, def->stack_size);
-	coro_set_flags(coro, def->flags);
-	coro_set_entry(coro, def->entry);
-
-	if (def->finalizer)
-		coro_set_finalizer(coro, def->finalizer);
 
 	if ((rc = coro_create(EV_A_ coro)) < 0)
 		coro_finish(coro);
@@ -543,10 +485,10 @@ coro_push(struct coro *into, const void *data, size_t size)
 		CORO_YIELD(self);
 	}
 
-	CORO_DEBUG(self, "push: pushing %zu bytes into %s", size, into->def.name);
-	CORO_DEBUG(self, "push: yield until consumed by %s", into->def.name);
+	CORO_DEBUG(self, "push: pushing %zu bytes into %s", size, into->name);
+	CORO_DEBUG(self, "push: yield until consumed by %s", into->name);
 
-	CORO_PUSH(self, into, data, size);
+	CORO_PUSH(into, data, size);
 
 	while (mco_get_bytes_stored(into->mco_coro) != 0)
 		CORO_YIELD(self);
@@ -570,7 +512,7 @@ coro_pull(struct coro *from, void *data, size_t size)
 	while (mco_get_bytes_stored(from->mco_coro) != size)
 		CORO_YIELD(self);
 
-	CORO_PULL(self, from, data, size);
+	CORO_PULL(from, data, size);
 	CORO_DEBUG(self, "pull: consumed %zu bytes", size);
 }
 
@@ -625,6 +567,6 @@ coro_finish(struct coro *coro)
 		coro->mco_coro = NULL;
 	}
 
-	if (coro->def.finalizer)
-		coro->def.finalizer(CORO_A_ coro);
+	if (coro->finalizer)
+		coro->finalizer(CORO_A_ coro);
 }

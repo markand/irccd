@@ -43,7 +43,7 @@
 
 struct cchild;
 struct cchild_coro;
-struct cchild_coro_def;
+struct cchild_coro_ops;
 
 /**
  * \brief Coroutine entrypoint for child.
@@ -89,58 +89,40 @@ struct cchild_coro {
 	struct cchild child;
 
 	/**
-	 * Underlying coroutine.
+	 * Coroutine attached to this watcher.
+	 *
+	 * Caller can set fields just like a normal coroutine however:
+	 *
+	 * The field ::coro::entry is replaced with an internal callback calling
+	 * ::cchild_coro::entry instead.
+	 *
+	 * If ::coro::finalizer is NULL, an internal callback is set to stop and
+	 * destroy the associated watcher. This internal callback will call
+	 * ::cchild_coro::finalizer and user is encouraged to use it
+	 * instead.
 	 */
 	struct coro coro;
 
 	/**
-	 * (private)
-	 */
-	cchild_coro_entry_t entry;
-
-	/**
-	 * (private)
-	 */
-	cchild_coro_finalizer_t finalizer;
-};
-
-/**
- * \struct cchild_coro_def
- * \brief Watcher coroutine definition.
- *
- * This structure is used as a descriptor for ::cchild_coro_spawn.
- */
-struct cchild_coro_def {
-	/**
-	 * \copydoc ::coro_def::name.
-	 */
-	const char *name;
-
-	/**
-	 * \copydoc ::coro_def::stack_size.
-	 */
-	size_t stack_size;
-
-	/**
-	 * \copydoc ::coro_def::flags.
-	 */
-	unsigned int flags;
-
-	/**
-	 * Watcher coroutine entrypoint.
+	 * (init)
+	 *
+	 * Coroutine watcher entrypoint.
 	 */
 	cchild_coro_entry_t entry;
 
 	/**
 	 * (optional)
 	 *
-	 * Coroutine finalizer.
-	 *
-	 * This user function is called after the coroutine watcher has been
-	 * cleanup itself.
+	 * Finalizer for the coroutine watcher.
 	 */
 	cchild_coro_finalizer_t finalizer;
+};
 
+/**
+ * \struct cchild_coro_ops
+ * \brief Optchildns for ::cchild_coro_spawn.
+ */
+struct cchild_coro_ops {
 	/**
 	 * Process PID to monitor.
 	 */
@@ -153,11 +135,7 @@ struct cchild_coro_def {
 };
 
 /**
- * Initialize defaults.
- *
- * This function is not required if you directly use ::cchild_use or
- * ::cchild_create but is provided if you wish to call ::cchild_finish
- * prematurly.
+ * Initialize private fields.
  */
 void
 cchild_init(struct cchild *ev);
@@ -273,17 +251,16 @@ cchild_coro_init(struct cchild_coro *evco);
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
  *
- * \pre def != NULL
- * \param def the coroutine and watcher description
- * \return same as ::coro_create
+ * \param ops additional watcher spawn options (maybe NULL)
+ * \return refer to ::coro_spawn
  */
 int
-cchild_coro_spawn(EV_P_ struct cchild_coro *evco, const struct cchild_coro_def *def);
+cchild_coro_spawn(EV_P_ struct cchild_coro *evco, const struct cchild_coro_ops *ops);
 
 /**
  * Stop the internal watcher and destroy it along with its dedicated coroutine.
  *
- * Do not call this function within a ::cchild_coro_def::finalizer callback.
+ * Do not call this function within a ::cchild_coro::finalizer callback.
  */
 void
 cchild_coro_finish(struct cchild_coro *evco);

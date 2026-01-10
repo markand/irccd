@@ -1,1 +1,0 @@
-	evco->close = 0;

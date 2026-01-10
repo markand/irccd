@@ -76,9 +76,8 @@ cio_init(struct cio *ev)
 {
 	assert(ev);
 
-	ev->revents = 0;
-	ev->io = (const struct ev_io) {};
 	ev_init(&ev->io, cio_cb);
+	ev->revents = 0;
 }
 
 void
@@ -175,46 +174,43 @@ cio_coro_init(struct cio_coro *evco)
 	assert(evco);
 
 	cio_init(&evco->io);
-
 	coro_init(&evco->coro);
-	coro_set_entry(&evco->coro, cio_coro_entry_cb);
-	coro_set_finalizer(&evco->coro, cio_coro_finalizer_cb);
 
-	evco->entry = NULL;
-	evco->finalizer = NULL;
-	evco->close = 0;
+	evco->coro.entry = cio_coro_entry_cb;
+
+	if (!evco->coro.finalizer)
+		evco->coro.finalizer = cio_coro_finalizer_cb;
 }
 
 int
-cio_coro_spawn(EV_P_ struct cio_coro *evco, const struct cio_coro_def *def)
+cio_coro_spawn(EV_P_ struct cio_coro *evco, const struct cio_coro_ops *ops)
 {
 	assert(evco);
-	assert(def);
-	assert(def->entry);
+	assert(evco->entry);
 
 	int rc;
 
 	cio_coro_init(evco);
-
-	evco->entry = def->entry;
-	evco->finalizer = def->finalizer;
 
 	/*
 	 * Watchers should be executed before attached coroutines to allow
 	 * resuming them if an event happened.
 	 */
 	ev_set_priority(&evco->io.io, CORO_PRI_MAX - 1);
-	cio_set(&evco->io, def->fd, def->events);
-	evco->close = def->close;
+
+	/*
+	 * Avoid starting the watcher if events is zero because if the whole
+	 * cio_coro_ops is zero it could start on STDIN_FILENO which may be
+	 * undesired.
+	 */
+	if (!ops || ops->events == 0)
+		evco->coro.flags |= CORO_INACTIVE;
+	else
+		cio_set(&evco->io, ops->fd, ops->events);
 
 	/* Automatically start the watcher unless disabled. */
-	if (!(def->flags & CORO_INACTIVE))
+	if (!(evco->coro.flags & CORO_INACTIVE))
 		cio_start(EV_A_ &evco->io);
-
-	/* All other fields are available for customization. */
-	coro_set_name(&evco->coro, def->name);
-	coro_set_stack_size(&evco->coro, def->stack_size);
-	coro_set_flags(&evco->coro, def->flags);
 
 	if ((rc = coro_create(EV_A_ &evco->coro)) < 0)
 		cio_stop(EV_A_ &evco->io);

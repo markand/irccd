@@ -43,7 +43,7 @@
 
 struct csignal;
 struct csignal_coro;
-struct csignal_coro_def;
+struct csignal_coro_ops;
 
 /**
  * \brief Coroutine entrypoint for signal.
@@ -89,69 +89,48 @@ struct csignal_coro {
 	struct csignal signal;
 
 	/**
-	 * Underlying coroutine.
+	 * Coroutine attached to this watcher.
+	 *
+	 * Caller can set fields just like a normal coroutine however:
+	 *
+	 * The field ::coro::entry is replaced with an internal callback calling
+	 * ::csignal_coro::entry instead.
+	 *
+	 * If ::coro::finalizer is NULL, an internal callback is set to stop and
+	 * destroy the associated watcher. This internal callback will call
+	 * ::csignal_coro::finalizer and user is encouraged to use it
+	 * instead.
 	 */
 	struct coro coro;
 
 	/**
-	 * (private)
-	 */
-	csignal_coro_entry_t entry;
-
-	/**
-	 * (private)
-	 */
-	csignal_coro_finalizer_t finalizer;
-};
-
-/**
- * \struct csignal_coro_def
- * \brief Watcher coroutine definition.
- *
- * This structure is used as a descriptor for ::csignal_coro_spawn.
- */
-struct csignal_coro_def {
-	/**
-	 * \copydoc ::coro_def::name.
-	 */
-	const char *name;
-
-	/**
-	 * \copydoc ::coro_def::stack_size.
-	 */
-	size_t stack_size;
-
-	/**
-	 * \copydoc ::coro_def::flags.
-	 */
-	unsigned int flags;
-
-	/**
-	 * Watcher coroutine entrypoint.
+	 * (init)
+	 *
+	 * Coroutine watcher entrypoint.
 	 */
 	csignal_coro_entry_t entry;
 
 	/**
 	 * (optional)
 	 *
-	 * Coroutine finalizer.
-	 *
-	 * This user function is called after the coroutine watcher has been
-	 * cleanup itself.
+	 * Finalizer for the coroutine watcher.
 	 */
 	csignal_coro_finalizer_t finalizer;
+};
+
+/**
+ * \struct csignal_coro_ops
+ * \brief Options for ::csignal_coro_spawn.
+ */
+struct csignal_coro_ops {
 	/**
-	 * Signal number to watch on.
+	 * Signal to wait on.
 	 */
 	int signo;
 };
 
 /**
- * Initialize defaults.
- *
- * This function is not required if you directly use ::csignal_use or
- * ::csignal_create but is provided if you wish to call ::csignal_finish
- * prematurly.
+ * Initialize private fields.
  */
 void
 csignal_init(struct csignal *ev);
@@ -238,6 +217,11 @@ csignal_ready(struct csignal *ev);
 int
 csignal_wait(EV_P_ struct csignal *ev);
 
+/**
+ * Configure watcher.
+ *
+ * This function is equivalent to ev_signal_set.
+ */
 void
 csignal_set(struct csignal *ev, int signo);
 
@@ -262,17 +246,16 @@ csignal_coro_init(struct csignal_coro *evco);
  * and immediately creates its dedicated coroutine which is also started
  * automatically.
  *
- * \pre def != NULL
- * \param def the coroutine and watcher description
- * \return same as ::coro_create
+ * \param ops additional watcher spawn options (maybe NULL)
+ * \return refer to ::coro_spawn
  */
 int
-csignal_coro_spawn(EV_P_ struct csignal_coro *evco, const struct csignal_coro_def *def);
+csignal_coro_spawn(EV_P_ struct csignal_coro *evco, const struct csignal_coro_ops *ops);
 
 /**
  * Stop the internal watcher and destroy it along with its dedicated coroutine.
  *
- * Do not call this function within a ::csignal_coro_def::finalizer callback.
+ * Do not call this function within a ::csignal_coro::finalizer callback.
  */
 void
 csignal_coro_finish(struct csignal_coro *evco);

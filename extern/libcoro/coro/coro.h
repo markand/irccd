@@ -83,7 +83,6 @@
 #endif
 
 struct coro;
-struct coro_def;
 
 /**
  * \brief Coroutine entrypoint.
@@ -148,11 +147,12 @@ typedef void (*coro_finalizer_t)(EV_P_ struct coro *);
  */
 #define CORO_INACTIVE (1 << 3)
 
+#if defined(DOXYGEN)
 /**
- * \struct coro_def
- * \brief Coroutine description for ::coro_spawn.
+ * \struct coro
+ * \brief Coroutine object.
  */
-struct coro_def {
+struct coro {
 	/**
 	 * Coroutine name.
 	 *
@@ -195,88 +195,13 @@ struct coro_def {
 	 */
 	coro_finalizer_t finalizer;
 };
-
-#if defined(DOXYGEN)
-/**
- * \struct coro
- * \brief Coroutine object.
- */
-struct coro {
-	/**
-	 * Coroutine definition.
-	 */
-	struct coro_def def;
-};
 #endif
 
 /**
- * Initialize defaults in coroutine.
+ * Initialize private fields.
  */
 void
 coro_init(struct coro *coro);
-
-/**
- * Set coroutine name.
- *
- * If name is NULL, ::CORO_DEFAULT_NAME will be used
- *
- * \param name the new coroutine name
- * \sa ::coro_def::name
- */
-void
-coro_set_name(struct coro *coro, const char *name);
-
-/**
- * Set coroutine priority.
- *
- * \param priority the new priority
- * \sa ::coro_def::priority
- */
-void
-coro_set_priority(struct coro *coro, int priority);
-
-/**
- * Set coroutine flags.
- *
- * \param flags the new flags
- * \sa ::coro_def::flags
- */
-void
-coro_set_flags(struct coro *coro, unsigned int flags);
-
-/**
- * Set coroutine stack size.
- *
- * This function has no effect if already started.
- *
- * \param stack_size the coroutine stack size to allocate
- * \sa ::coro_def::stack_size
- */
-void
-coro_set_stack_size(struct coro *coro, size_t stack_size);
-
-/**
- * Set coroutine entrypoint.
- *
- * This function can be called on an active coroutine.
- *
- * \pre entry != NULL
- * \param entry the coroutine entrypoint
- * \sa ::coro_def::entry
- */
-void
-coro_set_entry(struct coro *coro, coro_entry_t entry);
-
-/**
- * Set coroutine finalizer.
- *
- * Passing NULL will remove the finalizer.
- *
- * \param finalizer the coroutine finalizer (maybe NULL)
- * \sa ::coro_def::finalizer
- */
-void
-coro_set_finalizer(struct coro *coro, coro_finalizer_t finalizer);
 
 /**
  * Create the underlying coroutine.
@@ -294,14 +219,10 @@ coro_create(EV_P_ struct coro *coro);
  * This is a convenient all-in-one function that initialize the coroutine and
  * start it immediately.
  *
- * The `def` argument is copied in the coroutine and can be discarded (note that
- * the ::coro_def::name must remain valid though).
- *
- * \pre def != NULL
- * \param def the coroutine definition
+ * \return refer to ::coro_create.
  */
 int
-coro_spawn(EV_P_ struct coro *coro, const struct coro_def *def);
+coro_spawn(EV_P_ struct coro *coro);
 
 /**
  * Indicate if the coroutine is resumable (aka not started or suspended).
