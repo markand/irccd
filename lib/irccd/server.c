@@ -53,6 +53,10 @@
 #include "server.h"
 #include "util.h"
 
+#define IRC_ARGS_MAX 32         /* maximum number of arguments to parse */
+#define IRC_MESSAGE_LEN 512     /* per IRC message length */
+#define IRC_BUF_SIZE 65536      /* incoming and outgoing buffers */
+
 #define RECONNECT_DELAY 30.0    /* Seconds to wait before reconnecting. */
 #define CONNECT_TIMEOUT 5.0     /* Seconds before marking a server as dead. */
 #define PING_TIMEOUT    300.0   /* Seconds after assuming ping timeout. */
@@ -78,10 +82,13 @@ struct conn {
 	/*
 	 * Input & output buffer and their respective sizes, not NUL
 	 * terminated.
+	 *
+	 * Since conn is allocated on the heap its fine to have a fixed size
+	 * array here.
 	 */
-	char in[IRC_BUF_LEN];
+	char in[IRC_BUF_SIZE];
 	size_t insz;
-	char out[IRC_BUF_LEN];
+	char out[IRC_BUF_SIZE];
 	size_t outsz;
 
 	int fd;
@@ -1678,7 +1685,7 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 int
 irc_server_send_va(struct irc_server *s, const char *fmt, va_list ap)
 {
-	char buf[IRC_BUF_LEN];
+	char buf[IRC_MESSAGE_LEN];
 	struct conn *conn = s->conn;
 
 	if (!conn)
