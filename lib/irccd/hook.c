@@ -220,7 +220,7 @@ irc_hook_new(const char *name, const char *path)
 
 	struct irc_hook *h;
 
-	h = irc_util_malloc(sizeof (*h));
+	h = irc_util_calloc(1, sizeof (*h));
 	h->name = irc_util_strdup(name);
 	h->path = irc_util_strdup(path);
 

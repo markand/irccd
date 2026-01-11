@@ -35,9 +35,9 @@
 
 #include <utlist.h>
 
-#include <coro/cio.h>
-#include <coro/coro.h>
-#include <coro/ctimer.h>
+#include <nce/coro.h>
+#include <nce/io.h>
+#include <nce/timer.h>
 
 #include "config.h"
 
@@ -92,8 +92,8 @@ struct conn {
 	size_t outsz;
 
 	int fd;
-	struct cio_coro io_fd;
-	struct ctimer_coro timer;
+	struct nce_io_coro io_fd;
+	struct nce_timer_coro timer;
 
 	/* OpenBSD's nice libtls. */
 #if IRCCD_WITH_SSL == 1
@@ -736,7 +736,7 @@ handle_ping(struct irc_server *s, struct msg *msg)
 {
 	struct conn *conn = s->conn;
 
-	ctimer_again(&conn->timer.timer);
+	nce_timer_again(&conn->timer.timer);
 
 	if (msg->args[0])
 		irc_server_send(s, "PONG :%s", msg->args[0]);
@@ -932,11 +932,11 @@ conn_reschedule(struct conn *conn)
 	handle_disconnect(conn->parent);
 
 	/* Stop at least our socket watcher, finalizer will do the rest. */
-	cio_stop(&conn->io_fd.io);
+	nce_io_stop(&conn->io_fd.io);
 
 	/* Feed the watchdog timer quickly. */
-	ctimer_feed(&conn->timer.timer, EV_TIMER);
-	coro_idle();
+	nce_timer_feed(&conn->timer.timer, EV_TIMER);
+	nce_coro_idle();
 }
 
 /*
@@ -1025,9 +1025,9 @@ conn_dial(struct conn *conn)
 		 * once connection is complete or error'ed.
 		 */
 		irc_log_debug("server %s: connect in progress", conn->parent->name);
-		cio_reset(&conn->io_fd.io, conn->fd, EV_WRITE);
-		cio_wait(&conn->io_fd.io);
-		cio_stop(&conn->io_fd.io);
+		nce_io_reset(&conn->io_fd.io, conn->fd, EV_WRITE);
+		nce_io_wait(&conn->io_fd.io);
+		nce_io_stop(&conn->io_fd.io);
 
 		/*
 		 * Determine if the non blocking connect(2) call succeeded, otherwise
@@ -1089,7 +1089,7 @@ conn_connect(struct conn *conn)
 		}
 	}
 #endif
-
+	nce_io_reset(&conn->io_fd.io, conn->fd, EV_READ);
 	conn->state = STATE_IDENT;
 }
 
@@ -1115,8 +1115,7 @@ conn_tcp_recv(struct conn *conn, void *buf, size_t bufsz, int *events)
 	} else if (nr == 0) {
 		irc_log_warn("server %s: remote closed connection", conn->parent->name);
 		nr = -1;
-	} else if (conn->insz < sizeof (conn->in))
-		*events |= EV_READ;
+	}
 
 	return nr;
 }
@@ -1248,7 +1247,7 @@ conn_push(struct conn *conn, const char *data, size_t datasz)
 	memcpy(&conn->out[conn->outsz], "\r\n", 2);
 	conn->outsz += 2;
 
-	cio_reset(&conn->io_fd.io, conn->fd, EV_READ | EV_WRITE);
+	nce_io_reset(&conn->io_fd.io, conn->fd, EV_READ | EV_WRITE);
 
 	return 0;
 }
@@ -1261,8 +1260,8 @@ conn_wait(struct conn *conn)
 {
 	int events, revents, rc;
 
-	revents = cio_wait(&conn->io_fd.io);
-	events = 0;
+	revents = nce_io_wait(&conn->io_fd.io);
+	events = EV_READ;
 
 	if ((revents & EV_READ) && (rc = conn_recv(conn, &events)) < 0)
 		return rc;
@@ -1270,7 +1269,7 @@ conn_wait(struct conn *conn)
 		return rc;
 
 	if (events != conn->io_fd.io.io.events)
-		cio_reset(&conn->io_fd.io, conn->fd, events);
+		nce_io_reset(&conn->io_fd.io, conn->fd, events);
 
 	return 0;
 }
@@ -1342,9 +1341,9 @@ conn_ident(struct conn *conn)
 			 * Now that we are ready we can tell the watchdog that
 			 * it must inspect larger timeouts.
 			 */
-			ctimer_stop(&conn->timer.timer);
-			ctimer_set(&conn->timer.timer, PING_TIMEOUT, PING_TIMEOUT);
-			ctimer_start(&conn->timer.timer);
+			nce_timer_stop(&conn->timer.timer);
+			nce_timer_set(&conn->timer.timer, PING_TIMEOUT, PING_TIMEOUT);
+			nce_timer_start(&conn->timer.timer);
 		}
 
 		handler(conn->parent, &msg);
@@ -1371,7 +1370,7 @@ conn_ready(struct conn *conn)
 }
 
 static void
-conn_io_entry(struct cio *self)
+conn_io_entry(struct nce_io *self)
 {
 	struct conn *conn = CONN(self, io_fd.io);
 
@@ -1379,7 +1378,7 @@ conn_io_entry(struct cio *self)
 
 	for (;;) {
 		/* Rearm timer */
-		ctimer_again(&conn->timer.timer);
+		nce_timer_again(&conn->timer.timer);
 
 		switch (conn->state) {
 		case STATE_RESOLVE:
@@ -1404,7 +1403,7 @@ conn_io_entry(struct cio *self)
 }
 
 static void
-conn_io_finalizer(struct cio *self)
+conn_io_finalizer(struct nce_io *self)
 {
 	struct conn *conn = CONN(self, io_fd.io);
 
@@ -1431,14 +1430,14 @@ conn_io_finalizer(struct cio *self)
 static void
 conn_io_spawn(struct conn *conn)
 {
-	conn->io_fd = (const struct cio_coro) {
+	conn->io_fd = (const struct nce_io_coro) {
 		.coro.name  = "irc_server.io",
-		.coro.flags = CORO_ATTACHED | CORO_INACTIVE,
+		.coro.flags = NCE_CORO_ATTACHED | NCE_CORO_INACTIVE,
 		.entry      = conn_io_entry,
 		.finalizer  = conn_io_finalizer
 	};
 
-	cio_coro_spawn(&conn->io_fd, NULL);
+	nce_io_coro_spawn(&conn->io_fd, NULL);
 }
 
 static void
@@ -1461,37 +1460,37 @@ conn_timer_resurrect(struct conn *conn)
 		break;
 	}
 
-	coro_finish(&conn->io_fd.coro);
+	nce_coro_destroy(&conn->io_fd.coro);
 
 	/* Now reschedule ourself to reconnect later. */
-	ctimer_stop(&conn->timer.timer);
-	ctimer_set(&conn->timer.timer, 2.0, 0.0);
-	ctimer_start(&conn->timer.timer);
-	ctimer_wait(&conn->timer.timer);
-	ctimer_stop(&conn->timer.timer);
+	nce_timer_stop(&conn->timer.timer);
+	nce_timer_set(&conn->timer.timer, 2.0, 0.0);
+	nce_timer_start(&conn->timer.timer);
+	nce_timer_wait(&conn->timer.timer);
+	nce_timer_stop(&conn->timer.timer);
 
 	conn_io_spawn(conn);
 }
 
 static void
-conn_timer_entry(struct ctimer *self)
+conn_timer_entry(struct nce_timer *self)
 {
 	struct conn *conn = CONN(self, timer.timer);
 
-	while (ctimer_wait(self))
+	while (nce_timer_wait(self))
 		conn_timer_resurrect(conn);
 }
 
 static void
 conn_timer_spawn(struct conn *conn)
 {
-	conn->timer = (const struct ctimer_coro) {
+	conn->timer = (const struct nce_timer_coro) {
 		.coro.name  = "irc_server.timer",
-		.coro.flags = CORO_ATTACHED,
+		.coro.flags = NCE_CORO_ATTACHED,
 		.entry      = conn_timer_entry
 	};
 
-	ctimer_coro_spawn(&conn->timer, &(const struct ctimer_coro_ops) {
+	nce_timer_coro_spawn(&conn->timer, &(const struct nce_timer_coro_args) {
 		.after  = 60.0,
 		.repeat = 60.0
 	});
@@ -1646,8 +1645,8 @@ irc_server_disconnect(struct irc_server *s)
 		return;
 	}
 
-	coro_finish(&conn->io_fd.coro);
-	coro_finish(&conn->timer.coro);
+	nce_coro_destroy(&conn->io_fd.coro);
+	nce_coro_destroy(&conn->timer.coro);
 
 	server_channels_clear(s);
 	server_clear(s);
