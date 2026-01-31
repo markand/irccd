@@ -24,11 +24,8 @@
  * \brief Coroutine watcher support for ev_prepare.
  * \ingroup libnce-watchers
  */
-#include <stddef.h>
 
-#include <ev.h>
-
-#include "coro.h"
+#include "nce.h"
 
 #if defined(DOXYGEN)
 #define EV_P_ struct ev_loop *,
@@ -45,26 +42,18 @@
  */
 #define NCE_PREPARE(Ptr, Field) \
 	(NCE_CONTAINER_OF(Ptr, struct nce_prepare, Field))
+
+/**
+ * Convenient ::NCE_CONTAINER_OF macro for ::nce_prepare_coro.
+ */
+#define NCE_PREPARE_CORO(Ptr, Field) \
+	(NCE_CONTAINER_OF(Ptr, struct nce_prepare_coro, Field))
 #endif
 
 struct nce_prepare;
 struct nce_prepare_coro;
 struct nce_prepare_coro_args;
 
-/**
- * \brief Coroutine entrypoint for prepare.
- *
- * Similar to ::nce_coro_entry_t but it receives its watcher as argument.
- */
-typedef void (* nce_prepare_coro_entry_t)(EV_P_ struct nce_prepare *self);
-
-/**
- * \brief Finalizer function.
- *
- * Similar to ::nce_coro_finalizer_t but let the user perform extra step on a
- * coroutine watcher.
- */
-typedef void (* nce_prepare_coro_finalizer_t)(EV_P_ struct nce_prepare *self);
 
 /**
  * \struct nce_prepare
@@ -102,47 +91,13 @@ struct nce_prepare_coro {
 	 * (read-write)
 	 *
 	 * Coroutine attached to this watcher.
-	 *
-	 * Caller can set fields just like a normal coroutine however:
-	 *
-	 * The field ::coro::entry is replaced with an internal callback calling
-	 * ::nce_prepare_coro::entry instead.
 	 */
 	struct nce_coro coro;
-
-	/**
-	 * (init)
-	 *
-	 * Coroutine watcher entrypoint.
-	 */
-	nce_prepare_coro_entry_t entry;
-
-	/**
-	 * (optional)
-	 *
-	 * Finalizer for the coroutine watcher.
-	 */
-	nce_prepare_coro_finalizer_t finalizer;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \struct nce_prepare_coro_args
- * \brief Options for ::nce_prepare_coro_spawn.
- */
-struct nce_prepare_coro_args {
-#if defined(DOXYGEN)
-	/**
-	 * (private)
-	 *
-	 * Dummy field because no options.
-	 */
-	int dummy;
-#endif
-};
 
 /**
  * Start the event watcher.
@@ -219,27 +174,27 @@ nce_prepare_ready(struct nce_prepare *ev);
  * \return the watcher revents
  */
 int
-nce_prepare_wait(EV_P_ struct nce_prepare *ev);
-
+nce_prepare_wait(struct nce_prepare *ev);
 
 /**
- * This all in one function initialize, set and optionnally start the watcher
- * and immediately creates its dedicated coroutine which is also started
- * automatically.
- *
- * \param args additional watcher spawn arguments (maybe NULL)
- * \return refer to ::nce_coro_spawn
+ * Spawn a coroutine with an embedded `ev_prepare`.
  */
 int
-nce_prepare_coro_spawn(EV_P_ struct nce_prepare_coro *evco, const struct nce_prepare_coro_args *args);
-
+nce_prepare_coro_spawn(EV_P_ struct nce_prepare_coro *evco);
 /**
- * Stop the internal watcher and destroy it along with its dedicated coroutine.
- *
- * Do not call this function within a ::nce_prepare_coro::finalizer callback.
+ * Usable callback function as ::nce_coro::terminate to stop the ::nce_prepare
+ * when destroying the coroutine.
  */
 void
-nce_prepare_coro_destroy(struct nce_prepare_coro *evco);
+nce_prepare_coro_terminate(EV_P_ struct nce_coro *self);
+
+/**
+ * Destroy the watcher and its coroutine.
+ *
+ * The watcher is stopped **before** destroying the coroutine.
+ */
+void
+nce_prepare_coro_destroy(EV_P_ struct nce_prepare_coro *evco);
 
 #ifdef __cplusplus
 }

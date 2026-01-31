@@ -1,5 +1,5 @@
 /*
- * nce_signal.c -- coroutine watcher support for ev_signal
+ * nce/signal.c -- coroutine watcher support for ev_signal
  *
  * Copyright (c) 2025-2026 David Demelier <markand@malikania.fr>
  *
@@ -42,27 +42,6 @@ nce_signal_cb(EV_P_ struct ev_signal *self, int revents)
 #endif
 		ev->revents = revents;
 	}
-}
-
-static void
-nce_signal_coro_entry_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_signal_coro *evco = NCE_CONTAINER_OF(self, struct nce_signal_coro, coro);
-
-	evco->entry(EV_A_ &evco->signal);
-}
-
-static void
-nce_signal_coro_finalizer_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_signal_coro *evco = NCE_CONTAINER_OF(self, struct nce_signal_coro, coro);
-
-	/* Stop the watcher for convenience. */
-	nce_signal_stop(EV_A_ &evco->signal);
-
-	/* Call user as very last function. */
-	if (evco->finalizer)
-		evco->finalizer(EV_A_ &evco->signal);
 }
 
 void
@@ -118,7 +97,7 @@ nce_signal_ready(struct nce_signal *ev)
 }
 
 int
-nce_signal_wait(EV_P_ struct nce_signal *ev)
+nce_signal_wait(struct nce_signal *ev)
 {
 	assert(ev);
 
@@ -140,33 +119,19 @@ nce_signal_set(struct nce_signal *ev, int signo)
 }
 
 int
-nce_signal_coro_spawn(EV_P_ struct nce_signal_coro *evco, const struct nce_signal_coro_args *args)
+nce_signal_coro_spawn(EV_P_ struct nce_signal_coro *evco, int signo)
 {
 	assert(evco);
-	assert(evco->entry);
-
-	(void)args;
 
 	int rc;
 
-	evco->coro.entry = nce_signal_coro_entry_cb;
+	ev_init(&evco->signal.signal, nce_signal_cb);
+	ev_set_priority(&evco->signal.signal, -1);
 
-	if (!evco->coro.finalizer)
-		evco->coro.finalizer = nce_signal_coro_finalizer_cb;
-
-	/*
-	 * Watchers should be executed before attached coroutines to allow
-	 * resuming them if an event happened.
-	 */
-	ev_set_priority(&evco->signal.signal, NCE_PRI_MAX - 1);
-	if (args)
-		nce_signal_set(&evco->signal, args->signo);
-	else
-		evco->coro.flags |= NCE_CORO_INACTIVE;
-
-	/* Automatically start the watcher unless disabled. */
-	if (!(evco->coro.flags & NCE_CORO_INACTIVE))
+	if (!(evco->coro.flags & NCE_INACTIVE)) {
+		nce_signal_set(&evco->signal, signo);
 		nce_signal_start(EV_A_ &evco->signal);
+	}
 
 	if ((rc = nce_coro_create(EV_A_ &evco->coro)) < 0)
 		nce_signal_stop(EV_A_ &evco->signal);
@@ -175,12 +140,19 @@ nce_signal_coro_spawn(EV_P_ struct nce_signal_coro *evco, const struct nce_signa
 
 	return rc;
 }
-
 void
-nce_signal_coro_destroy(struct nce_signal_coro *evco)
+nce_signal_coro_destroy(EV_P_ struct nce_signal_coro *evco)
 {
 	assert(evco);
 
-	/* Will call nce_signal_coro_finalizer_cb */
+	nce_signal_stop(EV_A_ &evco->signal);
 	nce_coro_destroy(&evco->coro);
+}
+
+void
+nce_signal_coro_terminate(EV_P_ struct nce_coro *self)
+{
+	struct nce_signal_coro *evco = NCE_SIGNAL_CORO(self, coro);
+
+	nce_signal_stop(EV_A_ &evco->signal);
 }

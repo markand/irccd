@@ -24,11 +24,8 @@
  * \brief Coroutine watcher support for ev_timer.
  * \ingroup libnce-watchers
  */
-#include <stddef.h>
 
-#include <ev.h>
-
-#include "coro.h"
+#include "nce.h"
 
 #if defined(DOXYGEN)
 #define EV_P_ struct ev_loop *,
@@ -45,26 +42,18 @@
  */
 #define NCE_TIMER(Ptr, Field) \
 	(NCE_CONTAINER_OF(Ptr, struct nce_timer, Field))
+
+/**
+ * Convenient ::NCE_CONTAINER_OF macro for ::nce_timer_coro.
+ */
+#define NCE_TIMER_CORO(Ptr, Field) \
+	(NCE_CONTAINER_OF(Ptr, struct nce_timer_coro, Field))
 #endif
 
 struct nce_timer;
 struct nce_timer_coro;
 struct nce_timer_coro_args;
 
-/**
- * \brief Coroutine entrypoint for timer.
- *
- * Similar to ::nce_coro_entry_t but it receives its watcher as argument.
- */
-typedef void (* nce_timer_coro_entry_t)(EV_P_ struct nce_timer *self);
-
-/**
- * \brief Finalizer function.
- *
- * Similar to ::nce_coro_finalizer_t but let the user perform extra step on a
- * coroutine watcher.
- */
-typedef void (* nce_timer_coro_finalizer_t)(EV_P_ struct nce_timer *self);
 
 /**
  * \struct nce_timer
@@ -102,48 +91,13 @@ struct nce_timer_coro {
 	 * (read-write)
 	 *
 	 * Coroutine attached to this watcher.
-	 *
-	 * Caller can set fields just like a normal coroutine however:
-	 *
-	 * The field ::coro::entry is replaced with an internal callback calling
-	 * ::nce_timer_coro::entry instead.
 	 */
 	struct nce_coro coro;
-
-	/**
-	 * (init)
-	 *
-	 * Coroutine watcher entrypoint.
-	 */
-	nce_timer_coro_entry_t entry;
-
-	/**
-	 * (optional)
-	 *
-	 * Finalizer for the coroutine watcher.
-	 */
-	nce_timer_coro_finalizer_t finalizer;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \struct nce_timer_coro_args
- * \brief Options for ::nce_timer_coro_spawn.
- */
-struct nce_timer_coro_args {
-	/**
-	 * Refer to ::nce_timer_set.
-	 */
-	ev_tstamp after;
-
-	/**
-	 * Refer to ::nce_timer_set.
-	 */
-	ev_tstamp repeat;
-};
 
 /**
  * Start the event watcher.
@@ -220,7 +174,7 @@ nce_timer_ready(struct nce_timer *ev);
  * \return the watcher revents
  */
 int
-nce_timer_wait(EV_P_ struct nce_timer *ev);
+nce_timer_wait(struct nce_timer *ev);
 
 /**
  * Configure watcher.
@@ -246,25 +200,29 @@ nce_timer_restart(EV_P_ struct nce_timer *ev, ev_tstamp after, ev_tstamp repeat)
 void
 nce_timer_again(EV_P_ struct nce_timer *ev);
 
-
 /**
- * This all in one function initialize, set and optionnally start the watcher
- * and immediately creates its dedicated coroutine which is also started
- * automatically.
+ * Spawn a coroutine with an embedded `ev_timer`.
  *
- * \param args additional watcher spawn arguments (maybe NULL)
- * \return refer to ::nce_coro_spawn
+ * Arguments are similar to ::nce_timer_set.
  */
 int
-nce_timer_coro_spawn(EV_P_ struct nce_timer_coro *evco, const struct nce_timer_coro_args *args);
-
+nce_timer_coro_spawn(EV_P_ struct nce_timer_coro *evco,
+                           ev_tstamp after,
+                           ev_tstamp repeat);
 /**
- * Stop the internal watcher and destroy it along with its dedicated coroutine.
- *
- * Do not call this function within a ::nce_timer_coro::finalizer callback.
+ * Usable callback function as ::nce_coro::terminate to stop the ::nce_timer
+ * when destroying the coroutine.
  */
 void
-nce_timer_coro_destroy(struct nce_timer_coro *evco);
+nce_timer_coro_terminate(EV_P_ struct nce_coro *self);
+
+/**
+ * Destroy the watcher and its coroutine.
+ *
+ * The watcher is stopped **before** destroying the coroutine.
+ */
+void
+nce_timer_coro_destroy(EV_P_ struct nce_timer_coro *evco);
 
 #ifdef __cplusplus
 }

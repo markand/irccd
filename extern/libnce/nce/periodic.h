@@ -24,11 +24,8 @@
  * \brief Coroutine watcher support for ev_periodic.
  * \ingroup libnce-watchers
  */
-#include <stddef.h>
 
-#include <ev.h>
-
-#include "coro.h"
+#include "nce.h"
 
 #if defined(DOXYGEN)
 #define EV_P_ struct ev_loop *,
@@ -45,31 +42,23 @@
  */
 #define NCE_PERIODIC(Ptr, Field) \
 	(NCE_CONTAINER_OF(Ptr, struct nce_periodic, Field))
+
+/**
+ * Convenient ::NCE_CONTAINER_OF macro for ::nce_periodic_coro.
+ */
+#define NCE_PERIODIC_CORO(Ptr, Field) \
+	(NCE_CONTAINER_OF(Ptr, struct nce_periodic_coro, Field))
 #endif
 
 struct nce_periodic;
 struct nce_periodic_coro;
 struct nce_periodic_coro_args;
 
-/**
- * \brief Coroutine entrypoint for periodic.
- *
- * Similar to ::nce_coro_entry_t but it receives its watcher as argument.
- */
-typedef void (* nce_periodic_coro_entry_t)(EV_P_ struct nce_periodic *self);
 
 /**
- * \brief Finalizer function.
- *
- * Similar to ::nce_coro_finalizer_t but let the user perform extra step on a
- * coroutine watcher.
+ * Typedef for `ev_periodic` rescheduler callback.
  */
-typedef void (* nce_periodic_coro_finalizer_t)(EV_P_ struct nce_periodic *self);
-
-/**
- * Function wrapping ev_periodic's rescheduler callback.
- */
-typedef ev_tstamp (* nce_periodic_rescheduler_t)(struct nce_periodic *self, ev_tstamp now);
+typedef ev_tstamp (* nce_periodic_rescheduler_t)(struct ev_periodic *self, ev_tstamp now);
 
 /**
  * \struct nce_periodic
@@ -89,24 +78,6 @@ struct nce_periodic {
 	 * Events received from the libev callback.
 	 */
 	int revents;
-
-	/**
-	 * \cond DOXYGEN_PRIVATE
-	 */
-
-	/**
-	 * (read-only)
-	 *
-	 * When using a rescheduler, this function pointer wraps ev_periodic
-	 * rescheduler_cb to provide cperiodic as argument.
-	 *
-	 * Do not edit this field directly, use ::nce_periodic_set instead.
-	 */
-	nce_periodic_rescheduler_t rescheduler;
-
-	/**
-	 * \endcond DOXYGEN_PRIVATE
-	 */
 };
 
 /**
@@ -125,59 +96,13 @@ struct nce_periodic_coro {
 	 * (read-write)
 	 *
 	 * Coroutine attached to this watcher.
-	 *
-	 * Caller can set fields just like a normal coroutine however:
-	 *
-	 * The field ::coro::entry is replaced with an internal callback calling
-	 * ::nce_periodic_coro::entry instead.
 	 */
 	struct nce_coro coro;
-
-	/**
-	 * (init)
-	 *
-	 * Coroutine watcher entrypoint.
-	 */
-	nce_periodic_coro_entry_t entry;
-
-	/**
-	 * (optional)
-	 *
-	 * Finalizer for the coroutine watcher.
-	 */
-	nce_periodic_coro_finalizer_t finalizer;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \struct nce_periodic_coro_args
- * \brief Options for ::nce_periodic_coro_spawn.
- */
-struct nce_periodic_coro_args {
-	/**
-	 * (optional)
-	 *
-	 * Refer to ::nce_periodic_set.
-	 */
-	ev_tstamp offset;
-
-	/**
-	 * (optional)
-	 *
-	 * Refer to ::nce_periodic_set.
-	 */
-	ev_tstamp interval;
-
-	/**
-	 * (optional)
-	 *
-	 * Refer to ::nce_periodic_set.
-	 */
-	nce_periodic_rescheduler_t rescheduler;
-};
 
 /**
  * Start the event watcher.
@@ -254,7 +179,7 @@ nce_periodic_ready(struct nce_periodic *ev);
  * \return the watcher revents
  */
 int
-nce_periodic_wait(EV_P_ struct nce_periodic *ev);
+nce_periodic_wait(struct nce_periodic *ev);
 
 /**
  * Configure periodic interval, offset and optional rescheduler.
@@ -268,25 +193,30 @@ nce_periodic_set(struct nce_periodic *ev,
                  nce_periodic_rescheduler_t rescheduler
 );
 
-
 /**
- * This all in one function initialize, set and optionnally start the watcher
- * and immediately creates its dedicated coroutine which is also started
- * automatically.
+ * Spawn a coroutine with an embedded `ev_periodic`.
  *
- * \param args additional watcher spawn arguments (maybe NULL)
- * \return refer to ::nce_coro_spawn
+ * Arguments are similar to ::nce_periodic_set.
  */
 int
-nce_periodic_coro_spawn(EV_P_ struct nce_periodic_coro *evco, const struct nce_periodic_coro_args *args);
-
+nce_periodic_coro_spawn(EV_P_ struct nce_periodic_coro *evco,
+                              ev_tstamp offset,
+                              ev_tstamp interval,
+                              nce_periodic_rescheduler_t rescheduler);
 /**
- * Stop the internal watcher and destroy it along with its dedicated coroutine.
- *
- * Do not call this function within a ::nce_periodic_coro::finalizer callback.
+ * Usable callback function as ::nce_coro::terminate to stop the ::nce_periodic
+ * when destroying the coroutine.
  */
 void
-nce_periodic_coro_destroy(struct nce_periodic_coro *evco);
+nce_periodic_coro_terminate(EV_P_ struct nce_coro *self);
+
+/**
+ * Destroy the watcher and its coroutine.
+ *
+ * The watcher is stopped **before** destroying the coroutine.
+ */
+void
+nce_periodic_coro_destroy(EV_P_ struct nce_periodic_coro *evco);
 
 #ifdef __cplusplus
 }

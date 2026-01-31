@@ -35,7 +35,6 @@
 
 #include <utlist.h>
 
-#include <nce/coro.h>
 #include <nce/io.h>
 #include <nce/timer.h>
 
@@ -63,6 +62,13 @@
 
 #define CONN(Ptr, Field) \
         (IRC_UTIL_CONTAINER_OF(Ptr, struct conn, Field))
+
+#define DEBUG(...) \
+        irc_server_log(server, irc_log_debug, __VA_ARGS__)
+#define INFO(...) \
+        irc_server_log(server, irc_log_info, __VA_ARGS__)
+#define WARN(...) \
+        irc_server_log(server, irc_log_warn, __VA_ARGS__)
 
 /*
  * Private abstraction to the server connection using either plain or SSL
@@ -126,13 +132,6 @@ irc_server_log(const struct irc_server *server, log_t logger, const char *fmt, .
 
 	logger("server %s: %s", server->name, line);
 }
-
-#define DEBUG(...) \
-	irc_server_log(server, irc_log_debug, __VA_ARGS__)
-#define INFO(...) \
-	irc_server_log(server, irc_log_info, __VA_ARGS__)
-#define WARN(...) \
-	irc_server_log(server, irc_log_warn, __VA_ARGS__)
 
 /* {{{ misc */
 
@@ -1370,9 +1369,9 @@ conn_ready(struct conn *conn)
 }
 
 static void
-conn_io_entry(struct nce_io *self)
+conn_io_entry(struct nce_coro *self)
 {
-	struct conn *conn = CONN(self, io_fd.io);
+	struct conn *conn = CONN(self, io_fd.coro);
 
 	conn->state = STATE_RESOLVE;
 
@@ -1403,9 +1402,9 @@ conn_io_entry(struct nce_io *self)
 }
 
 static void
-conn_io_finalizer(struct nce_io *self)
+conn_io_finalizer(struct nce_coro *self)
 {
-	struct conn *conn = CONN(self, io_fd.io);
+	struct conn *conn = CONN(self, io_fd.coro);
 
 	if (conn->ai_list) {
 		freeaddrinfo(conn->ai_list);
@@ -1430,14 +1429,11 @@ conn_io_finalizer(struct nce_io *self)
 static void
 conn_io_spawn(struct conn *conn)
 {
-	conn->io_fd = (const struct nce_io_coro) {
-		.coro.name  = "irc_server.io",
-		.coro.flags = NCE_CORO_ATTACHED | NCE_CORO_INACTIVE,
-		.entry      = conn_io_entry,
-		.finalizer  = conn_io_finalizer
-	};
-
-	nce_io_coro_spawn(&conn->io_fd, NULL);
+	conn->io_fd.coro.name = "irc_server.io";
+	conn->io_fd.coro.flags = NCE_INACTIVE;
+	conn->io_fd.coro.entry = conn_io_entry;
+	conn->io_fd.coro.finalizer = conn_io_finalizer;
+	nce_io_coro_spawn(&conn->io_fd, 0, 0);
 }
 
 static void
@@ -1473,27 +1469,20 @@ conn_timer_resurrect(struct conn *conn)
 }
 
 static void
-conn_timer_entry(struct nce_timer *self)
+conn_timer_entry(struct nce_coro *self)
 {
-	struct conn *conn = CONN(self, timer.timer);
+	struct conn *conn = CONN(self, timer.coro);
 
-	while (nce_timer_wait(self))
+	while (nce_timer_wait(&conn->timer.timer))
 		conn_timer_resurrect(conn);
 }
 
 static void
 conn_timer_spawn(struct conn *conn)
 {
-	conn->timer = (const struct nce_timer_coro) {
-		.coro.name  = "irc_server.timer",
-		.coro.flags = NCE_CORO_ATTACHED,
-		.entry      = conn_timer_entry
-	};
-
-	nce_timer_coro_spawn(&conn->timer, &(const struct nce_timer_coro_args) {
-		.after  = 60.0,
-		.repeat = 60.0
-	});
+	conn->timer.coro.name  = "irc_server.timer";
+	conn->timer.coro.entry = conn_timer_entry;
+	nce_timer_coro_spawn(&conn->timer, 60.0, 60.0);
 }
 
 static void

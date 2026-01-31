@@ -24,11 +24,8 @@
  * \brief Coroutine watcher support for ev_stat.
  * \ingroup libnce-watchers
  */
-#include <stddef.h>
 
-#include <ev.h>
-
-#include "coro.h"
+#include "nce.h"
 
 #if defined(DOXYGEN)
 #define EV_P_ struct ev_loop *,
@@ -45,26 +42,18 @@
  */
 #define NCE_STAT(Ptr, Field) \
 	(NCE_CONTAINER_OF(Ptr, struct nce_stat, Field))
+
+/**
+ * Convenient ::NCE_CONTAINER_OF macro for ::nce_stat_coro.
+ */
+#define NCE_STAT_CORO(Ptr, Field) \
+	(NCE_CONTAINER_OF(Ptr, struct nce_stat_coro, Field))
 #endif
 
 struct nce_stat;
 struct nce_stat_coro;
 struct nce_stat_coro_args;
 
-/**
- * \brief Coroutine entrypoint for stat.
- *
- * Similar to ::nce_coro_entry_t but it receives its watcher as argument.
- */
-typedef void (* nce_stat_coro_entry_t)(EV_P_ struct nce_stat *self);
-
-/**
- * \brief Finalizer function.
- *
- * Similar to ::nce_coro_finalizer_t but let the user perform extra step on a
- * coroutine watcher.
- */
-typedef void (* nce_stat_coro_finalizer_t)(EV_P_ struct nce_stat *self);
 
 /**
  * \struct nce_stat
@@ -102,48 +91,13 @@ struct nce_stat_coro {
 	 * (read-write)
 	 *
 	 * Coroutine attached to this watcher.
-	 *
-	 * Caller can set fields just like a normal coroutine however:
-	 *
-	 * The field ::coro::entry is replaced with an internal callback calling
-	 * ::nce_stat_coro::entry instead.
 	 */
 	struct nce_coro coro;
-
-	/**
-	 * (init)
-	 *
-	 * Coroutine watcher entrypoint.
-	 */
-	nce_stat_coro_entry_t entry;
-
-	/**
-	 * (optional)
-	 *
-	 * Finalizer for the coroutine watcher.
-	 */
-	nce_stat_coro_finalizer_t finalizer;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \struct nce_stat_coro_args
- * \brief Options for ::nce_stat_coro_spawn.
- */
-struct nce_stat_coro_args {
-	/**
-	 * Path to monitor.
-	 */
-	const char *path;
-
-	/**
-	 * Interval for monitoring the path.
-	 */
-	ev_tstamp interval;
-};
 
 /**
  * Start the event watcher.
@@ -220,7 +174,7 @@ nce_stat_ready(struct nce_stat *ev);
  * \return the watcher revents
  */
 int
-nce_stat_wait(EV_P_ struct nce_stat *ev);
+nce_stat_wait(struct nce_stat *ev);
 
 /**
  * Configure watcher.
@@ -238,25 +192,29 @@ nce_stat_set(struct nce_stat *ev, const char *path, ev_tstamp interval);
 void
 nce_stat_stat(EV_P_ struct nce_stat *ev);
 
-
 /**
- * This all in one function initialize, set and optionnally start the watcher
- * and immediately creates its dedicated coroutine which is also started
- * automatically.
+ * Spawn a coroutine with an embedded `ev_stat`.
  *
- * \param args additional watcher spawn arguments (maybe NULL)
- * \return refer to ::nce_coro_spawn
+ * Arguments are similar to ::nce_stat_set.
  */
 int
-nce_stat_coro_spawn(EV_P_ struct nce_stat_coro *evco, const struct nce_stat_coro_args *args);
-
+nce_stat_coro_spawn(EV_P_ struct nce_stat_coro *evco,
+                          const char *path,
+                          ev_tstamp interval);
 /**
- * Stop the internal watcher and destroy it along with its dedicated coroutine.
- *
- * Do not call this function within a ::nce_stat_coro::finalizer callback.
+ * Usable callback function as ::nce_coro::terminate to stop the ::nce_stat
+ * when destroying the coroutine.
  */
 void
-nce_stat_coro_destroy(struct nce_stat_coro *evco);
+nce_stat_coro_terminate(EV_P_ struct nce_coro *self);
+
+/**
+ * Destroy the watcher and its coroutine.
+ *
+ * The watcher is stopped **before** destroying the coroutine.
+ */
+void
+nce_stat_coro_destroy(EV_P_ struct nce_stat_coro *evco);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 /*
- * nce_prepare.c -- coroutine watcher support for ev_prepare
+ * nce/prepare.c -- coroutine watcher support for ev_prepare
  *
  * Copyright (c) 2025-2026 David Demelier <markand@malikania.fr>
  *
@@ -42,27 +42,6 @@ nce_prepare_cb(EV_P_ struct ev_prepare *self, int revents)
 #endif
 		ev->revents = revents;
 	}
-}
-
-static void
-nce_prepare_coro_entry_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_prepare_coro *evco = NCE_CONTAINER_OF(self, struct nce_prepare_coro, coro);
-
-	evco->entry(EV_A_ &evco->prepare);
-}
-
-static void
-nce_prepare_coro_finalizer_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_prepare_coro *evco = NCE_CONTAINER_OF(self, struct nce_prepare_coro, coro);
-
-	/* Stop the watcher for convenience. */
-	nce_prepare_stop(EV_A_ &evco->prepare);
-
-	/* Call user as very last function. */
-	if (evco->finalizer)
-		evco->finalizer(EV_A_ &evco->prepare);
 }
 
 void
@@ -118,7 +97,7 @@ nce_prepare_ready(struct nce_prepare *ev)
 }
 
 int
-nce_prepare_wait(EV_P_ struct nce_prepare *ev)
+nce_prepare_wait(struct nce_prepare *ev)
 {
 	assert(ev);
 
@@ -131,27 +110,16 @@ nce_prepare_wait(EV_P_ struct nce_prepare *ev)
 }
 
 int
-nce_prepare_coro_spawn(EV_P_ struct nce_prepare_coro *evco, const struct nce_prepare_coro_args *args)
+nce_prepare_coro_spawn(EV_P_ struct nce_prepare_coro *evco)
 {
 	assert(evco);
-	assert(evco->entry);
-
-	(void)args;
 
 	int rc;
 
-	evco->coro.entry = nce_prepare_coro_entry_cb;
+	ev_init(&evco->prepare.prepare, nce_prepare_cb);
+	ev_set_priority(&evco->prepare.prepare, -1);
 
-	if (!evco->coro.finalizer)
-		evco->coro.finalizer = nce_prepare_coro_finalizer_cb;
-
-	/*
-	 * Watchers should be executed before attached coroutines to allow
-	 * resuming them if an event happened.
-	 */
-	ev_set_priority(&evco->prepare.prepare, NCE_PRI_MAX - 1);
-	/* Automatically start the watcher unless disabled. */
-	if (!(evco->coro.flags & NCE_CORO_INACTIVE))
+	if (!(evco->coro.flags & NCE_INACTIVE))
 		nce_prepare_start(EV_A_ &evco->prepare);
 
 	if ((rc = nce_coro_create(EV_A_ &evco->coro)) < 0)
@@ -161,12 +129,19 @@ nce_prepare_coro_spawn(EV_P_ struct nce_prepare_coro *evco, const struct nce_pre
 
 	return rc;
 }
-
 void
-nce_prepare_coro_destroy(struct nce_prepare_coro *evco)
+nce_prepare_coro_destroy(EV_P_ struct nce_prepare_coro *evco)
 {
 	assert(evco);
 
-	/* Will call nce_prepare_coro_finalizer_cb */
+	nce_prepare_stop(EV_A_ &evco->prepare);
 	nce_coro_destroy(&evco->coro);
+}
+
+void
+nce_prepare_coro_terminate(EV_P_ struct nce_coro *self)
+{
+	struct nce_prepare_coro *evco = NCE_PREPARE_CORO(self, coro);
+
+	nce_prepare_stop(EV_A_ &evco->prepare);
 }

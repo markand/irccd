@@ -26,11 +26,8 @@
  */
 
 #include <sys/types.h>
-#include <stddef.h>
 
-#include <ev.h>
-
-#include "coro.h"
+#include "nce.h"
 
 #if defined(DOXYGEN)
 #define EV_P_ struct ev_loop *,
@@ -47,26 +44,18 @@
  */
 #define NCE_CHILD(Ptr, Field) \
 	(NCE_CONTAINER_OF(Ptr, struct nce_child, Field))
+
+/**
+ * Convenient ::NCE_CONTAINER_OF macro for ::nce_child_coro.
+ */
+#define NCE_CHILD_CORO(Ptr, Field) \
+	(NCE_CONTAINER_OF(Ptr, struct nce_child_coro, Field))
 #endif
 
 struct nce_child;
 struct nce_child_coro;
 struct nce_child_coro_args;
 
-/**
- * \brief Coroutine entrypoint for child.
- *
- * Similar to ::nce_coro_entry_t but it receives its watcher as argument.
- */
-typedef void (* nce_child_coro_entry_t)(EV_P_ struct nce_child *self);
-
-/**
- * \brief Finalizer function.
- *
- * Similar to ::nce_coro_finalizer_t but let the user perform extra step on a
- * coroutine watcher.
- */
-typedef void (* nce_child_coro_finalizer_t)(EV_P_ struct nce_child *self);
 
 /**
  * \struct nce_child
@@ -104,48 +93,13 @@ struct nce_child_coro {
 	 * (read-write)
 	 *
 	 * Coroutine attached to this watcher.
-	 *
-	 * Caller can set fields just like a normal coroutine however:
-	 *
-	 * The field ::coro::entry is replaced with an internal callback calling
-	 * ::nce_child_coro::entry instead.
 	 */
 	struct nce_coro coro;
-
-	/**
-	 * (init)
-	 *
-	 * Coroutine watcher entrypoint.
-	 */
-	nce_child_coro_entry_t entry;
-
-	/**
-	 * (optional)
-	 *
-	 * Finalizer for the coroutine watcher.
-	 */
-	nce_child_coro_finalizer_t finalizer;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \struct nce_child_coro_args
- * \brief Optchildns for ::nce_child_coro_spawn.
- */
-struct nce_child_coro_args {
-	/**
-	 * Process PID to monitor.
-	 */
-	pid_t pid;
-
-	/**
-	 * Set non-zero to monitor stopped/continued events too.
-	 */
-	int trace;
-};
 
 /**
  * Start the event watcher.
@@ -222,7 +176,7 @@ nce_child_ready(struct nce_child *ev);
  * \return the watcher revents
  */
 int
-nce_child_wait(EV_P_ struct nce_child *ev);
+nce_child_wait(struct nce_child *ev);
 
 /**
  * Configure watcher.
@@ -232,25 +186,27 @@ nce_child_wait(EV_P_ struct nce_child *ev);
 void
 nce_child_set(struct nce_child *ev, pid_t pid, int trace);
 
-
 /**
- * This all in one function initialize, set and optionnally start the watcher
- * and immediately creates its dedicated coroutine which is also started
- * automatically.
+ * Spawn a coroutine with an embedded `ev_child`.
  *
- * \param args additional watcher spawn arguments (maybe NULL)
- * \return refer to ::nce_coro_spawn
+ * Arguments are similar to ::nce_child_set.
  */
 int
-nce_child_coro_spawn(EV_P_ struct nce_child_coro *evco, const struct nce_child_coro_args *args);
-
+nce_child_coro_spawn(EV_P_ struct nce_child_coro *evco, pid_t pid, int trace);
 /**
- * Stop the internal watcher and destroy it along with its dedicated coroutine.
- *
- * Do not call this function within a ::nce_child_coro::finalizer callback.
+ * Usable callback function as ::nce_coro::terminate to stop the ::nce_child
+ * when destroying the coroutine.
  */
 void
-nce_child_coro_destroy(struct nce_child_coro *evco);
+nce_child_coro_terminate(EV_P_ struct nce_coro *self);
+
+/**
+ * Destroy the watcher and its coroutine.
+ *
+ * The watcher is stopped **before** destroying the coroutine.
+ */
+void
+nce_child_coro_destroy(EV_P_ struct nce_child_coro *evco);
 
 #ifdef __cplusplus
 }

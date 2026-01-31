@@ -1,3 +1,334 @@
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MINICORO_IMPL
+#include "nce.h"
+
+/* {{{ embedded utlist */
+
+/*
+ * Note: even though these are macros, for simplicity and conciseness only
+ *       useful ones where kept.
+ */
+
+/*
+Copyright (c) 2007-2021, Troy D. Hanson   http://troydhanson.github.com/uthash/
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+#ifndef UTLIST_H
+#define UTLIST_H
+
+
+/* These macros use decltype or the earlier __typeof GNU extension.
+   As decltype is only available in newer compilers (VS2010 or gcc 4.3+
+   when compiling c++ source) this code uses whatever method is needed
+   or, for VS2008 where neither is available, uses casting workarounds. */
+#if !defined(LDECLTYPE) && !defined(NO_DECLTYPE)
+#if defined(_MSC_VER)   /* MS compiler */
+#if _MSC_VER >= 1600 && defined(__cplusplus)  /* VS2010 or newer in C++ mode */
+#define LDECLTYPE(x) decltype(x)
+#else                   /* VS2008 or older (or VS2010 in C mode) */
+#define NO_DECLTYPE
+#endif
+#elif defined(__BORLANDC__) || defined(__ICCARM__) || defined(__LCC__) || defined(__WATCOMC__)
+#define NO_DECLTYPE
+#else                   /* GNU, Sun and other compilers */
+#define LDECLTYPE(x) __typeof(x)
+#endif
+#endif
+
+/* for VS2008 we use some workarounds to get around the lack of decltype,
+ * namely, we always reassign our tmp variable to the list head if we need
+ * to dereference its prev/next pointers, and save/restore the real head.*/
+#ifdef NO_DECLTYPE
+#define IF_NO_DECLTYPE(x) x
+#define LDECLTYPE(x) char*
+#define UTLIST_SV(elt,list) _tmp = (char*)(list); {char **_alias = (char**)&(list); *_alias = (elt); }
+#define UTLIST_NEXT(elt,list,next) ((char*)((list)->next))
+#define UTLIST_NEXTASGN(elt,list,to,next) { char **_alias = (char**)&((list)->next); *_alias=(char*)(to); }
+/* #define UTLIST_PREV(elt,list,prev) ((char*)((list)->prev)) */
+#define UTLIST_PREVASGN(elt,list,to,prev) { char **_alias = (char**)&((list)->prev); *_alias=(char*)(to); }
+#define UTLIST_RS(list) { char **_alias = (char**)&(list); *_alias=_tmp; }
+#define UTLIST_CASTASGN(a,b) { char **_alias = (char**)&(a); *_alias=(char*)(b); }
+#else
+#define IF_NO_DECLTYPE(x)
+#define UTLIST_SV(elt,list)
+#define UTLIST_NEXT(elt,list,next) ((elt)->next)
+#define UTLIST_NEXTASGN(elt,list,to,next) ((elt)->next)=(to)
+/* #define UTLIST_PREV(elt,list,prev) ((elt)->prev) */
+#define UTLIST_PREVASGN(elt,list,to,prev) ((elt)->prev)=(to)
+#define UTLIST_RS(list)
+#define UTLIST_CASTASGN(a,b) (a)=(b)
+#endif
+
+#define DL_SORT(list, cmp)                                                                     \
+    DL_SORT2(list, cmp, prev, next)
+
+#define DL_SORT2(list, cmp, prev, next)                                                        \
+do {                                                                                           \
+  LDECLTYPE(list) _ls_p;                                                                       \
+  LDECLTYPE(list) _ls_q;                                                                       \
+  LDECLTYPE(list) _ls_e;                                                                       \
+  LDECLTYPE(list) _ls_tail;                                                                    \
+  IF_NO_DECLTYPE(LDECLTYPE(list) _tmp;)                                                        \
+  int _ls_insize, _ls_nmerges, _ls_psize, _ls_qsize, _ls_i, _ls_looping;                       \
+  if (list) {                                                                                  \
+    _ls_insize = 1;                                                                            \
+    _ls_looping = 1;                                                                           \
+    while (_ls_looping) {                                                                      \
+      UTLIST_CASTASGN(_ls_p,list);                                                             \
+      (list) = NULL;                                                                           \
+      _ls_tail = NULL;                                                                         \
+      _ls_nmerges = 0;                                                                         \
+      while (_ls_p) {                                                                          \
+        _ls_nmerges++;                                                                         \
+        _ls_q = _ls_p;                                                                         \
+        _ls_psize = 0;                                                                         \
+        for (_ls_i = 0; _ls_i < _ls_insize; _ls_i++) {                                         \
+          _ls_psize++;                                                                         \
+          UTLIST_SV(_ls_q,list); _ls_q = UTLIST_NEXT(_ls_q,list,next); UTLIST_RS(list);        \
+          if (!_ls_q) break;                                                                   \
+        }                                                                                      \
+        _ls_qsize = _ls_insize;                                                                \
+        while ((_ls_psize > 0) || ((_ls_qsize > 0) && _ls_q)) {                                \
+          if (_ls_psize == 0) {                                                                \
+            _ls_e = _ls_q; UTLIST_SV(_ls_q,list); _ls_q =                                      \
+              UTLIST_NEXT(_ls_q,list,next); UTLIST_RS(list); _ls_qsize--;                      \
+          } else if ((_ls_qsize == 0) || (!_ls_q)) {                                           \
+            _ls_e = _ls_p; UTLIST_SV(_ls_p,list); _ls_p =                                      \
+              UTLIST_NEXT(_ls_p,list,next); UTLIST_RS(list); _ls_psize--;                      \
+          } else if (cmp(_ls_p,_ls_q) <= 0) {                                                  \
+            _ls_e = _ls_p; UTLIST_SV(_ls_p,list); _ls_p =                                      \
+              UTLIST_NEXT(_ls_p,list,next); UTLIST_RS(list); _ls_psize--;                      \
+          } else {                                                                             \
+            _ls_e = _ls_q; UTLIST_SV(_ls_q,list); _ls_q =                                      \
+              UTLIST_NEXT(_ls_q,list,next); UTLIST_RS(list); _ls_qsize--;                      \
+          }                                                                                    \
+          if (_ls_tail) {                                                                      \
+            UTLIST_SV(_ls_tail,list); UTLIST_NEXTASGN(_ls_tail,list,_ls_e,next); UTLIST_RS(list); \
+          } else {                                                                             \
+            UTLIST_CASTASGN(list,_ls_e);                                                       \
+          }                                                                                    \
+          UTLIST_SV(_ls_e,list); UTLIST_PREVASGN(_ls_e,list,_ls_tail,prev); UTLIST_RS(list);   \
+          _ls_tail = _ls_e;                                                                    \
+        }                                                                                      \
+        _ls_p = _ls_q;                                                                         \
+      }                                                                                        \
+      UTLIST_CASTASGN((list)->prev, _ls_tail);                                                 \
+      UTLIST_SV(_ls_tail,list); UTLIST_NEXTASGN(_ls_tail,list,NULL,next); UTLIST_RS(list);     \
+      if (_ls_nmerges <= 1) {                                                                  \
+        _ls_looping=0;                                                                         \
+      }                                                                                        \
+      _ls_insize *= 2;                                                                         \
+    }                                                                                          \
+  }                                                                                            \
+} while (0)
+
+/******************************************************************************
+ * doubly linked list macros (non-circular)                                   *
+ *****************************************************************************/
+#define DL_PREPEND(head,add)                                                                   \
+    DL_PREPEND2(head,add,prev,next)
+
+#define DL_PREPEND2(head,add,prev,next)                                                        \
+do {                                                                                           \
+ (add)->next = (head);                                                                         \
+ if (head) {                                                                                   \
+   (add)->prev = (head)->prev;                                                                 \
+   (head)->prev = (add);                                                                       \
+ } else {                                                                                      \
+   (add)->prev = (add);                                                                        \
+ }                                                                                             \
+ (head) = (add);                                                                               \
+} while (0)
+
+#define DL_APPEND(head,add)                                                                    \
+    DL_APPEND2(head,add,prev,next)
+
+#define DL_APPEND2(head,add,prev,next)                                                         \
+do {                                                                                           \
+  if (head) {                                                                                  \
+      (add)->prev = (head)->prev;                                                              \
+      (head)->prev->next = (add);                                                              \
+      (head)->prev = (add);                                                                    \
+      (add)->next = NULL;                                                                      \
+  } else {                                                                                     \
+      (head)=(add);                                                                            \
+      (head)->prev = (head);                                                                   \
+      (head)->next = NULL;                                                                     \
+  }                                                                                            \
+} while (0)
+
+#define DL_INSERT_INORDER(head,add,cmp)                                                        \
+    DL_INSERT_INORDER2(head,add,cmp,prev,next)
+
+#define DL_INSERT_INORDER2(head,add,cmp,prev,next)                                             \
+do {                                                                                           \
+  LDECLTYPE(head) _tmp;                                                                        \
+  if (head) {                                                                                  \
+    DL_LOWER_BOUND2(head, _tmp, add, cmp, next);                                               \
+    DL_APPEND_ELEM2(head, _tmp, add, prev, next);                                              \
+  } else {                                                                                     \
+    (head) = (add);                                                                            \
+    (head)->prev = (head);                                                                     \
+    (head)->next = NULL;                                                                       \
+  }                                                                                            \
+} while (0)
+
+#define DL_LOWER_BOUND(head,elt,like,cmp)                                                      \
+    DL_LOWER_BOUND2(head,elt,like,cmp,next)
+
+#define DL_LOWER_BOUND2(head,elt,like,cmp,next)                                                \
+do {                                                                                           \
+  if ((head) == NULL || (cmp(head, like)) >= 0) {                                              \
+    (elt) = NULL;                                                                              \
+  } else {                                                                                     \
+    for ((elt) = (head); (elt)->next != NULL; (elt) = (elt)->next) {                           \
+      if ((cmp((elt)->next, like)) >= 0) {                                                     \
+        break;                                                                                 \
+      }                                                                                        \
+    }                                                                                          \
+  }                                                                                            \
+} while (0)
+
+#define DL_DELETE(head,del)                                                                    \
+    DL_DELETE2(head,del,prev,next)
+
+#define DL_DELETE2(head,del,prev,next)                                                         \
+do {                                                                                           \
+  assert((head) != NULL);                                                                      \
+  assert((del)->prev != NULL);                                                                 \
+  if ((del)->prev == (del)) {                                                                  \
+      (head)=NULL;                                                                             \
+  } else if ((del)==(head)) {                                                                  \
+      (del)->next->prev = (del)->prev;                                                         \
+      (head) = (del)->next;                                                                    \
+  } else {                                                                                     \
+      (del)->prev->next = (del)->next;                                                         \
+      if ((del)->next) {                                                                       \
+          (del)->next->prev = (del)->prev;                                                     \
+      } else {                                                                                 \
+          (head)->prev = (del)->prev;                                                          \
+      }                                                                                        \
+  }                                                                                            \
+} while (0)
+
+#define DL_FOREACH(head,el)                                                                    \
+    DL_FOREACH2(head,el,next)
+
+#define DL_FOREACH2(head,el,next)                                                              \
+    for ((el) = (head); el; (el) = (el)->next)
+
+/* this version is safe for deleting the elements during iteration */
+#define DL_FOREACH_SAFE(head,el,tmp)                                                           \
+    DL_FOREACH_SAFE2(head,el,tmp,next)
+
+#define DL_FOREACH_SAFE2(head,el,tmp,next)                                                     \
+  for ((el) = (head); (el) && ((tmp) = (el)->next, 1); (el) = (tmp))
+
+#define DL_APPEND_ELEM2(head, el, add, prev, next)                                             \
+do {                                                                                           \
+ if (el) {                                                                                     \
+  assert((head) != NULL);                                                                      \
+  assert((add) != NULL);                                                                       \
+  (add)->next = (el)->next;                                                                    \
+  (add)->prev = (el);                                                                          \
+  (el)->next = (add);                                                                          \
+  if ((add)->next) {                                                                           \
+   (add)->next->prev = (add);                                                                  \
+  } else {                                                                                     \
+   (head)->prev = (add);                                                                       \
+  }                                                                                            \
+ } else {                                                                                      \
+  DL_PREPEND2(head, add, prev, next);                                                          \
+ }                                                                                             \
+} while (0)                                                                                    \
+
+#define DL_APPEND_ELEM(head, el, add)                                                          \
+   DL_APPEND_ELEM2(head, el, add, prev, next)
+
+#ifdef NO_DECLTYPE
+/* Here are VS2008 / NO_DECLTYPE replacements for a few functions */
+
+#undef DL_INSERT_INORDER2
+#define DL_INSERT_INORDER2(head,add,cmp,prev,next)                                             \
+do {                                                                                           \
+  if ((head) == NULL) {                                                                        \
+    (add)->prev = (add);                                                                       \
+    (add)->next = NULL;                                                                        \
+    (head) = (add);                                                                            \
+  } else if ((cmp(head, add)) >= 0) {                                                          \
+    (add)->prev = (head)->prev;                                                                \
+    (add)->next = (head);                                                                      \
+    (head)->prev = (add);                                                                      \
+    (head) = (add);                                                                            \
+  } else {                                                                                     \
+    char *_tmp = (char*)(head);                                                                \
+    while ((head)->next && (cmp((head)->next, add)) < 0) {                                     \
+      (head) = (head)->next;                                                                   \
+    }                                                                                          \
+    (add)->prev = (head);                                                                      \
+    (add)->next = (head)->next;                                                                \
+    (head)->next = (add);                                                                      \
+    UTLIST_RS(head);                                                                           \
+    if ((add)->next) {                                                                         \
+      (add)->next->prev = (add);                                                               \
+    } else {                                                                                   \
+      (head)->prev = (add);                                                                    \
+    }                                                                                          \
+  }                                                                                            \
+} while (0)
+#endif /* NO_DECLTYPE */
+
+#endif /* UTLIST_H */
+
+/* }}} */
+
+/* {{{ embedded minicoro */
+
+/*
+ * ===============================================================================
+ * ALTERNATIVE 2 - MIT No Attribution
+ * ===============================================================================
+ * Copyright (c) 2021-2023 Eduardo Bart (https://github.com/edubart/minicoro)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 /*
 Minimal asymmetric stackful cross-platform coroutine library in pure C.
 minicoro - v0.2.0 - 15/Nov/2023
@@ -483,6 +814,15 @@ extern "C" {
   #include <windows.h>
 #endif
 
+/* https://github.com/edubart/minicoro/issues/27 */
+#if defined(__OpenBSD__) && !defined(MCO_USE_VMEM_ALLOCATOR)
+#       define MCO_USE_VMEM_ALLOCATOR
+#endif
+
+#if !defined(MAP_STACK)
+#       define MAP_STACK 0
+#endif
+
 #ifndef MCO_NO_DEFAULT_ALLOCATOR
   #if defined(MCO_USE_VMEM_ALLOCATOR) && defined(_WIN32)
     static void* mco_alloc(size_t size, void* allocator_data) {
@@ -500,7 +840,7 @@ extern "C" {
     #include <sys/mman.h>
     static void* mco_alloc(size_t size, void* allocator_data) {
       _MCO_UNUSED(allocator_data);
-      void *ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+      void *ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_STACK | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
       return ptr != MAP_FAILED ? ptr : NULL;
     }
     static void mco_dealloc(void* ptr, size_t size, void* allocator_data) {
@@ -2031,3 +2371,771 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+/* }}} */
+
+#if EV_MULTIPLICITY
+#define NCE_CORO_A_ (coro)->loop,
+#define NCE_SCHED_A_ (sched)->loop,
+#else
+#define NCE_CORO_A_
+#define NCE_SCHED_A_
+#endif
+
+#ifdef NCE_NO_ERRNO
+#       define NCE_ENOBUFS 1
+#       define NCE_ENOMEM 2
+#       define NCE_ENOMSG 3
+#else
+#       define NCE_ENOBUFS ENOBUFS
+#       define NCE_ENOMEM ENOMEM
+#       define NCE_ENOMSG ENOMSG
+#endif
+
+/*
+ * NCE_SCHED_CMP(A, B)
+ *
+ * Compare coroutine 'A' and 'B' to order by priority ascending.
+ */
+#define NCE_SCHED_CMP(A, B) ((A)->priority - (B)->priority)
+
+/*
+ * NCE_SCHED_RESUME_ALL(Scheduler)
+ *
+ * Resume every coroutine.
+ *
+ * After resuming a coroutine, we check if it is still resumable. If not it means
+ * it has terminated. In that case we remove it from the loop and destroy it
+ * unless it is immortal leaving the destruction to the user.
+ *
+ * When resuming a coroutine, it may remove its siblings so we must always
+ * traverse by checking the next coroutine after resuming it. This is safe to do
+ * because a coroutine can't destroy itself when resuming it.
+ */
+#define NCE_SCHED_RESUME_ALL(Sched)                                             \
+do {                                                                            \
+        struct nce_coro *coro, *next;                                           \
+                                                                                \
+        DL_FOREACH_SAFE((Sched)->coroutines, coro, next) {                      \
+                if (nce_coro_resumable(coro))                                   \
+                        NCE_CORO_RESUME(coro);                                  \
+                if (!nce_coro_resumable(coro)) {                                \
+                        if (coro->flags & NCE_ESSENTIAL) {                      \
+                                NCE_DEBUGF(coro, "breaking loop");              \
+                                nce_sched_break((Sched), EVBREAK_ALL);          \
+                        }                                                       \
+                                                                                \
+                        if (coro->flags & NCE_IMMORTAL) {                       \
+                                NCE_DEBUGF(coro, "immortal coroutine removed"); \
+                                NCE_SCHED_REMOVE((Sched), coro);                \
+                        } else {                                                \
+                                NCE_DEBUGF(coro, "destroying");                 \
+                                nce_coro_destroy(coro);                         \
+                                next = (Sched)->coroutines;                     \
+                        }                                                       \
+                } else                                                          \
+                        next = coro->next;                                      \
+        }                                                                       \
+                                                                                \
+        if (!(Sched)->coroutines)                                               \
+                nce_sched_break((Sched), EVBREAK_ALL);                          \
+} while (0)
+
+/*
+ * NCE_SCHED_REMOVE(Sched, Coro)
+ *
+ * If coroutine is attached to the scheduler, removes it and disable
+ * persistence.
+ */
+#define NCE_SCHED_REMOVE(Sched, Coro)                                           \
+do {                                                                            \
+        if ((Sched)->coroutines && ((Coro)->next || (Coro)->prev)) {            \
+                if ((Coro)->persisting) {                                       \
+                        (Coro)->persisting = 0;                                 \
+                        nce_sched_persist((Sched), (Coro), 0);                  \
+                }                                                               \
+                                                                                \
+                nce_sched_attach((Sched), (Coro), 0);                           \
+        }                                                                       \
+} while (0)
+
+#if defined(NCE_DEBUG) || !defined(NDEBUG)
+static const char * const statuses[] = {
+	[MCO_DEAD]      = "D",
+	[MCO_NORMAL]    = "N",
+	[MCO_RUNNING]   = "R",
+	[MCO_SUSPENDED] = "S"
+};
+#endif
+
+#if defined(NCE_DEBUG)
+__attribute__ ((format(printf, 2, 3)))
+static inline void
+nce_debugf(const struct nce_coro *coro, const char *fmt, ...)
+{
+	va_list ap;
+
+	enum mco_state state = mco_status(coro->mco_coro);
+
+	va_start(ap, fmt);
+	fprintf(stderr, "[coro] <%s> (%s) ", statuses[state], coro->name);
+	vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
+	va_end(ap);
+}
+
+#define NCE_DEBUGF(Coro, ...) \
+        nce_debugf((Coro), __VA_ARGS__)
+
+#else
+#define NCE_DEBUGF(...) do {} while (0)
+#endif
+
+/*
+ * NCE_ABORT(coro, fmt, ...)
+ *
+ * Print a final message on error output and call abort().
+ */
+#if !defined(NDEBUG)
+#define NCE_ABORT(Coro, ...)                                                    \
+do {                                                                            \
+        enum mco_state state = mco_status((Coro)->mco_coro);                    \
+                                                                                \
+        if (!(Coro)->name)                                                      \
+                fprintf(stderr, "[coro] (%p %s) ",                              \
+                    (const void *)(Coro), statuses[state]);                     \
+        else                                                                    \
+                fprintf(stderr, "[coro] (%s %s) ",                              \
+                    (Coro)->name, statuses[state]);                             \
+                                                                                \
+        fprintf(stderr, __VA_ARGS__);                                           \
+        fprintf(stderr, "\n");                                                  \
+        abort();                                                                \
+} while (0)
+#endif
+
+/*
+ * NCE_CORO_RESUME(Coro)
+ *
+ * Resume the coroutine.
+ *
+ * Unoptimized asserts that the coroutine is resumable.
+ */
+#if !defined(NDEBUG)
+
+#define NCE_CORO_RESUME(Co)                                                     \
+do {                                                                            \
+        if (mco_status((Co)->mco_coro) != MCO_SUSPENDED)                        \
+                NCE_ABORT((Co), "non-resumable coroutine");                     \
+                                                                                \
+        NCE_DEBUGF((Co), "resuming");                                           \
+        mco_resume((Co)->mco_coro);                                             \
+} while (0)
+
+#else
+
+#define NCE_CORO_RESUME(Co)                                                     \
+do {                                                                            \
+        NCE_DEBUGF((Co), "resuming");                                           \
+        mco_resume(coro->mco_coro);                                             \
+} while (0)
+
+#endif
+
+/*
+ * NCE_CORO_YIELD(Co)
+ *
+ * Yield the coroutine provided as argument.
+ *
+ * Unoptimized asserts that the coroutine is running.
+ */
+#if !defined(NDEBUG)
+
+#define NCE_CORO_YIELD(Co)                                                      \
+do {                                                                            \
+        if (mco_status((Co)->mco_coro) != MCO_RUNNING)                          \
+                NCE_ABORT((Co), "yield non-running coroutine");                 \
+                                                                                \
+        mco_yield((Co)->mco_coro);                                              \
+} while (0)
+
+#else
+
+#define NCE_CORO_YIELD(Co)                                                      \
+do {                                                                            \
+        mco_yield((Co)->mco_coro);                                              \
+} while (0)
+
+#endif
+
+/*
+ * NCE_CORO_PUSH(Into, Data, Size)
+ *
+ * Push data into the coroutine `Into`
+ */
+#if !defined(NDEBUG)
+
+#define NCE_CORO_PUSH(Into, Data, Size)                                         \
+do {                                                                            \
+        enum mco_result rc;                                                     \
+                                                                                \
+        /*                                                                      \
+         * This should not happen now unless user really broke the code, ooh oh \
+         * ooooh.                                                               \
+         */                                                                     \
+        if ((rc = mco_push((Into)->mco_coro, (Data), (Size))) != MCO_SUCCESS)   \
+                NCE_ABORT((Into), "push: storage error: %d", rc);               \
+} while (0)
+
+#else
+
+#define NCE_CORO_PUSH(Into, Data, Size)                                         \
+do {                                                                            \
+        mco_push((Into)->mco_coro, (Data), (Size));                             \
+} while (0)
+
+#endif
+
+/*
+ * NCE_CORO_PULL(From, Data, Size)
+ *
+ * Pull data from coroutine `From`.
+ */
+
+#if !defined(NDEBUG)
+
+#define NCE_CORO_PULL(From, Data, Size)                                         \
+do {                                                                            \
+        enum mco_result rc;                                                     \
+                                                                                \
+        /*                                                                      \
+         * Should not happen now unless user really broke the trophy twice.     \
+         */                                                                     \
+        if ((rc = mco_pop((From)->mco_coro, (Data), (Size))) != MCO_SUCCESS)    \
+                NCE_ABORT((From), "pull: storage error: %d", rc);               \
+} while (0)
+
+#else
+
+#define NCE_CORO_PULL(From, Data, Size)                                         \
+do {                                                                            \
+        mco_pop((From)->mco_coro, (Data), (Size));                              \
+} while (0)
+
+#endif
+
+/*
+ * NCE_CORO_SCHED(Coro)
+ *
+ * Expand to coroutine's scheduler or the nce_sched_default if not NULL.
+ */
+#define NCE_CORO_SCHED(Coro) \
+        ((Coro)->sched ? (Coro)->sched : nce_sched_default)
+
+/*
+ * Wrap minicoro entrypoint to the one, passing the loop as argument.
+ */
+static void
+nce_coro_entry_cb(struct mco_coro *self)
+{
+	struct nce_coro *coro = self->user_data;
+
+	coro->entry(NCE_CORO_A_ coro);
+}
+
+static inline void
+nce_coro_reset(struct nce_coro *coro)
+{
+	coro->sched = NULL;
+	coro->mco_coro = NULL;
+	coro->off = 0;
+	coro->persisting = 0;
+#ifndef NCE_NO_SCHED
+	coro->next = NULL;
+	coro->prev = NULL;
+#endif
+#if EV_MULTIPLICITY
+	coro->loop = NULL;
+#endif
+}
+
+int
+nce_coro_create(EV_P_ struct nce_coro *coro)
+{
+	assert(coro);
+	assert(coro->entry);
+
+	struct nce_sched *sched;
+	struct mco_desc desc;
+	enum mco_result rc;
+
+	nce_coro_reset(coro);
+
+	desc = mco_desc_init(nce_coro_entry_cb, coro->stack_size);
+	desc.user_data = coro;
+
+#if EV_MULTIPLICITY
+	coro->loop = EV_A;
+#endif
+
+	if ((rc = mco_create(&coro->mco_coro, &desc)) != MCO_SUCCESS)
+		rc = -NCE_ENOMEM;
+	else {
+		rc = 0;
+
+		/*
+		 * Attach the coroutine to the scheduler if either coro->sched
+		 * is not NULL or nce_sched_default isn't either.
+		 */
+		if (!(sched = coro->sched))
+			sched = nce_sched_default;
+		if (sched)
+			nce_sched_attach(sched, coro, 1);
+	}
+
+	if (rc < 0)
+		nce_coro_reset(coro);
+
+	return rc;
+}
+
+int
+nce_coro_spawn(EV_P_ struct nce_coro *coro)
+{
+	assert(coro);
+
+	int rc;
+
+	if ((rc = nce_coro_create(EV_A_ coro)) == 0)
+		NCE_CORO_RESUME(coro);
+
+	return rc;
+}
+
+int
+nce_coro_resumable(const struct nce_coro *coro)
+{
+	assert(coro);
+
+	return coro->mco_coro && mco_status(coro->mco_coro) == MCO_SUSPENDED;
+}
+
+void
+nce_coro_resume(struct nce_coro *coro)
+{
+	assert(coro);
+
+	NCE_CORO_RESUME(coro);
+}
+
+void
+nce_coro_yield(void)
+{
+	struct nce_coro *coro = nce_coro_self();
+
+	NCE_CORO_YIELD(coro);
+}
+
+void
+nce_coro_idle(void)
+{
+	struct nce_coro *coro = nce_coro_self();
+
+	for (;;)
+		NCE_CORO_YIELD(coro);
+}
+
+void
+nce_coro_off(void)
+{
+	struct nce_coro *coro = nce_coro_self();
+
+	for (coro->off = 1; coro->off; )
+		NCE_CORO_YIELD(coro);
+}
+
+void
+nce_coro_on(struct nce_coro *coro)
+{
+	assert(coro);
+
+	if (coro->off) {
+		coro->off = 0;
+
+#if !defined(NDEBUG)
+		if (!nce_coro_resumable(coro))
+			NCE_ABORT(coro, "off coroutine is not resumable");
+#endif
+
+		NCE_CORO_RESUME(coro);
+	}
+}
+
+#ifndef NCE_NO_STORAGE
+
+void
+nce_coro_return(const void *data, size_t size)
+{
+	assert(data);
+
+	nce_coro_push(nce_coro_self(), data, size);
+}
+
+void
+nce_coro_wait(void *data, size_t size)
+{
+	assert(data);
+
+	nce_coro_pull(nce_coro_self(), data, size);
+}
+
+void
+nce_coro_push(struct nce_coro *into, const void *data, size_t size)
+{
+	assert(into);
+	assert(into->mco_coro);
+	assert(data);
+	assert(size);
+
+	struct nce_sched *sched;
+	struct nce_coro *coro;
+
+	coro = nce_coro_self();
+	sched = NCE_CORO_SCHED(coro);
+
+	while (mco_get_bytes_stored(into->mco_coro) != 0) {
+		NCE_DEBUGF(coro, "push: storage busy, yielding");
+		NCE_CORO_YIELD(coro);
+	}
+
+	NCE_DEBUGF(coro, "push: pushing %zu bytes into %s", size, into->name);
+	NCE_DEBUGF(coro, "push: yield until consumed by %s", into->name);
+
+	NCE_CORO_PUSH(into, data, size);
+
+	/*
+	 * Start an idle watcher if the coroutine is attached. This will allow
+	 * any coroutine waiting on this one to be resumed constantly until
+	 * data is pushed.
+	 *
+	 * Then, the calling coroutine pushing data can do it in a loop while
+	 * there is no loop event.
+	 */
+	if (sched)
+		nce_sched_persist(sched, coro, coro->persisting = 1);
+
+	while (mco_get_bytes_stored(into->mco_coro) != 0)
+		NCE_CORO_YIELD(coro);
+
+	/*
+	 * Coroutine may be destroyed already here so make sure to test the
+	 * persisting state.
+	 */
+	if (sched && coro->persisting)
+		nce_sched_persist(sched, coro, coro->persisting = 0);
+
+	/*
+	 * Note: if attached, `coro` may point to an already finalized
+	 * coroutine, do not use it there.
+	 */
+	NCE_DEBUGF(coro, "push: consumed by returning");
+}
+
+void
+nce_coro_pull(struct nce_coro *from, void *data, size_t size)
+{
+	assert(data);
+
+	struct nce_coro *self = nce_coro_self();
+
+	NCE_DEBUGF(self, "pull: requiring %zu bytes", size);
+
+	while (mco_get_bytes_stored(from->mco_coro) < size)
+		NCE_CORO_YIELD(self);
+
+	NCE_CORO_PULL(from, data, size);
+	NCE_DEBUGF(self, "pull: consumed %zu bytes", size);
+}
+
+int
+nce_coro_queue(struct nce_coro *into, const void *data, size_t size)
+{
+	assert(into);
+	assert(data);
+
+	struct mco_coro *co = into->mco_coro;
+
+	if (mco_get_storage_size(co) - mco_get_bytes_stored(co) < size)
+		return -NCE_ENOBUFS;
+
+	NCE_CORO_PUSH(into, data, size);
+
+	return 0;
+}
+
+int
+nce_coro_dequeue(struct nce_coro *from, void *data, size_t size)
+{
+	assert(from);
+	assert(data);
+
+	if (mco_get_bytes_stored(from->mco_coro) < size)
+		return -NCE_ENOMSG;
+
+	NCE_CORO_PULL(from, data, size);
+
+	return 0;
+}
+
+void
+nce_coro_clear(struct nce_coro *target)
+{
+	assert(target);
+
+	/*
+	 * No direct API so we will play directly with the internal mco storage
+	 * in the meantime.
+	 */
+	memset(target->mco_coro->storage, 0, target->mco_coro->storage_size);
+	target->mco_coro->bytes_stored = 0;
+}
+
+#endif
+
+struct nce_coro *
+nce_coro_self(void)
+{
+	struct mco_coro *current;
+
+	if (!(current = mco_running()))
+		return NULL;
+
+	/*
+	 * If user is playing with minicoro on its own we may use an invalid
+	 * pointer but for the time being we will assume it accepts this
+	 * destiny.
+	 */
+	assert(current->user_data);
+
+	return current->user_data;
+}
+
+void
+nce_coro_join(struct nce_coro *coro)
+{
+	assert(coro);
+
+	if (!coro->mco_coro)
+		return;
+
+	while (nce_coro_resumable(coro))
+		NCE_CORO_RESUME(coro);
+
+	nce_coro_destroy(coro);
+}
+
+void
+nce_coro_destroy(struct nce_coro *coro)
+{
+	assert(coro);
+
+	struct nce_sched *sched;
+
+	if (!coro->mco_coro)
+		return;
+
+	/* If coroutine is still attached to the scheduler, remove it */
+	if ((sched = NCE_CORO_SCHED(coro)))
+		NCE_SCHED_REMOVE(sched, coro);
+
+#if !defined(NDEBUG)
+	if (mco_status(coro->mco_coro) != MCO_SUSPENDED &&
+	    mco_status(coro->mco_coro) != MCO_DEAD)
+		NCE_ABORT(coro, "attempting to destroy active coroutine");
+#endif
+	/* Let user pre-terminate coroutine. */
+	if (coro->terminate)
+		coro->terminate(NCE_CORO_A_ coro);
+
+	mco_destroy(coro->mco_coro);
+	nce_coro_reset(coro);
+
+	/* Let user free resources now. */
+	if (coro->finalizer)
+		coro->finalizer(NCE_CORO_A_ coro);
+}
+
+struct nce_sched *nce_sched_default;
+
+/* {{{ built-in scheduler */
+
+/*
+ * Default naive scheduler.
+ *
+ * Only implemented if NCE_NO_SCHED is not defined.
+ */
+#ifndef NCE_NO_SCHED
+
+/*
+ * Resume all coroutines during pre-loop iteration.
+ */
+static void
+nce_sched_prepare_cb(EV_P_ struct ev_prepare *self, int revents)
+{
+	(void)revents;
+
+	struct nce_sched *sched = NCE_SCHED(self, prepare);
+
+	NCE_SCHED_RESUME_ALL(sched);
+}
+
+/*
+ * Resume all coroutines during post-loop iteration.
+ */
+static void
+nce_sched_check_cb(EV_P_ struct ev_check *self, int revents)
+{
+	(void)revents;
+
+	struct nce_sched *sched = NCE_SCHED(self, check);
+
+	NCE_SCHED_RESUME_ALL(sched);
+}
+
+#ifndef NCE_NO_STORAGE
+
+/*
+ * Resume all corouting currently blocking in a push call.
+ */
+static void
+nce_sched_persist_cb(EV_P_ struct ev_idle *self, int revents)
+{
+	(void)revents;
+
+	struct nce_sched *sched = NCE_SCHED(self, persist);
+
+	NCE_SCHED_RESUME_ALL(sched);
+}
+
+#endif /* !NCE_NO_STORAGE */
+
+void
+nce_sched_default_init(EV_P)
+{
+	static struct nce_sched sched;
+
+	ev_prepare_init(&sched.prepare, nce_sched_prepare_cb);
+	ev_check_init(&sched.check, nce_sched_check_cb);
+
+#ifndef NCE_NO_STORAGE
+	ev_idle_init(&sched.persist, nce_sched_persist_cb);
+#endif
+#if EV_MULTIPLICITY
+	sched.loop = EV_A;
+#endif
+
+	nce_sched_default = &sched;
+}
+
+void
+nce_sched_attach(struct nce_sched *sched, struct nce_coro *coro, int mode)
+{
+	assert(sched || nce_sched_default);
+	assert(coro);
+
+	if (!sched)
+		sched = nce_sched_default;
+
+	/* Register the coroutine ordered directly by priority. */
+	if (mode) {
+		DL_INSERT_INORDER(sched->coroutines, coro, NCE_SCHED_CMP);
+
+#ifdef NCE_DEBUG
+		DL_FOREACH(sched->coroutines, coro)
+			NCE_DEBUGF(coro, "ordered: %d", coro->priority);
+#endif
+	} else {
+		DL_DELETE(sched->coroutines, coro);
+		coro->next = NULL;
+		coro->prev = NULL;
+	}
+}
+
+#ifndef NCE_NO_STORAGE
+
+void
+nce_sched_persist(struct nce_sched *sched, struct nce_coro *coro, int mode)
+{
+	assert(sched || nce_sched_default);
+	assert(coro);
+
+	if (!sched)
+		sched = nce_sched_default;
+
+	if (mode) {
+		if (++sched->persisting == 1) {
+			NCE_DEBUGF(coro, "is turning idle on");
+			ev_idle_start(NCE_SCHED_A_ &sched->persist);
+		}
+	} else {
+#ifndef NDEBUG
+		if (sched->persisting == 0)
+			NCE_ABORT(coro, "persisting count underflow");
+#endif
+		if (--sched->persisting == 0) {
+			NCE_DEBUGF(coro, "is turning idle off");
+			ev_idle_stop(NCE_SCHED_A_ &sched->persist);
+		}
+	}
+}
+
+#endif
+
+void
+nce_sched_run(struct nce_sched *sched, int flags)
+{
+	assert(sched || nce_sched_default);
+
+	struct nce_coro *coro;
+
+	if (!sched)
+		sched = nce_sched_default;
+
+	/* Setup the pre/post and persistent resumers. */
+	ev_prepare_start(NCE_SCHED_A_ &sched->prepare);
+	ev_check_start(NCE_SCHED_A_ &sched->check);
+
+	/* Run loop until closed. */
+	ev_run(NCE_SCHED_A_ flags);
+
+	/* Stop all our watchers before cleaning coroutines. */
+	ev_prepare_stop(NCE_SCHED_A_ &sched->prepare);
+	ev_check_stop(NCE_SCHED_A_ &sched->check);
+
+#ifndef NCE_NO_STORAGE
+	ev_idle_stop(NCE_SCHED_A_ &sched->persist);
+#endif
+
+	/* Destroy or detach all pending coroutines. */
+	while ((coro = sched->coroutines)) {
+		if (coro->flags & NCE_IMMORTAL)
+			NCE_SCHED_REMOVE(sched, coro);
+		else
+			nce_coro_destroy(coro);
+	}
+}
+
+void
+nce_sched_break(struct nce_sched *sched, int how)
+{
+	assert(sched || nce_sched_default);
+
+	if (!sched)
+		sched = nce_sched_default;
+
+	ev_break(NCE_SCHED_A_ how);
+}
+
+#endif /* !NCE_NO_SCHED */
+
+/* }}} */

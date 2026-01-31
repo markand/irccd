@@ -27,6 +27,8 @@
 
 #include <utlist.h>
 
+#include <nce/nce.h>
+
 #include <irccd/config.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
@@ -210,6 +212,7 @@ main(int argc, char **argv)
 	int ch, verbose = 0;
 
 	ev_default_loop(0);
+	nce_sched_default_init();
 
 	while ((ch = getopt(argc, argv, "c:v")) != -1) {
 		switch (ch) {
@@ -240,6 +243,6 @@ main(int argc, char **argv)
 	if (verbose)
 		irc_log_set_verbose(1);
 
-	ev_loop(0);
+	nce_sched_run(NULL, 0);
 	finish();
 }

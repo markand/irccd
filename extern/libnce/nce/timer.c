@@ -1,5 +1,5 @@
 /*
- * nce_timer.c -- coroutine watcher support for ev_timer
+ * nce/timer.c -- coroutine watcher support for ev_timer
  *
  * Copyright (c) 2025-2026 David Demelier <markand@malikania.fr>
  *
@@ -42,27 +42,6 @@ nce_timer_cb(EV_P_ struct ev_timer *self, int revents)
 #endif
 		ev->revents = revents;
 	}
-}
-
-static void
-nce_timer_coro_entry_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_timer_coro *evco = NCE_CONTAINER_OF(self, struct nce_timer_coro, coro);
-
-	evco->entry(EV_A_ &evco->timer);
-}
-
-static void
-nce_timer_coro_finalizer_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_timer_coro *evco = NCE_CONTAINER_OF(self, struct nce_timer_coro, coro);
-
-	/* Stop the watcher for convenience. */
-	nce_timer_stop(EV_A_ &evco->timer);
-
-	/* Call user as very last function. */
-	if (evco->finalizer)
-		evco->finalizer(EV_A_ &evco->timer);
 }
 
 void
@@ -118,7 +97,7 @@ nce_timer_ready(struct nce_timer *ev)
 }
 
 int
-nce_timer_wait(EV_P_ struct nce_timer *ev)
+nce_timer_wait(struct nce_timer *ev)
 {
 	assert(ev);
 
@@ -144,9 +123,9 @@ nce_timer_restart(EV_P_ struct nce_timer *ev, ev_tstamp after, ev_tstamp repeat)
 {
 	assert(ev);
 
-	ev_timer_stop(EV_A_ &ev->timer);
-	ev_timer_set(&ev->timer, after, repeat);
-	ev_timer_start(EV_A_ &ev->timer);
+	nce_timer_stop(EV_A_ ev);
+	nce_timer_set(ev, after, repeat);
+	nce_timer_start(EV_A_ ev);
 }
 
 void
@@ -158,33 +137,21 @@ nce_timer_again(EV_P_ struct nce_timer *ev)
 }
 
 int
-nce_timer_coro_spawn(EV_P_ struct nce_timer_coro *evco, const struct nce_timer_coro_args *args)
+nce_timer_coro_spawn(EV_P_ struct nce_timer_coro *evco,
+                           ev_tstamp after,
+                           ev_tstamp repeat)
 {
 	assert(evco);
-	assert(evco->entry);
-
-	(void)args;
 
 	int rc;
 
-	evco->coro.entry = nce_timer_coro_entry_cb;
+	ev_init(&evco->timer.timer, nce_timer_cb);
+	ev_set_priority(&evco->timer.timer, -1);
 
-	if (!evco->coro.finalizer)
-		evco->coro.finalizer = nce_timer_coro_finalizer_cb;
-
-	/*
-	 * Watchers should be executed before attached coroutines to allow
-	 * resuming them if an event happened.
-	 */
-	ev_set_priority(&evco->timer.timer, NCE_PRI_MAX - 1);
-	if (args)
-		nce_timer_set(&evco->timer, args->after, args->repeat);
-	else
-		evco->coro.flags |= NCE_CORO_INACTIVE;
-
-	/* Automatically start the watcher unless disabled. */
-	if (!(evco->coro.flags & NCE_CORO_INACTIVE))
+	if (!(evco->coro.flags & NCE_INACTIVE)) {
+		nce_timer_set(&evco->timer, after, repeat);
 		nce_timer_start(EV_A_ &evco->timer);
+	}
 
 	if ((rc = nce_coro_create(EV_A_ &evco->coro)) < 0)
 		nce_timer_stop(EV_A_ &evco->timer);
@@ -193,12 +160,19 @@ nce_timer_coro_spawn(EV_P_ struct nce_timer_coro *evco, const struct nce_timer_c
 
 	return rc;
 }
-
 void
-nce_timer_coro_destroy(struct nce_timer_coro *evco)
+nce_timer_coro_destroy(EV_P_ struct nce_timer_coro *evco)
 {
 	assert(evco);
 
-	/* Will call nce_timer_coro_finalizer_cb */
+	nce_timer_stop(EV_A_ &evco->timer);
 	nce_coro_destroy(&evco->coro);
+}
+
+void
+nce_timer_coro_terminate(EV_P_ struct nce_coro *self)
+{
+	struct nce_timer_coro *evco = NCE_TIMER_CORO(self, coro);
+
+	nce_timer_stop(EV_A_ &evco->timer);
 }

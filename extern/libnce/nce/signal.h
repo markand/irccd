@@ -24,11 +24,8 @@
  * \brief Coroutine watcher support for ev_signal.
  * \ingroup libnce-watchers
  */
-#include <stddef.h>
 
-#include <ev.h>
-
-#include "coro.h"
+#include "nce.h"
 
 #if defined(DOXYGEN)
 #define EV_P_ struct ev_loop *,
@@ -45,26 +42,18 @@
  */
 #define NCE_SIGNAL(Ptr, Field) \
 	(NCE_CONTAINER_OF(Ptr, struct nce_signal, Field))
+
+/**
+ * Convenient ::NCE_CONTAINER_OF macro for ::nce_signal_coro.
+ */
+#define NCE_SIGNAL_CORO(Ptr, Field) \
+	(NCE_CONTAINER_OF(Ptr, struct nce_signal_coro, Field))
 #endif
 
 struct nce_signal;
 struct nce_signal_coro;
 struct nce_signal_coro_args;
 
-/**
- * \brief Coroutine entrypoint for signal.
- *
- * Similar to ::nce_coro_entry_t but it receives its watcher as argument.
- */
-typedef void (* nce_signal_coro_entry_t)(EV_P_ struct nce_signal *self);
-
-/**
- * \brief Finalizer function.
- *
- * Similar to ::nce_coro_finalizer_t but let the user perform extra step on a
- * coroutine watcher.
- */
-typedef void (* nce_signal_coro_finalizer_t)(EV_P_ struct nce_signal *self);
 
 /**
  * \struct nce_signal
@@ -102,43 +91,13 @@ struct nce_signal_coro {
 	 * (read-write)
 	 *
 	 * Coroutine attached to this watcher.
-	 *
-	 * Caller can set fields just like a normal coroutine however:
-	 *
-	 * The field ::coro::entry is replaced with an internal callback calling
-	 * ::nce_signal_coro::entry instead.
 	 */
 	struct nce_coro coro;
-
-	/**
-	 * (init)
-	 *
-	 * Coroutine watcher entrypoint.
-	 */
-	nce_signal_coro_entry_t entry;
-
-	/**
-	 * (optional)
-	 *
-	 * Finalizer for the coroutine watcher.
-	 */
-	nce_signal_coro_finalizer_t finalizer;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * \struct nce_signal_coro_args
- * \brief Options for ::nce_signal_coro_spawn.
- */
-struct nce_signal_coro_args {
-	/**
-	 * Signal to wait on.
-	 */
-	int signo;
-};
 
 /**
  * Start the event watcher.
@@ -215,7 +174,7 @@ nce_signal_ready(struct nce_signal *ev);
  * \return the watcher revents
  */
 int
-nce_signal_wait(EV_P_ struct nce_signal *ev);
+nce_signal_wait(struct nce_signal *ev);
 
 /**
  * Configure watcher.
@@ -225,25 +184,27 @@ nce_signal_wait(EV_P_ struct nce_signal *ev);
 void
 nce_signal_set(struct nce_signal *ev, int signo);
 
-
 /**
- * This all in one function initialize, set and optionnally start the watcher
- * and immediately creates its dedicated coroutine which is also started
- * automatically.
+ * Spawn a coroutine with an embedded `ev_signal`.
  *
- * \param args additional watcher spawn arguments (maybe NULL)
- * \return refer to ::nce_coro_spawn
+ * Arguments are similar to ::nce_signal_set.
  */
 int
-nce_signal_coro_spawn(EV_P_ struct nce_signal_coro *evco, const struct nce_signal_coro_args *args);
-
+nce_signal_coro_spawn(EV_P_ struct nce_signal_coro *evco, int signo);
 /**
- * Stop the internal watcher and destroy it along with its dedicated coroutine.
- *
- * Do not call this function within a ::nce_signal_coro::finalizer callback.
+ * Usable callback function as ::nce_coro::terminate to stop the ::nce_signal
+ * when destroying the coroutine.
  */
 void
-nce_signal_coro_destroy(struct nce_signal_coro *evco);
+nce_signal_coro_terminate(EV_P_ struct nce_coro *self);
+
+/**
+ * Destroy the watcher and its coroutine.
+ *
+ * The watcher is stopped **before** destroying the coroutine.
+ */
+void
+nce_signal_coro_destroy(EV_P_ struct nce_signal_coro *evco);
 
 #ifdef __cplusplus
 }

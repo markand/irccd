@@ -1,5 +1,5 @@
 /*
- * nce_stat.c -- coroutine watcher support for ev_stat
+ * nce/stat.c -- coroutine watcher support for ev_stat
  *
  * Copyright (c) 2025-2026 David Demelier <markand@malikania.fr>
  *
@@ -42,27 +42,6 @@ nce_stat_cb(EV_P_ struct ev_stat *self, int revents)
 #endif
 		ev->revents = revents;
 	}
-}
-
-static void
-nce_stat_coro_entry_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_stat_coro *evco = NCE_CONTAINER_OF(self, struct nce_stat_coro, coro);
-
-	evco->entry(EV_A_ &evco->stat);
-}
-
-static void
-nce_stat_coro_finalizer_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_stat_coro *evco = NCE_CONTAINER_OF(self, struct nce_stat_coro, coro);
-
-	/* Stop the watcher for convenience. */
-	nce_stat_stop(EV_A_ &evco->stat);
-
-	/* Call user as very last function. */
-	if (evco->finalizer)
-		evco->finalizer(EV_A_ &evco->stat);
 }
 
 void
@@ -118,7 +97,7 @@ nce_stat_ready(struct nce_stat *ev)
 }
 
 int
-nce_stat_wait(EV_P_ struct nce_stat *ev)
+nce_stat_wait(struct nce_stat *ev)
 {
 	assert(ev);
 
@@ -148,33 +127,22 @@ nce_stat_stat(EV_P_ struct nce_stat *ev)
 }
 
 int
-nce_stat_coro_spawn(EV_P_ struct nce_stat_coro *evco, const struct nce_stat_coro_args *args)
+nce_stat_coro_spawn(EV_P_ struct nce_stat_coro *evco,
+                          const char *path,
+                          ev_tstamp interval)
 {
 	assert(evco);
-	assert(evco->entry);
-
-	(void)args;
+	assert(path);
 
 	int rc;
 
-	evco->coro.entry = nce_stat_coro_entry_cb;
+	ev_init(&evco->stat.stat, nce_stat_cb);
+	ev_set_priority(&evco->stat.stat, -1);
 
-	if (!evco->coro.finalizer)
-		evco->coro.finalizer = nce_stat_coro_finalizer_cb;
-
-	/*
-	 * Watchers should be executed before attached coroutines to allow
-	 * resuming them if an event happened.
-	 */
-	ev_set_priority(&evco->stat.stat, NCE_PRI_MAX - 1);
-	if (args)
-		nce_stat_set(&evco->stat, args->path, args->interval);
-	else
-		evco->coro.flags |= NCE_CORO_INACTIVE;
-
-	/* Automatically start the watcher unless disabled. */
-	if (!(evco->coro.flags & NCE_CORO_INACTIVE))
+	if (!(evco->coro.flags & NCE_INACTIVE)) {
+		nce_stat_set(&evco->stat, path, interval);
 		nce_stat_start(EV_A_ &evco->stat);
+	}
 
 	if ((rc = nce_coro_create(EV_A_ &evco->coro)) < 0)
 		nce_stat_stop(EV_A_ &evco->stat);
@@ -185,10 +153,18 @@ nce_stat_coro_spawn(EV_P_ struct nce_stat_coro *evco, const struct nce_stat_coro
 }
 
 void
-nce_stat_coro_destroy(struct nce_stat_coro *evco)
+nce_stat_coro_destroy(EV_P_ struct nce_stat_coro *evco)
 {
 	assert(evco);
 
-	/* Will call nce_stat_coro_finalizer_cb */
+	nce_stat_stop(EV_A_ &evco->stat);
 	nce_coro_destroy(&evco->coro);
+}
+
+void
+nce_stat_coro_terminate(EV_P_ struct nce_coro *self)
+{
+	struct nce_stat_coro *evco = NCE_STAT_CORO(self, coro);
+
+	nce_stat_stop(EV_A_ &evco->stat);
 }

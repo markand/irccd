@@ -1,5 +1,5 @@
 /*
- * nce_periodic.c -- coroutine watcher support for ev_periodic
+ * nce/periodic.c -- coroutine watcher support for ev_periodic
  *
  * Copyright (c) 2025-2026 David Demelier <markand@malikania.fr>
  *
@@ -42,27 +42,6 @@ nce_periodic_cb(EV_P_ struct ev_periodic *self, int revents)
 #endif
 		ev->revents = revents;
 	}
-}
-
-static void
-nce_periodic_coro_entry_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_periodic_coro *evco = NCE_CONTAINER_OF(self, struct nce_periodic_coro, coro);
-
-	evco->entry(EV_A_ &evco->periodic);
-}
-
-static void
-nce_periodic_coro_finalizer_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_periodic_coro *evco = NCE_CONTAINER_OF(self, struct nce_periodic_coro, coro);
-
-	/* Stop the watcher for convenience. */
-	nce_periodic_stop(EV_A_ &evco->periodic);
-
-	/* Call user as very last function. */
-	if (evco->finalizer)
-		evco->finalizer(EV_A_ &evco->periodic);
 }
 
 void
@@ -118,7 +97,7 @@ nce_periodic_ready(struct nce_periodic *ev)
 }
 
 int
-nce_periodic_wait(EV_P_ struct nce_periodic *ev)
+nce_periodic_wait(struct nce_periodic *ev)
 {
 	assert(ev);
 
@@ -128,14 +107,6 @@ nce_periodic_wait(EV_P_ struct nce_periodic *ev)
 		nce_coro_yield();
 
 	return rc;
-}
-
-static ev_tstamp
-rescheduler_cb(struct ev_periodic *self, ev_tstamp now)
-{
-	struct nce_periodic *ev = NCE_PERIODIC(self, periodic);
-
-	return ev->rescheduler(ev, now);
 }
 
 void
@@ -148,46 +119,26 @@ nce_periodic_set(struct nce_periodic *ev,
 	assert(ev);
 	assert(ev->periodic.active == 0);
 
-	ev->rescheduler = rescheduler;
-
-	if (rescheduler)
-		ev_periodic_set(&ev->periodic, offset, interval, rescheduler_cb);
-	else
-		ev_periodic_set(&ev->periodic, offset, interval, NULL);
+	ev_periodic_set(&ev->periodic, offset, interval, rescheduler);
 }
 
 int
-nce_periodic_coro_spawn(EV_P_ struct nce_periodic_coro *evco, const struct nce_periodic_coro_args *args)
+nce_periodic_coro_spawn(EV_P_ struct nce_periodic_coro *evco,
+                              ev_tstamp offset,
+                              ev_tstamp interval,
+                              nce_periodic_rescheduler_t rescheduler)
 {
 	assert(evco);
-	assert(evco->entry);
-
-	(void)args;
 
 	int rc;
 
-	evco->coro.entry = nce_periodic_coro_entry_cb;
+	ev_init(&evco->periodic.periodic, nce_periodic_cb);
+	ev_set_priority(&evco->periodic.periodic, -1);
 
-	if (!evco->coro.finalizer)
-		evco->coro.finalizer = nce_periodic_coro_finalizer_cb;
-
-	/*
-	 * Watchers should be executed before attached coroutines to allow
-	 * resuming them if an event happened.
-	 */
-	ev_set_priority(&evco->periodic.periodic, NCE_PRI_MAX - 1);
-
-	if (args)
-		nce_periodic_set(&evco->periodic,
-		                  args->offset,
-		                  args->interval,
-		                  evco->periodic.rescheduler);
-	else
-		evco->coro.flags |= NCE_CORO_INACTIVE;
-
-	/* Automatically start the watcher unless disabled. */
-	if (!(evco->coro.flags & NCE_CORO_INACTIVE))
+	if (!(evco->coro.flags & NCE_INACTIVE)) {
+		nce_periodic_set(&evco->periodic, offset, interval, rescheduler);
 		nce_periodic_start(EV_A_ &evco->periodic);
+	}
 
 	if ((rc = nce_coro_create(EV_A_ &evco->coro)) < 0)
 		nce_periodic_stop(EV_A_ &evco->periodic);
@@ -196,12 +147,19 @@ nce_periodic_coro_spawn(EV_P_ struct nce_periodic_coro *evco, const struct nce_p
 
 	return rc;
 }
-
 void
-nce_periodic_coro_destroy(struct nce_periodic_coro *evco)
+nce_periodic_coro_destroy(EV_P_ struct nce_periodic_coro *evco)
 {
 	assert(evco);
 
-	/* Will call nce_periodic_coro_finalizer_cb */
+	nce_periodic_stop(EV_A_ &evco->periodic);
 	nce_coro_destroy(&evco->coro);
+}
+
+void
+nce_periodic_coro_terminate(EV_P_ struct nce_coro *self)
+{
+	struct nce_periodic_coro *evco = NCE_PERIODIC_CORO(self, coro);
+
+	nce_periodic_stop(EV_A_ &evco->periodic);
 }

@@ -1,5 +1,5 @@
 /*
- * nce_idle.c -- coroutine watcher support for ev_idle
+ * nce/idle.c -- coroutine watcher support for ev_idle
  *
  * Copyright (c) 2025-2026 David Demelier <markand@malikania.fr>
  *
@@ -42,27 +42,6 @@ nce_idle_cb(EV_P_ struct ev_idle *self, int revents)
 #endif
 		ev->revents = revents;
 	}
-}
-
-static void
-nce_idle_coro_entry_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_idle_coro *evco = NCE_CONTAINER_OF(self, struct nce_idle_coro, coro);
-
-	evco->entry(EV_A_ &evco->idle);
-}
-
-static void
-nce_idle_coro_finalizer_cb(EV_P_ struct nce_coro *self)
-{
-	struct nce_idle_coro *evco = NCE_CONTAINER_OF(self, struct nce_idle_coro, coro);
-
-	/* Stop the watcher for convenience. */
-	nce_idle_stop(EV_A_ &evco->idle);
-
-	/* Call user as very last function. */
-	if (evco->finalizer)
-		evco->finalizer(EV_A_ &evco->idle);
 }
 
 void
@@ -118,7 +97,7 @@ nce_idle_ready(struct nce_idle *ev)
 }
 
 int
-nce_idle_wait(EV_P_ struct nce_idle *ev)
+nce_idle_wait(struct nce_idle *ev)
 {
 	assert(ev);
 
@@ -131,27 +110,16 @@ nce_idle_wait(EV_P_ struct nce_idle *ev)
 }
 
 int
-nce_idle_coro_spawn(EV_P_ struct nce_idle_coro *evco, const struct nce_idle_coro_args *args)
+nce_idle_coro_spawn(EV_P_ struct nce_idle_coro *evco)
 {
 	assert(evco);
-	assert(evco->entry);
-
-	(void)args;
 
 	int rc;
 
-	evco->coro.entry = nce_idle_coro_entry_cb;
+	ev_init(&evco->idle.idle, nce_idle_cb);
+	ev_set_priority(&evco->idle.idle, -1);
 
-	if (!evco->coro.finalizer)
-		evco->coro.finalizer = nce_idle_coro_finalizer_cb;
-
-	/*
-	 * Watchers should be executed before attached coroutines to allow
-	 * resuming them if an event happened.
-	 */
-	ev_set_priority(&evco->idle.idle, NCE_PRI_MAX - 1);
-	/* Automatically start the watcher unless disabled. */
-	if (!(evco->coro.flags & NCE_CORO_INACTIVE))
+	if (!(evco->coro.flags & NCE_INACTIVE))
 		nce_idle_start(EV_A_ &evco->idle);
 
 	if ((rc = nce_coro_create(EV_A_ &evco->coro)) < 0)
@@ -161,12 +129,19 @@ nce_idle_coro_spawn(EV_P_ struct nce_idle_coro *evco, const struct nce_idle_coro
 
 	return rc;
 }
-
 void
-nce_idle_coro_destroy(struct nce_idle_coro *evco)
+nce_idle_coro_destroy(EV_P_ struct nce_idle_coro *evco)
 {
 	assert(evco);
 
-	/* Will call nce_idle_coro_finalizer_cb */
+	nce_idle_stop(EV_A_ &evco->idle);
 	nce_coro_destroy(&evco->coro);
+}
+
+void
+nce_idle_coro_terminate(EV_P_ struct nce_coro *self)
+{
+	struct nce_idle_coro *evco = NCE_IDLE_CORO(self, coro);
+
+	nce_idle_stop(EV_A_ &evco->idle);
 }
