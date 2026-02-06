@@ -322,36 +322,80 @@ struct irc_server {
  * The server is only created and require few more calls before attempting to
  * connect.
  *
- * \pre name != NULL
- * \param name the server name
- * \sa irc_server_set_params
- * \sa irc_server_set_ident
- * \sa irc_server_connect
+ * \param name the IRC server identifier (not NULL)
  * \return a IRC server
  */
 struct irc_server *
 irc_server_new(const char *name);
 
+/**
+ * Set server hostname.
+ *
+ * \pre Server must not be connected.
+ * \param hostname the new hostname (not NULL)
+ */
 void
-irc_server_set_hostname(struct irc_server *s, const char *hostname);
+irc_server_set_hostname(struct irc_server *server, const char *hostname);
 
+/**
+ * Set server optional flags.
+ *
+ * \pre Server must not be connected.
+ * \param flags the new flags
+ */
 void
-irc_server_set_flags(struct irc_server *s, enum irc_server_flags flags);
+irc_server_set_flags(struct irc_server *server, enum irc_server_flags flags);
 
+/**
+ * Set server port.
+ *
+ * \pre Server must not be connected.
+ * \param port the IRC port (in range 1..65535)
+ */
 void
-irc_server_set_port(struct irc_server *s, unsigned int port);
+irc_server_set_port(struct irc_server *server, unsigned int port);
 
+/**
+ * Set IRC nickname.
+ *
+ * If the server is connected, a change request will be send and nickname be
+ * applied asynchronously. Otherwise it is replaced immediately.
+ *
+ * \param nickname the new nickname (not NULL)
+ */
 void
-irc_server_set_nickname(struct irc_server *s, const char *nickname);
+irc_server_set_nickname(struct irc_server *server, const char *nickname);
 
+/**
+ * Set IRC username.
+ *
+ * \pre Server must not be connected.
+ * \param username the IRC username (not NULL)
+ */
 void
-irc_server_set_username(struct irc_server *s, const char *username);
+irc_server_set_username(struct irc_server *server, const char *username);
 
+/**
+ * Set IRC realname.
+ *
+ * \pre Server must not be connected.
+ * \param username the IRC realname (not NULL)
+ */
 void
-irc_server_set_realname(struct irc_server *s, const char *realname);
+irc_server_set_realname(struct irc_server *server, const char *realname);
 
+/**
+ * Set a CTCP reply.
+ *
+ * Argument key is a CTCP reply which is case-insensitive.
+ *
+ * If value is NULL, the CTCP reply will be ignored.
+ *
+ * \param key a CTCP key to reply (not NULL)
+ * \param value the CTCP response
+ */
 void
-irc_server_set_ctcp(struct irc_server *s, const char *key, const char *value);
+irc_server_set_ctcp(struct irc_server *server, const char *key, const char *value);
 
 /**
  * Set the command message prefix.
@@ -363,26 +407,21 @@ irc_server_set_ctcp(struct irc_server *s, const char *key, const char *value);
  * rich?` will be detected as a command for the plugin `ask` with the content
  * `will I be rich?`.
  *
- * \pre s != NULL
- * \pre prefix != NULL
- * \param s the server
- * \param prefix the prefix character to set
+ * \param prefix the prefix character to set (may be NULL)
  * \sa IRC_SERVER_DEFAULT_PREFIX
  */
 void
-irc_server_set_prefix(struct irc_server *s, const char *prefix);
+irc_server_set_prefix(struct irc_server *server, const char *prefix);
 
 /**
  * Set a password to connect to the IRC server.
  *
  * This function must be used before the server is connected.
  *
- * \pre s != NULL
- * \param s the server
- * \param password the server password
+ * \param password the server password (may be NULL)
  */
 void
-irc_server_set_password(struct irc_server *s, const char *password);
+irc_server_set_password(struct irc_server *server, const char *password);
 
 /**
  * Start the connection mechanism.
@@ -392,12 +431,9 @@ irc_server_set_password(struct irc_server *s, const char *password);
  *
  * For convenience, this function does nothing if the server is already
  * connected.
- *
- * \pre s != NULL
- * \param s the server
  */
 void
-irc_server_connect(struct irc_server *s);
+irc_server_connect(struct irc_server *server);
 
 /**
  * Force disconnection of the server.
@@ -407,12 +443,9 @@ irc_server_connect(struct irc_server *s);
  *
  * For convenience, this function does nothing if the server is already
  * disconnected.
- *
- * \pre s != NULL
- * \param s the server
  */
 void
-irc_server_disconnect(struct irc_server *s);
+irc_server_disconnect(struct irc_server *server);
 
 /**
  * Force a reconnection immediately.
@@ -421,23 +454,18 @@ irc_server_disconnect(struct irc_server *s);
  * a server was disconnected and user do not want to wait the delay before
  * retrying. It's also possible to use it whenever the server seems disconnected
  * but irccd was unable to detect it on its own.
- *
- * \pre s != NULL
- * \param s the server
  */
 void
-irc_server_reconnect(struct irc_server *s);
+irc_server_reconnect(struct irc_server *server);
 
 /**
  * Find a IRC channel by name.
  *
- * \pre s != NULL
- * \param s the server
  * \param name the channel name to find
  * \return the channel or NULL if not found
  */
 const struct irc_channel *
-irc_server_channels_find(struct irc_server *s, const char *name);
+irc_server_channels_find(struct irc_server *server, const char *name);
 
 /**
  * Send a raw message to the IRC server using printf(3) format style.
@@ -446,8 +474,6 @@ irc_server_channels_find(struct irc_server *s, const char *name);
  * itself.
  *
  * \warning use this function with care
- * \pre s != NULL
- * \param s the server
  * \param fmt the format string
  * \return 0 on success
  * \return -ENOTCONN if the server is not connected
@@ -455,26 +481,24 @@ irc_server_channels_find(struct irc_server *s, const char *name);
  */
 IRC_ATTR_PRINTF(2, 3)
 int
-irc_server_send(struct irc_server *s, const char *fmt, ...);
+irc_server_send(struct irc_server *server, const char *fmt, ...);
 
 /**
  * Similar to ::irc_server_send using a `va_list`.
  */
 IRC_ATTR_PRINTF(2, 0)
 int
-irc_server_send_va(struct irc_server *s, const char *fmt, va_list ap);
+irc_server_send_va(struct irc_server *server, const char *fmt, va_list ap);
 
 /**
  * Invite the target nickname into the channel.
  *
- * \pre s != NULL
- * \param s the server
  * \param channel the channel name
  * \param target the nickname target
  * \return 0 on success or -1 on error
  */
 int
-irc_server_invite(struct irc_server *s, const char *channel, const char *target);
+irc_server_invite(struct irc_server *server, const char *channel, const char *target);
 
 /**
  * Join a channel.
@@ -484,89 +508,75 @@ irc_server_invite(struct irc_server *s, const char *channel, const char *target)
  * If the server is not connected, the channel is added to the list to be joined
  * upon successful connection. Otherwise the join command is sent immediately.
  *
- * \pre s != NULL
- * \param s the server
  * \param name the channel name to join
  * \param password an optional password (may be NULL)
  * \return 0 on success or -1 on error
  */
 int
-irc_server_join(struct irc_server *s, const char *name, const char *password);
+irc_server_join(struct irc_server *server, const char *name, const char *password);
 
 /**
  * Kick someone from a channel.
  *
- * \pre s != NULL
- * \param s the server
  * \param channel the channel name
  * \param target the target nickname to kick
  * \param reason an optional reason (may be NULL)
  * \return 0 on success or -1 on error
  */
 int
-irc_server_kick(struct irc_server *s, const char *channel, const char *target, const char *reason);
+irc_server_kick(struct irc_server *server, const char *channel, const char *target, const char *reason);
 
 /**
  * Leave a channel.
  *
- * \pre s != NULL
- * \param s the server
  * \param channel the channel name to leave
  * \param reason an optional reason (may be NULL)
  * \return 0 on success or -1 on error
  */
 int
-irc_server_part(struct irc_server *s, const char *channel, const char *reason);
+irc_server_part(struct irc_server *server, const char *channel, const char *reason);
 
 /**
  * Change a channel topic content.
  *
- * \pre s != NULL
- * \param s the server
  * \param channel the channel name
  * \param topic the new topic
  * \return 0 on success or -1 on error
  */
 int
-irc_server_topic(struct irc_server *s, const char *channel, const char *topic);
+irc_server_topic(struct irc_server *server, const char *channel, const char *topic);
 
 /**
  * Send a message to a channel or a nickname.
  *
- * \pre s != NULL
- * \param s the server
  * \param target the channel or target
  * \param message the message content
  * \return 0 on success or -1 on error
  */
 int
-irc_server_message(struct irc_server *s, const char *target, const char *message);
+irc_server_message(struct irc_server *server, const char *target, const char *message);
 
 /**
  * Send a CTCP action emote to a channel or a nickname (like `/me` in most
  * clients).
  *
- * \pre s != NULL
- * \param s the server
  * \param target the channel or target
  * \param message the message content
  * \return 0 on success or -1 on error
  */
 int
-irc_server_me(struct irc_server *s, const char *target, const char *message);
+irc_server_me(struct irc_server *server, const char *target, const char *message);
 
 /**
  * Set both user or channel modes.
  *
- * \pre s != NULL
- * \param s the server
  * \param target the channel or target
  * \param modes the list of modes
  * \param args the arguments to the modes
  * \return 0 on success or -1 on error
  */
 int
-irc_server_mode(struct irc_server *s, const char *target, const char *mode, const char *args);
+irc_server_mode(struct irc_server *server, const char *target, const char *mode, const char *args);
 
 /**
  * Request a names listing for a channel.
@@ -574,42 +584,21 @@ irc_server_mode(struct irc_server *s, const char *target, const char *mode, cons
  * This function is asynchronous and will generate a ::irc_event of type names
  * when the list has been received entirely.
  *
- * \pre s != NULL
- * \pre channel != NULL
- * \param s the server
  * \param channel the channel name
  * \return 0 on success or -1 on error
  */
 int
-irc_server_names(struct irc_server *s, const char *channel);
-
-/**
- * Change bot nickname.
- *
- * This function must be used instead of ::irc_server_set_ident when the server
- * has been started (aka ::irc_server_connect has been called).
- *
- * \pre s != NULL
- * \param s the server
- * \param nickname the new desired nickname
- * \return 0 on success or -1 on error
- */
-int
-irc_server_nick(struct irc_server *s, const char *nickname);
+irc_server_names(struct irc_server *server, const char *channel);
 
 /**
  * Send a private notice.
  *
- * \pre s != NULL
- * \pre target != NULL
- * \pre message != NULL
- * \param s the server
- * \param target the channel or target
- * \param message the notice content
+ * \param target the channel or target (not NULL)
+ * \param message the notice content (not NULL)
  * \return 0 on success or -1 on error
  */
 int
-irc_server_notice(struct irc_server *s, const char *target, const char *message);
+irc_server_notice(struct irc_server *server, const char *target, const char *message);
 
 /**
  * Request a whois information for a target.
@@ -617,14 +606,11 @@ irc_server_notice(struct irc_server *s, const char *target, const char *message)
  * This function is asynchronous and will generate a ::irc_event of type whois
  * when the information has been received entirely.
  *
- * \pre s != NULL
- * \pre target != NULL
- * \param s the server
- * \param target the target nickname
+ * \param target the target nickname (not NULL)
  * \return 0 on success or -1 on error
  */
 int
-irc_server_whois(struct irc_server *s, const char *target);
+irc_server_whois(struct irc_server *server, const char *target);
 
 /**
  * Strip a user nickname from its optional prefixes if any.
@@ -637,35 +623,27 @@ irc_server_whois(struct irc_server *s, const char *target);
  *
  * This function also returns the modes applied to the nickname if present.
  *
- * \pre s != NULL
- * \param s the server
  * \param nickname the nickname to shift
  * \return the modes for this nickname or 0 if none (and nickname is untouched)
  */
 int
-irc_server_strip(const struct irc_server *s, const char **nickname);
+irc_server_strip(const struct irc_server *server, const char **nickname);
 
 /**
  * Increment the reference count for this server.
  *
  * This function is mostly intended for plugins which may keep track of a server
  * while being removed from the bot.
- *
- * \pre s != NULL
- * \param s the server
  */
 void
-irc_server_incref(struct irc_server *);
+irc_server_incref(struct irc_server *server);
 
 /**
  * Decrement the server and possibly freeing it if it was the last reference
  * count.
- *
- * \pre s != NULL
- * \param s the server
  */
 void
-irc_server_decref(struct irc_server *);
+irc_server_decref(struct irc_server *server);
 
 #if defined(__cplusplus)
 }

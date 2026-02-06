@@ -1561,9 +1561,9 @@ void
 irc_server_set_nickname(struct irc_server *s, const char *nickname)
 {
 	assert(s);
-	assert(s->conn == NULL);
 	assert(nickname);
 
+	/* TODO: if connected change async. */
 	s->nickname = irc_util_strdupfree(s->nickname, nickname);
 }
 
