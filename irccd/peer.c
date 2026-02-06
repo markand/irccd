@@ -1086,27 +1086,27 @@ peer_stream_entry(struct nce_coro *self)
 	}
 
 end:
-	irc_log_warn("peer connection closed");
+	irc_log_warn("peer: connection closed");
 	nce_stream_stop(stream);
 }
 
 struct peer *
-peer_new(int fd)
+peer_new(int sockfd)
 {
 	struct peer *peer;
 	int flags;
 
 	peer = irc_util_calloc(1, sizeof (*peer));
-	peer->fd = fd;
+	peer->fd = sockfd;
 
-	if ((flags = fcntl(fd, F_GETFL)) < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
+	if ((flags = fcntl(sockfd, F_GETFL)) < 0 || fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) < 0)
 		irc_util_die("fcntl: %s\n", strerror(errno));
 
 	peer->stream.coro.name = "peer.stream";
 	peer->stream.coro.entry = peer_stream_entry;
 	peer->stream.coro.terminate = nce_stream_coro_terminate;
 	peer->stream.stream.ops = &nce_stream_ops_socket;
-	peer->stream.stream.fd = fd;
+	peer->stream.stream.fd = sockfd;
 	peer->stream.stream.in_cap = 2048;
 	peer->stream.stream.out_cap = 2048;
 	peer->stream.stream.close = 1;

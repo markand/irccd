@@ -27,6 +27,9 @@ int
 transport_start(const char *, long long uid, long long gid);
 
 void
+transport_broadcast(const char *data);
+
+void
 transport_stop(void);
 
 #endif /* !IRCCD_TRANSPORT_H */

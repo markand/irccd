@@ -47,22 +47,31 @@ static struct peer *peers;
 static void
 transport_entry(struct nce_coro *)
 {
-	struct peer *peer;
+	struct peer *peer, *tmp;
 	int clt;
 
 	while (nce_io_wait(&fd_co.io)) {
 		if ((clt = accept(fd, NULL, 0)) < 0) {
 			switch (errno) {
 			case -EINTR:
+				irc_log_debug("transport: accept: %s", strerror(errno));
+				/* Ignore. */
 				break;
 			}
 		} else {
-			irc_log_debug("new client connected (%d)", clt);
+			irc_log_debug("transport: new client (%d)", clt);
 			peer = peer_new(clt);
 			LL_APPEND(peers, peer);
 		}
 
-		/* clear dead clients */
+		/* Cleanup zombies. */
+		LL_FOREACH_SAFE(peers, peer, tmp) {
+			if (!nce_stream_active(&peer->stream.stream)) {
+				irc_log_debug("transport: reap client (%d)", peer->fd);
+				LL_DELETE(peers, peer);
+				peer_free(peer);
+			}
+		}
 	}
 }
 
@@ -100,7 +109,6 @@ transport_start(const char *path, long long uid, long long gid)
 		goto err;
 
 	irc_log_info("transport: listening on %s", path);
-	irc_log_debug("transport: file descriptor %d", fd);
 
 	if (uid != -1 && gid != -1)
 		irc_log_info("transport: uid=%lld, gid=%lld", uid, gid);
@@ -123,11 +131,30 @@ err:
 }
 
 void
+transport_broadcast(const char *data)
+{
+	assert(data);
+
+	struct peer *peer;
+
+	LL_FOREACH(peers, peer)
+		if (peer->is_watching)
+			peer_push(peer, "%s", data);
+}
+
+void
 transport_stop(void)
 {
+	struct peer *peer, *tmp;
+
 	/* Connection socket. */
 	if (fd != -1)
 		close(fd);
 
 	unlink(addr.sun_path);
+
+	LL_FOREACH_SAFE(peers, peer, tmp) {
+		LL_DELETE(peers, peer);
+		peer_free(peer);
+	}
 }

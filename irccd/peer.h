@@ -34,7 +34,7 @@ struct peer {
 };
 
 struct peer *
-peer_new(int);
+peer_new(int sockfd);
 
 IRC_ATTR_PRINTF(2, 3)
 int

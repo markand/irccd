@@ -39,34 +39,24 @@
 
 #include "conf.h"
 #include "dl-plugin.h"
-#include "peer.h"
 #include "transport.h"
 
 #if IRCCD_WITH_JS == 1
 #       include "js-plugin.h"
 #endif
 
-static struct ev_loop *loop;
 static struct ev_signal sig_int;
 static struct ev_signal sig_term;
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
-static struct peer *peers;
 
-#if 0
-static void
+static inline void
 broadcast(const struct irc_event *ev)
 {
-	char buf[IRC_BUF_LEN];
-	struct peer *p;
+	char buf[IRC_BUF_LEN] = {};
 
-	if (!irc_event_str(ev, buf, sizeof (buf)))
-		return;
-
-	LL_FOREACH(peers, p)
-		if (p->is_watching)
-			peer_push(p, "%s", buf);
+	if (irc_event_str(ev, buf, sizeof (buf)))
+		transport_broadcast(buf);
 }
-#endif
 
 static void
 run_info(void)
@@ -152,11 +142,8 @@ run(int argc, char **argv)
 }
 
 static void
-sig_cb(struct ev_signal *self, int revents)
+sig_cb(struct ev_signal *self, int)
 {
-	(void)loop;
-	(void)revents;
-
 	irc_log_info("irccd: stopping on signal %d", self->signum);
 	ev_break(EVBREAK_ALL);
 }
@@ -186,11 +173,6 @@ load(void)
 static inline void
 finish(void)
 {
-	struct peer *peer, *tmp;
-
-	LL_FOREACH_SAFE(peers, peer, tmp)
-		peer_free(peer);
-
 	transport_stop();
 	irc_bot_finish();
 }
