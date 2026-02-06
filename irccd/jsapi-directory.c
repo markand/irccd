@@ -24,10 +24,6 @@
 #include <regex.h>
 #include <unistd.h>
 
-#if defined(_WIN32)
-#       include <windows.h>
-#endif
-
 #include <duktape.h>
 
 #include <irccd/util.h>
@@ -256,25 +252,8 @@ rm_helper(duk_context *ctx, const char *base, int recursive)
 static inline void
 mkpath(duk_context *ctx, const char *path)
 {
-#ifdef _WIN32
-	/* TODO: convert code to errno. */
-	if (!CreateDirectoryA(path, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
-		errno = EPERM;
-		jsapi_system_raise(ctx);
-#else
 	if (mkdir(path, 0755) < 0 && errno != EEXIST)
 		jsapi_system_raise(ctx);
-#endif
-}
-
-static inline char *
-normalize(char *str)
-{
-	for (char *p = str; *p; ++p)
-		if (*p == '\\')
-			*p = '/';
-
-	return str;
 }
 
 static int
@@ -365,23 +344,12 @@ Directory_remove(duk_context* ctx)
 static int
 Directory_mkdir(duk_context* ctx)
 {
-	char path[PATH_MAX], *p;
+	char path[PATH_MAX] = {};
 
-	/* Copy the directory to normalize and iterate over '/'. */
+	/* Copy the directory to iterate over '/'. */
 	irc_util_strlcpy(path, duk_require_string(ctx, 0), sizeof (path));
-	normalize(path);
 
-#if defined(_WIN32)
-	/* Remove drive letter that we don't need. */
-	if ((p = strchr(path, ':')))
-		++p;
-	else
-		p = path;
-#else
-	p = path;
-#endif
-
-	for (p = p + 1; *p; ++p) {
+	for (char *p = p + 1; *p; ++p) {
 		if (*p == '/') {
 			*p = 0;
 			mkpath(ctx, path);

@@ -49,7 +49,7 @@ static int
 Chrono_prototype_elapsed(duk_context *ctx)
 {
 	struct timer *timer = self(ctx);
-	struct timespec now = {0};
+	struct timespec now = {};
 
 	timespec_get(&now, TIME_UTC);
 

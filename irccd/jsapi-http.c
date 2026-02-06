@@ -210,10 +210,8 @@ request_complete(struct request *req)
 }
 
 static void
-request_io_cb(struct ev_io *self, int revents)
+request_io_cb(struct ev_io *self, int)
 {
-	(void)revents;
-
 	struct request *req;
 	CURLMsg *msg;
 	int msgsz, pending = 0;

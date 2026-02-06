@@ -34,9 +34,7 @@
 
 #define LDR_PATHS IRCCD_LIBDIR "/irccd"
 
-#if defined(_WIN32)
-#       define LDR_EXTENSIONS "dll"
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
 #       define LDR_EXTENSIONS "so:dylib"
 #else
 #       define LDR_EXTENSIONS "so"

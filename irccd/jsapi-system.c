@@ -17,6 +17,7 @@
  */
 
 #include <sys/types.h>
+#include <sys/utsname.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -24,17 +25,11 @@
 #include <string.h>
 #include <time.h>
 
-#if defined(_WIN32)
-#       include <windows.h>
-#elif defined(__linux__)
+#if defined(__linux__)
 #       include <sys/sysinfo.h>
 #elif defined(__APPLE__) || defined(__NetBSD__)
 #       include <sys/types.h>
 #       include <sys/sysctl.h>
-#endif
-
-#if !defined(_WIN32)
-#       include <sys/utsname.h>
 #endif
 
 #include <duktape.h>
@@ -80,20 +75,12 @@ System_exec(duk_context *ctx)
 static int
 System_home(duk_context *ctx)
 {
-#if defined(_WIN32)
-	char path[MAX_PATH] = {0};
-
-	SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, path);
-
-	duk_push_string(ctx, path);
-#else
 	const char *home;
 
 	if ((home = getenv("HOME")))
 		duk_push_string(ctx, home);
 	else
 		duk_push_undefined(ctx);
-#endif
 
 	return 1;
 }
@@ -103,8 +90,6 @@ System_name(duk_context *ctx)
 {
 #if defined(__linux__)
 	duk_push_string(ctx, "Linux");
-#elif defined(_WIN32)
-	duk_push_string(ctx, "Windows");
 #elif defined(__FreeBSD__)
 	duk_push_string(ctx, "FreeBSD");
 #elif defined(__DragonFly__)
@@ -160,9 +145,7 @@ System_usleep(duk_context *ctx)
 static int
 System_uptime(duk_context *ctx)
 {
-#if defined(_WIN32)
-	duk_push_uint(ctx, GetTickCount64() / 1000);
-#elif defined(__linux__)
+#if defined(__linux__)
 	struct sysinfo info;
 
 	if (sysinfo(&info) < 0)
@@ -198,20 +181,13 @@ System_uptime(duk_context *ctx)
 static int
 System_version(duk_context *ctx)
 {
-#if defined(_WIN32)
-	DWORD version = GetVersion();
-	DWORD major = (DWORD)(LOBYTE(LOWORD(version)));
-	DWORD minor = (DWORD)(HIBYTE(LOWORD(version)));
-
-	duk_push_sprintf(ctx, "%d.%d", (int)major, (int)minor);
-#else
 	struct utsname uts;
 
 	if (uname(&uts) < 0)
 		jsapi_system_raise(ctx);
 
 	duk_push_string(ctx, uts.release);
-#endif
+
 	return 1;
 }
 

@@ -93,10 +93,8 @@ Rule_add(duk_context *ctx)
 }
 
 static int
-Rule_clear(duk_context *ctx)
+Rule_clear(duk_context *)
 {
-	(void)ctx;
-
 	irc_bot_rule_clear();
 
 	return 0;
