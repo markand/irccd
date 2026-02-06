@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +38,9 @@
 #include <irccd/util.h>
 
 #include "peer.h"
+
+#define PEER(Ptr, Field) \
+        (IRC_UTIL_CONTAINER_OF(Ptr, struct peer, Field))
 
 typedef void (*plugin_set_fn)(struct irc_plugin *, const char *, const char *);
 typedef const char * (*plugin_get_fn)(struct irc_plugin *, const char *);
@@ -1043,135 +1047,93 @@ invoke(struct peer *p, char *line)
 }
 
 static void
-dispatch(struct peer *p)
+peer_stream_entry(struct nce_coro *self)
 {
-	char *pos;
-	size_t length;
-
-	while ((pos = memchr(p->in, '\n', p->insz))) {
-		/* Turn end of the string at delimiter. */
-		*pos = 0;
-		length = pos - p->in;
-
-		if (length > 0)
-			invoke(p, p->in);
-
-		memmove(p->in, pos + 1, sizeof (p->in) - (length + 1));
-		p->insz -= length;
-	}
-}
-
-static int
-input(struct peer *p)
-{
-	ssize_t nr;
-	size_t cap;
-
-	cap = sizeof (p->in) - p->insz;
-
-	if (cap == 0) {
-		irc_log_warn("transport: peer input full");
-		return -1;
-	}
-
-	while ((nr = recv(p->fd, &p->in[p->insz], cap, MSG_NOSIGNAL)) < 0 && errno == EINTR)
-		continue;
-
-	if (nr < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-		return -1;
-	if (nr == 0) {
-		irc_log_info("transport: client disconnect");
-		return -1;
-	}
-
-	dispatch(p);
-
-	return 0;
-}
-
-static int
-output(struct peer *p)
-{
-	ssize_t ns;
-
-	while ((ns = send(p->fd, p->out, p->outsz, MSG_NOSIGNAL)) < 0 && errno == EINTR)
-		continue;
-
-	if (ns < 0 && errno != EAGAIN && errno != EWOULDBLOCK)
-		return -1;
-
-	if ((size_t)ns >= p->outsz) {
-		memset(p->out, 0, sizeof (p->out));
-		p->outsz = 0;
-	} else {
-		memmove(p->out, &p->out[ns], sizeof (p->out) - ns);
-		p->outsz -= ns;
-	}
-
-	return 0;
-}
-
-static void
-io_cb(struct ev_io *self, int revents)
-{
+	struct nce_stream *stream;
+	unsigned char *pos;
 	struct peer *peer;
-	int rc = 0;
+	size_t length;
+	int major, minor, patch;
+	int rc;
 
-	peer = IRC_UTIL_CONTAINER_OF(self, struct peer, io_fd);
+	peer = PEER(self, stream.coro);
+	stream = &peer->stream.stream;
 
-	if (revents & EV_READ)
-		rc = input(peer);
-	if (rc == 0 && (revents & EV_WRITE))
-		rc = output(peer);
+	/* Send initial hello. */
+	major = IRCCD_VERSION_MAJOR;
+	minor = IRCCD_VERSION_MINOR;
+	patch = IRCCD_VERSION_PATCH;
 
-	if (rc < 0) {
-		ev_io_stop(&peer->io_fd);
-		peer->on_close(peer);
+	if ((rc = nce_stream_printf(&peer->stream.stream, "IRCCD %d.%d.%d\n", major, minor, patch)) < 0)
+		goto end;
+	if ((rc = nce_stream_flush(&peer->stream.stream)) < 0)
+		goto end;
+
+	for (;;) {
+		if ((rc = nce_stream_wait(&peer->stream.stream)) < 0)
+			goto end;
+
+		while ((pos = memchr(stream->in, '\n', stream->in_len))) {
+			/* Turn end of the string at delimiter. */
+			*pos = 0;
+			length = pos - stream->in;
+
+			if (length > 0)
+				invoke(peer, (char *)stream->in);
+
+			nce_stream_drain(stream, length + 1);
+		}
 	}
+
+end:
+	irc_log_warn("peer connection closed");
+	nce_stream_stop(stream);
 }
 
 struct peer *
 peer_new(int fd)
 {
-	struct peer *p;
+	struct peer *peer;
+	int flags;
 
-	p = irc_util_calloc(1, sizeof (*p));
-	p->fd = fd;
+	peer = irc_util_calloc(1, sizeof (*peer));
+	peer->fd = fd;
 
-	ev_io_init(&p->io_fd, io_cb, fd, EV_READ);
-	ev_io_start(&p->io_fd);
+	if ((flags = fcntl(fd, F_GETFL)) < 0 || fcntl(fd, F_SETFL, flags | O_NONBLOCK) < 0)
+		irc_util_die("fcntl: %s\n", strerror(errno));
 
-	return p;
+	peer->stream.coro.name = "peer.stream";
+	peer->stream.coro.entry = peer_stream_entry;
+	peer->stream.coro.terminate = nce_stream_coro_terminate;
+	peer->stream.stream.ops = &nce_stream_ops_socket;
+	peer->stream.stream.fd = fd;
+	peer->stream.stream.in_cap = 2048;
+	peer->stream.stream.out_cap = 2048;
+	peer->stream.stream.close = 1;
+	nce_stream_coro_spawn(&peer->stream);
+
+	return peer;
 }
 
 int
-peer_push(struct peer *p, const char *fmt, ...)
+peer_push(struct peer *peer, const char *fmt, ...)
 {
-	assert(p);
+	assert(peer);
 	assert(fmt);
 
-	char buf[IRC_BUF_LEN] = {};
 	va_list ap;
-	size_t len;
+	ssize_t rc;
 
 	va_start(ap, fmt);
-	vsnprintf(buf, sizeof (buf) - 1, fmt, ap);
+	rc = nce_stream_vprintf(&peer->stream.stream, fmt, ap);
 	va_end(ap);
 
-	len = strlen(buf);
+	if (rc < 0)
+		return rc;
 
-	/* We add a '\n' to the end of the message. */
-	if (len + 1 > sizeof (p->out) - p->outsz)
-		return -1;
-
-	/* Replace NUL terminator by \n' */
-	buf[len++] = '\n';
-	memcpy(&p->out[p->outsz], buf, len);
-	p->outsz += len;
-
-	ev_io_stop(&p->io_fd);
-	ev_io_modify(&p->io_fd, EV_READ | EV_WRITE);
-	ev_io_start(&p->io_fd);
+	/* Add message terminator. */
+	if ((rc = nce_stream_push(&peer->stream.stream, "\n", 1)) < 0)
+		return rc;
 
 	return 0;
 }
@@ -1181,12 +1143,6 @@ peer_free(struct peer *p)
 {
 	assert(p);
 
-	ev_io_stop(&p->io_fd);
-
-	if (p->fd != -1) {
-		close(p->fd);
-		p->fd = -1;
-	}
-
+	nce_stream_coro_destroy(&p->stream);
 	free(p);
 }

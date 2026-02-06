@@ -23,23 +23,10 @@
 
 #include "limits.h"
 
-struct pollfd;
-
-struct peer;
-
 int
-transport_bind(const char *);
-
-int
-transport_bindp(const char *, uid_t, gid_t);
+transport_start(const char *, long long uid, long long gid);
 
 void
-transport_prepare(struct pollfd *);
-
-struct peer *
-transport_flush(const struct pollfd *);
-
-void
-transport_finish(void);
+transport_stop(void);
 
 #endif /* !IRCCD_TRANSPORT_H */

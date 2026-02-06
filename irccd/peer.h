@@ -19,30 +19,17 @@
 #ifndef IRCCD_PEER_H
 #define IRCCD_PEER_H
 
-#include <stddef.h>
-
-#include <ev.h>
+#include <nce/stream.h>
 
 #include <irccd/attrs.h>
 #include <irccd/irccd.h>
 
 struct peer;
 
-typedef void (*peer_close_cb)(struct peer *);
-
 struct peer {
 	int fd;
-	struct ev_io io_fd;
-
+	struct nce_stream_coro stream;
 	int is_watching;
-
-	peer_close_cb on_close;
-
-	char in[IRC_BUF_LEN];
-	size_t insz;
-	char out[IRC_BUF_LEN];
-	size_t outsz;
-
 	struct peer *next;
 };
 

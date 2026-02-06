@@ -28,6 +28,10 @@
 #include <sys/un.h>
 #include <unistd.h>
 
+#include <utlist.h>
+
+#include <nce/io.h>
+
 #include <irccd/config.h>
 #include <irccd/log.h>
 #include <irccd/util.h>
@@ -37,9 +41,33 @@
 
 static struct sockaddr_un addr;
 static int fd = -1;
+static struct nce_io_coro fd_co;
+static struct peer *peers;
+
+static void
+transport_entry(struct nce_coro *)
+{
+	struct peer *peer;
+	int clt;
+
+	while (nce_io_wait(&fd_co.io)) {
+		if ((clt = accept(fd, NULL, 0)) < 0) {
+			switch (errno) {
+			case -EINTR:
+				break;
+			}
+		} else {
+			irc_log_debug("new client connected (%d)", clt);
+			peer = peer_new(clt);
+			LL_APPEND(peers, peer);
+		}
+
+		/* clear dead clients */
+	}
+}
 
 int
-wrap_bind(const char *path, uid_t *uid, gid_t *gid)
+transport_start(const char *path, long long uid, long long gid)
 {
 	assert(path);
 
@@ -63,7 +91,7 @@ wrap_bind(const char *path, uid_t *uid, gid_t *gid)
 
 	if (bind(fd, (const struct sockaddr *)&addr, sizeof (addr)) < 0)
 		goto err;
-	if (uid && gid && chown(path, *uid, *gid) < 0)
+	if (uid != -1 && gid != -1 && chown(path, uid, gid) < 0)
 		goto err;
 
 	umask(oldumask);
@@ -74,8 +102,12 @@ wrap_bind(const char *path, uid_t *uid, gid_t *gid)
 	irc_log_info("transport: listening on %s", path);
 	irc_log_debug("transport: file descriptor %d", fd);
 
-	if (uid && gid)
-		irc_log_info("transport: uid=%d, gid=%d", (int)*uid, (int)*gid);
+	if (uid != -1 && gid != -1)
+		irc_log_info("transport: uid=%lld, gid=%lld", uid, gid);
+
+	fd_co.coro.name = "transport.entry";
+	fd_co.coro.entry = transport_entry;
+	nce_io_coro_spawn(&fd_co, fd, EV_READ);
 
 	return 0;
 
@@ -90,62 +122,12 @@ err:
 	return -1;
 }
 
-int
-transport_bind(const char *path)
-{
-	return wrap_bind(path, NULL, NULL);
-}
-
-int
-transport_bindp(const char *path, uid_t uid, gid_t gid)
-{
-	return wrap_bind(path, &uid, &gid);
-}
-
 void
-transport_prepare(struct pollfd *pfd)
-{
-	assert(pfd);
-
-	if (fd < 0)
-		return;
-
-	pfd->fd = fd;
-	pfd->events = POLLIN;
-}
-
-struct peer *
-transport_flush(const struct pollfd *pfd)
-{
-	assert(pfd);
-
-	struct peer *peer;
-	int newfd;
-
-	if (fd < 0 || pfd->fd != fd || !(pfd->revents & POLLIN))
-		return NULL;
-
-	if ((newfd = accept(fd, NULL, NULL)) < 0) {
-		irc_log_warn("transport: %s", strerror(errno));
-		return NULL;
-	}
-
-	peer = peer_new(newfd);
-
-	irc_log_info("transport: new client connected");
-	peer_push(peer, "IRCCD %d.%d.%d", IRCCD_VERSION_MAJOR,
-	    IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH);
-
-	return peer;
-}
-
-void
-transport_finish(void)
+transport_stop(void)
 {
 	/* Connection socket. */
 	if (fd != -1)
 		close(fd);
 
 	unlink(addr.sun_path);
-	memset(&addr, 0, sizeof (addr));
 }

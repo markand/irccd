@@ -230,6 +230,7 @@ LIBNCE_DIR = extern/libnce
 LIBNCE_SRCS += $(LIBNCE_DIR)/nce/child.c
 LIBNCE_SRCS += $(LIBNCE_DIR)/nce/io.c
 LIBNCE_SRCS += $(LIBNCE_DIR)/nce/nce.c
+LIBNCE_SRCS += $(LIBNCE_DIR)/nce/stream.c
 LIBNCE_SRCS += $(LIBNCE_DIR)/nce/timer.c
 
 LIBNCE_OBJS = $(LIBNCE_SRCS:.c=.o)

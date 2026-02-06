@@ -978,14 +978,13 @@ conf_apply_transport(struct conf *conf)
 {
 	int rc;
 
-	if (conf->tpt_uid != -1 && conf->tpt_gid != -1) {
+	if (conf->tpt_uid != -1 && conf->tpt_gid != -1)
 		conf_debug(conf, "transport", "binding on '%s' with %lld:%lld",
 		    conf->tpt, conf->tpt_uid, conf->tpt_gid);
-		rc = transport_bindp(conf->tpt, conf->tpt_uid, conf->tpt_gid);
-	} else {
+	else
 		conf_debug(conf, "transport", "binding on '%s'", conf->tpt);
-		rc = transport_bind(conf->tpt);
-	}
+
+	rc = transport_start(conf->tpt, conf->tpt_uid, conf->tpt_gid);
 
 	if (rc < 0)
 		irc_util_die("abort: %s: %s\n", conf->tpt, strerror(-rc));

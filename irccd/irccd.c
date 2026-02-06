@@ -191,7 +191,7 @@ finish(void)
 	LL_FOREACH_SAFE(peers, peer, tmp)
 		peer_free(peer);
 
-	transport_finish();
+	transport_stop();
 	irc_bot_finish();
 }
 
