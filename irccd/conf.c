@@ -1,3 +1,21 @@
+/*
+ * conf.c -- configuration file parser
+ *
+ * Copyright (c) 2013-2026 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
 #include <sys/stat.h>
 #include <assert.h>
 #include <ctype.h>
@@ -12,6 +30,8 @@
 #include <unistd.h>
 
 #include <nce/nce.h>
+
+#include <utlist.h>
 
 #include <irccd/hook.h>
 #include <irccd/irccd.h>
@@ -54,6 +74,12 @@ union token {
 	} str;
 };
 
+enum log_type {
+	LOG_TYPE_CONSOLE,
+	LOG_TYPE_FILE,
+	LOG_TYPE_SYSLOG
+};
+
 struct conf {
 	const char *path;
 	char *text;
@@ -62,6 +88,24 @@ struct conf {
 	size_t column;
 	struct nce_coro lex;
 	struct nce_coro parser;
+
+	/*
+	 * Data types are loaded but not registered yet because the user
+	 * configuration can be defined in any order.
+	 */
+	struct irc_server *servers;
+	struct irc_hook *hooks;
+	struct irc_plugin *plugins;
+	struct irc_rule *rules;
+
+	long long tpt_uid;
+	long long tpt_gid;
+	char *tpt;
+
+	enum log_type log_type;
+	int log_level;
+	char *log_template;
+	char *log_file;
 };
 
 IRC_ATTR_PRINTF(2, 3)
@@ -95,6 +139,38 @@ conf_debug(const struct conf *, const char *origin, const char *fmt, ...)
 #endif
 }
 
+static long long
+conf_resolve_uid(struct conf *conf, const char *value)
+{
+	const struct passwd *pwd;
+	long long uid;
+
+	if (irc_util_stoi(value, &uid) == 0)
+		return uid;
+
+	if (!(pwd = getpwnam(value)))
+		conf_fatal(conf, "invalid uid: %s", value);
+
+	return pwd->pw_uid;
+}
+
+static long long
+conf_resolve_gid(struct conf *conf, const char *value)
+{
+	const struct group *grp;
+	long long gid;
+
+	if (irc_util_stoi(value, &gid) == 0)
+		return gid;
+
+	if (!(grp = getgrnam(value)))
+		conf_fatal(conf, "invalid gid: %s", value);
+
+	return grp->gr_gid;
+}
+
+/* {{{ lex */
+
 /*
  * Advance by one byte, adjusting conf->line and/or conf->column depending on
  * next character.
@@ -127,9 +203,7 @@ conf_lex_bskip(struct conf *conf)
 static inline void
 conf_lex_yield(struct conf *conf, const union token *token)
 {
-	//conf_debug(conf, "lex", "yielding");
 	nce_coro_push(&conf->parser, token, sizeof (*token));
-	//conf_debug(conf, "lex", "resumed");
 }
 
 /*
@@ -198,8 +272,6 @@ conf_lex_string(struct conf *conf)
 {
 	char *start, save;
 
-	//conf_debug(conf, "lex", "simple string");
-
 	/* Save current pointer location. */
 	start = conf->off;
 
@@ -214,12 +286,9 @@ conf_lex_string(struct conf *conf)
 	save = *conf->off;
 	*conf->off = '\0';
 
-	//conf_debug(conf, "lex", "simple string content '%s'", start);
 	conf_lex_yield(conf, &(const union token) {
-		.str = {
-			.type = TOKEN_STRING,
-			.at   = start
-		}
+		.str.type = TOKEN_STRING,
+		.str.at   = start
 	});
 
 	*conf->off = save;
@@ -234,7 +303,6 @@ conf_lex_string(struct conf *conf)
 static inline void
 conf_lex_comment(struct conf *conf)
 {
-	conf_debug(conf, "lex", "comment");
 	conf_lex_advance(conf);
 
 	while (*conf->off && *conf->off != '\n')
@@ -250,7 +318,6 @@ conf_lex_entry(struct nce_coro *self)
 	struct conf *conf;
 
 	conf = CONF(self, lex);
-	conf_debug(conf, "lex", "start");
 
 	while (*conf->off) {
 		switch (*conf->off) {
@@ -276,19 +343,22 @@ conf_lex_entry(struct nce_coro *self)
 		}
 	}
 
-	conf_debug(conf, "lex", "end");
 	conf_lex_yield0(conf, TOKEN_EOF);
 }
 
+/* }}} */
+
+/* {{{ parse */
+
 /*
  * Pull next incoming token and return its type.
+ *
+ * On end of content, this function stops parser coroutine.
  */
 static inline enum token_type
 conf_next(struct conf *conf, union token *token)
 {
-	//conf_debug(conf, "parser", "pulling");
 	nce_coro_pull(&conf->parser, token, sizeof (*token));
-	//conf_debug(conf, "parser", "pulled 0x%0x", token->type);
 
 	if (token->type == TOKEN_EOF)
 		nce_coro_off();
@@ -297,16 +367,43 @@ conf_next(struct conf *conf, union token *token)
 }
 
 /*
- * Put back the token in the parser coroutine without blocking.
+ * Pull next incoming typed token or keep it in the queue if doesn't match.
  */
-static inline void
-conf_rewind(struct conf *conf, union token *token)
+static inline int
+conf_next_is(struct conf *conf, union token *token, enum token_type type)
 {
-	nce_coro_queue(&conf->parser, token, sizeof (*token));
+	nce_coro_pull(&conf->parser, token, sizeof (*token));
+
+	if (token->type != type) {
+		nce_coro_queue(&conf->parser, token, sizeof (*token));
+		return 0;
+	}
+
+	return 1;
 }
 
 /*
- * Get the next token and expect to be a string.
+ * Get next token and if it's a string that equals `what` it is removed from the
+ * incoming queue.
+ */
+static inline int
+conf_string_is(struct conf *conf, const char *what)
+{
+	union token token = {};
+	int rc = 0;
+
+	if (conf_next_is(conf, &token, TOKEN_STRING)) {
+		if (CONF_EQ(token.str.at, what))
+			rc = 1;
+		else
+			nce_coro_queue(&conf->parser, &token, sizeof (token));
+	}
+
+	return rc;
+}
+
+/*
+ * Require next token to be a string.
  */
 static char *
 conf_string(struct conf *conf)
@@ -319,6 +416,18 @@ conf_string(struct conf *conf)
 	return token.str.at;
 }
 
+/*
+ * Similar to conf_string but dynamically allocate the string token.
+ */
+static inline char *
+conf_string_new(struct conf *conf)
+{
+	return irc_util_strdup(conf_string(conf));
+}
+
+/*
+ * Require next token to be an integer.
+ */
 static long long
 conf_int(struct conf *conf)
 {
@@ -334,39 +443,17 @@ conf_int(struct conf *conf)
 }
 
 /*
- * Similar to conf_string but dynamically allocate the string token.
+ * Require the next token to be a string that equals to `keyword`.
  */
-static inline char *
-conf_string_new(struct conf *conf)
+static inline void
+conf_keyword(struct conf *conf, const char *keyword)
 {
-	return irc_util_strdup(conf_string(conf));
+	if (!conf_string_is(conf, keyword))
+		conf_fatal(conf, "keyword '%s' expected", keyword);
 }
 
 /*
- * Get the next (or current) string and expect it to equal `keyword`.
- *
- * If value is provided, it is compared to it. Otherwise the function calls
- * conf_string to retrieve the next one.
- */
-static void
-conf_keyword(struct conf *conf, const char *value, const char *keyword)
-{
-	union token token = {};
-
-	if (!value) {
-		/* TODO: token description. */
-		if (conf_next(conf, &token) != TOKEN_STRING)
-			conf_fatal(conf, "unexpected token, expecting keyword '%s'", keyword);
-
-		value = token.str.at;
-	}
-
-	if (strcmp(value, keyword) != 0)
-		conf_fatal(conf, "unexpected string '%s', expected keyword '%s'", value, keyword);
-}
-
-/*
- * Expect a beginning block '{'.
+ * Require a beginning block '{'.
  */
 static inline void
 conf_begin(struct conf *conf)
@@ -377,10 +464,20 @@ conf_begin(struct conf *conf)
 		conf_fatal(conf, "expected '%c' block start", TOKEN_BLK_BEGIN);
 }
 
-#if 0
+/*
+ * Returns non-zero if next token is a beginning of block '{' and pull it from
+ * the queue, kept otherwise.
+ */
+static inline int
+conf_begin_is(struct conf *conf)
+{
+	union token token = {};
+
+	return conf_next_is(conf, &token, TOKEN_BLK_BEGIN);
+}
 
 /*
- * Expect a terminating block '}'.
+ * Require a terminating block '}'.
  */
 static inline void
 conf_end(struct conf *conf)
@@ -391,29 +488,9 @@ conf_end(struct conf *conf)
 		conf_fatal(conf, "expected '%c' block end", TOKEN_BLK_END);
 }
 
-#endif
+/* }}} */
 
-#if 0
-static inline const char *
-conf_list(struct conf *conf)
-{
-	union token token = {};
-
-	for (;;) {
-		switch (conf_next(conf, &token)) {
-		case TOKEN_STRING:
-			return token.str.at;
-		case TOKEN_COMMA:
-			break;
-		default:
-			conf_fatal(conf, "unexpected token '%c' in list",
-			break;
-		}
-	}
-	while (conf_next(conf, &token) == TOKEN_COMMA)
-		continue;
-}
-#endif
+/* {{{ log(s) */
 
 /*
  * Logging section.
@@ -423,71 +500,35 @@ conf_list(struct conf *conf)
 static void
 conf_parse_log(struct conf *conf)
 {
-	const char *token;
+	/* verbose|quiet */
+	if (conf_string_is(conf, "verbose"))
+		conf->log_level = 1;
+	else if (conf_string_is(conf, "quiet"))
+		conf->log_level = 0;
 
-	token = conf_string(conf);
-
-	if (CONF_EQ(token, "verbose")) {
-		irc_log_set_verbose(1);
-		token = conf_string(conf);
-	} else if (CONF_EQ(token, "quiet"))
-		token = conf_string(conf);
-
-	if (CONF_EQ(token, "template")) {
-		token = conf_string(conf);
-		conf_debug(conf, "log", "using template format '%s'", token);
-		irc_log_set_template(token);
-		token = conf_string(conf);
-	}
+	/* template fmt */
+	if (conf_string_is(conf, "template"))
+		conf->log_template = conf_string_new(conf);
 
 	/* Now 'to' keyword is to be expected. */
-	conf_keyword(conf, token, "to");
+	conf_keyword(conf, "to");
 
-	/* And now destination. */
-	token = conf_string(conf);
-
-	if (CONF_EQ(token, "console")) {
-		conf_debug(conf, "log", "log into console");
-		irc_log_to_console();
-	} else if (CONF_EQ(token, "syslog")) {
-		conf_debug(conf, "log", "log into syslog");
-		irc_log_to_syslog();
-	} else if (CONF_EQ(token, "file")) {
-		token = conf_string(conf);
-		conf_debug(conf, "log", "log into file '%s'", token);
-		irc_log_to_file(token);
+	/* console|syslog|file path */
+	if (conf_string_is(conf, "console")) {
+		conf->log_type = LOG_TYPE_CONSOLE;
+	} else if (conf_string_is(conf, "syslog")) {
+		conf->log_type = LOG_TYPE_SYSLOG;
+	} else if (conf_string_is(conf, "file")) {
+		conf->log_type = LOG_TYPE_FILE;
+		conf->log_file = conf_string_new(conf);
+	} else {
+		conf_fatal(conf, "invalid log sink");
 	}
 }
 
-static long long
-conf_resolve_uid(struct conf *conf, const char *value)
-{
-	const struct passwd *pwd;
-	long long uid;
+/* }}} */
 
-	if (irc_util_stoi(value, &uid) == 0)
-		return uid;
-
-	if (!(pwd = getpwnam(value)))
-		conf_fatal(conf, "invalid uid: %s", value);
-
-	return pwd->pw_uid;
-}
-
-static long long
-conf_resolve_gid(struct conf *conf, const char *value)
-{
-	const struct group *grp;
-	long long gid;
-
-	if (irc_util_stoi(value, &gid) == 0)
-		return gid;
-
-	if (!(grp = getgrnam(value)))
-		conf_fatal(conf, "invalid gid: %s", value);
-
-	return grp->gr_gid;
-}
+/* {{{ transport */
 
 /*
  * Transport section.
@@ -497,64 +538,44 @@ conf_resolve_gid(struct conf *conf, const char *value)
 static void
 conf_parse_transport(struct conf *conf)
 {
-	long long uid, gid;
-	const char *token;
-	int rc;
-
-	token = conf_string(conf);
-
-	if (CONF_EQ(token, "with")) {
-		conf_keyword(conf, NULL, "uid");
-		uid = conf_resolve_uid(conf, conf_string(conf));
-
-		conf_keyword(conf, NULL, "gid");
-		gid = conf_resolve_gid(conf, conf_string(conf));
+	if (conf_string_is(conf, "with")) {
+		conf_keyword(conf, "uid");
+		conf->tpt_uid = conf_resolve_uid(conf, conf_string(conf));
+		conf_keyword(conf, "gid");
+		conf->tpt_gid = conf_resolve_gid(conf, conf_string(conf));
 	} else
-		uid = gid = -1;
+		conf->tpt_uid = conf->tpt_gid = -1;
 
-	conf_keyword(conf, token, "to");
-	token = conf_string(conf);
-
-	if (uid != -1 && gid != -1) {
-		conf_debug(conf, "transport", "binding on '%s' with %lld:%lld", token, uid, gid);
-		rc = transport_bindp(token, uid, gid);
-	} else {
-		conf_debug(conf, "transport", "binding on '%s'", token);
-		rc = transport_bind(token);
-	}
-
-	if (rc < 0)
-		irc_util_die("abort: %s: %s\n", token, strerror(-rc));
+	conf_keyword(conf, "to");
+	conf->tpt = conf_string_new(conf);
 }
 
+/* }}} */
+
+/* {{{ hook */
+
+/*
+ * Hook section.
+ *
+ * hook name to path
+ */
 static void
 conf_parse_hook(struct conf *conf)
 {
+	struct irc_hook *hook;
 	char *name, *path;
 
 	name = conf_string_new(conf);
-	conf_keyword(conf, NULL, "to");
+	conf_keyword(conf, "to");
 	path = conf_string_new(conf);
 
-	irc_bot_hook_add(irc_hook_new(name, path));
-	conf_debug(conf, "hook", "added '%s' -> '%s'", name, path);
-
-	free(name);
-	free(path);
+	hook = irc_hook_new(name, path);
+	LL_APPEND(conf->hooks, hook);
 }
 
+/* }}} */
 
-
-
-
-
-
-
-
-
-
-
-
+/* {{{ server */
 
 static inline void
 conf_parse_server_hostname(struct conf *conf, struct irc_server *server)
@@ -595,28 +616,17 @@ conf_parse_server_password(struct conf *conf, struct irc_server *server)
 	irc_server_set_password(server, conf_string(conf));
 }
 
-
-
-/*
- * In server.
- *
- * join "channel"
- * join with password "secret" "channel"
- */
 static void
 conf_parse_server_join(struct conf *conf, struct irc_server *server)
 {
-	const char *token;
 	char *channel, *password;
 
-	token = conf_string(conf);
-
-	if (CONF_EQ(token, "with")) {
-		conf_keyword(conf, NULL, "password");
+	if (conf_string_is(conf, "with")) {
+		conf_keyword(conf, "password");
 		channel = conf_string_new(conf);
 		password = conf_string_new(conf);
 	} else {
-		channel = irc_util_strdup(token);
+		channel = conf_string_new(conf);
 		password = NULL;
 	}
 
@@ -631,7 +641,7 @@ conf_parse_server_ctcp(struct conf *conf, struct irc_server *server)
 
 	conf_begin(conf);
 
-	while (conf_next(conf, &token) == TOKEN_STRING) {
+	while (conf_next_is(conf, &token, TOKEN_STRING)) {
 		key = irc_util_strdup(token.str.at);
 		value = conf_string_new(conf);
 		irc_server_set_ctcp(server, key, value);
@@ -639,8 +649,7 @@ conf_parse_server_ctcp(struct conf *conf, struct irc_server *server)
 		free(value);
 	}
 
-	if (token.type != TOKEN_BLK_END)
-		conf_fatal(conf, "unterminated ctcp block");
+	conf_end(conf);
 }
 
 static inline void
@@ -674,37 +683,42 @@ static void
 conf_parse_server(struct conf *conf)
 {
 	struct irc_server *server;
+	const char *name;
 	union token token;
-	const char *str;
 
-	server = irc_server_new(conf_string(conf));
+	name = conf_string(conf);
+
+#if 0
+	if (irc_bot_server_get(name))
+		conf_fatal(conf, "server '%s' already exists", name);
+#endif
+
+	server = irc_server_new(name);
+
 	conf_begin(conf);
 
-	while (conf_next(conf, &token) == TOKEN_STRING) {
-		str = token.str.at;
-
-		if (CONF_EQ(str, "hostname"))
+	while (conf_next_is(conf, &token, TOKEN_STRING)) {
+		if (CONF_EQ(token.str.at, "hostname"))
 			conf_parse_server_hostname(conf, server);
-		else if (CONF_EQ(str, "port"))
+		else if (CONF_EQ(token.str.at, "port"))
 			conf_parse_server_port(conf, server);
-		else if (CONF_EQ(str, "prefix"))
+		else if (CONF_EQ(token.str.at, "prefix"))
 			conf_parse_server_prefix(conf, server);
-		else if (CONF_EQ(str, "ident"))
+		else if (CONF_EQ(token.str.at, "ident"))
 			conf_parse_server_ident(conf, server);
-		else if (CONF_EQ(str, "password"))
+		else if (CONF_EQ(token.str.at, "password"))
 			conf_parse_server_password(conf, server);
-		else if (CONF_EQ(str, "join"))
+		else if (CONF_EQ(token.str.at, "join"))
 			conf_parse_server_join(conf, server);
-		else if (CONF_EQ(str, "ctcp"))
+		else if (CONF_EQ(token.str.at, "ctcp"))
 			conf_parse_server_ctcp(conf, server);
-		else if (CONF_EQ(str, "ssl"))
+		else if (CONF_EQ(token.str.at, "ssl"))
 			conf_parse_server_ssl(conf, server);
-		else if (CONF_EQ(str, "options"))
+		else if (CONF_EQ(token.str.at, "options"))
 			conf_parse_server_options(conf, server);
 	}
 
-	if (token.type != TOKEN_BLK_END)
-		conf_fatal(conf, "unterminated server section");
+	conf_end(conf);
 
 	if (!server->hostname)
 		conf_fatal(conf, "no hostname set");
@@ -713,8 +727,12 @@ conf_parse_server(struct conf *conf)
 	if (!server->nickname || !server->username || !server->realname)
 		conf_fatal(conf, "ni ident set");
 
-	irc_bot_server_add(server);
+	LL_APPEND(conf->servers, server);
 }
+
+/* }}} */
+
+/* {{{ rule */
 
 static void
 conf_parse_rule_criteria(struct conf *conf,
@@ -754,23 +772,19 @@ conf_parse_rule(struct conf *conf)
 	enum irc_rule_action action;
 	struct irc_rule *rule;
 	union token token;
-	const char *str;
 
-	str = conf_string(conf);
-
-	if (CONF_EQ(str, "accept")) {
+	if (conf_string_is(conf, "accept")) {
 		conf_debug(conf, "rule", "type accept");
 		action = IRC_RULE_ACCEPT;
-	} else if (CONF_EQ(str, "drop")) {
+	} else if (conf_string_is(conf, "drop")) {
 		conf_debug(conf, "rule", "type drop");
 		action = IRC_RULE_DROP;
 	} else
-		conf_fatal(conf, "invalid action '%s'", str);
+		conf_fatal(conf, "invalid action");
 
 	rule = irc_rule_new(action);
 
-	/* Block is optional */
-	if (conf_next(conf, &token) == TOKEN_BLK_BEGIN) {
+	if (conf_next_is(conf, &token, TOKEN_BLK_BEGIN)) {
 		while (conf_next(conf, &token) == TOKEN_STRING) {
 			conf_debug(conf, "rule", "parsing '%s' rule criteria", token.str.at);
 			conf_parse_rule_criteria(conf, rule, token.str.at);
@@ -778,17 +792,100 @@ conf_parse_rule(struct conf *conf)
 
 		if (token.type != TOKEN_BLK_END)
 			conf_fatal(conf, "unterminated rule block");
-	} else
-		conf_rewind(conf, &token);
+	}
 
-	irc_bot_rule_insert(rule, -1);
+	DL_APPEND(conf->rules, rule);
 }
 
+/* }}} */
+
+/* {{{ plugin */
+
+static void
+conf_parse_plugin_options(struct conf *conf,
+                          struct irc_plugin *plg,
+                          const char *what)
+{
+	void (*setter)(struct irc_plugin *, const char *, const char *) = NULL;
+	union token token;
+	char *key, *value;
+
+	if (CONF_EQ(what, "config"))
+		setter = irc_plugin_set_option;
+	else if (CONF_EQ(what, "path") || CONF_EQ(what, "paths"))
+		setter = irc_plugin_set_path;
+	else if (CONF_EQ(what, "template"))
+		setter = irc_plugin_set_template;
+	else
+		conf_fatal(conf, "invalid directive '%s' in plugin block", what);
+
+	conf_begin(conf);
+
+	while (conf_next_is(conf, &token, TOKEN_STRING)) {
+		key = irc_util_strdup(token.str.at);
+		value = conf_string_new(conf);
+
+		conf_debug(conf, "plugin", "%s -> %s", key, value);
+		setter(plg, key, value);
+
+		free(key);
+		free(value);
+	}
+
+	conf_end(conf);
+}
+
+/*
+ * Plugin section
+ *
+ * plugin name [to path] [{
+ *     config {
+ *         key1 value1
+ *         ...
+ *     }
+ *     template {
+ *         key1 value1
+ *         ...
+ *     }
+ *     path {
+ *         key1 value1
+ *         ...
+ *     }
+ * }
+ */
 static void
 conf_parse_plugin(struct conf *conf)
 {
 	struct irc_plugin *plg;
+	char *location = NULL;
+	char *name = NULL;
+	union token token;
+
+	name = conf_string_new(conf);
+
+	/* Either `to path` should follow or the option block */
+	if (conf_string_is(conf, "to"))
+		location = conf_string_new(conf);
+
+	if (irc_bot_plugin_get(name))
+		conf_fatal(conf, "plugin '%s' already loaded", name);
+	if (!(plg = irc_bot_plugin_search(name, location)))
+		conf_fatal(conf, "plugin '%s' not found", name);
+
+	if (conf_begin_is(conf)) {
+		while (conf_next_is(conf, &token, TOKEN_STRING)) {
+			conf_debug(conf, "plugin", "parsing '%s'", token.str.at);
+			conf_parse_plugin_options(conf, plg, token.str.at);
+		}
+
+		conf_end(conf);
+	}
+
+	free(name);
+	free(location);
 }
+
+/* }}} */
 
 static void
 conf_parser_entry(struct nce_coro *self)
@@ -797,25 +894,101 @@ conf_parser_entry(struct nce_coro *self)
 	const char *topic;
 
 	conf = CONF(self, parser);
-
 	conf_debug(conf, "parser", "start");
 
 	while ((topic = conf_string(conf))) {
-		if (CONF_EQ(topic, "logs") || CONF_EQ(topic, "log"))
+		if (CONF_EQ(topic, "logs")) {
+			fprintf(stderr, "section 'logs' has been renamed to 'log'\n");
 			conf_parse_log(conf);
-		else if (CONF_EQ(topic, "transport"))
+		} else if (CONF_EQ(topic, "log")) {
+			conf_parse_log(conf);
+		} else if (CONF_EQ(topic, "transport")) {
 			conf_parse_transport(conf);
-		else if (CONF_EQ(topic, "hook"))
+		} else if (CONF_EQ(topic, "hook")) {
 			conf_parse_hook(conf);
-		else if (CONF_EQ(topic, "server"))
+		} else if (CONF_EQ(topic, "server")) {
 			conf_parse_server(conf);
-		else if (CONF_EQ(topic, "rule"))
+		} else if (CONF_EQ(topic, "rule")) {
 			conf_parse_rule(conf);
-		else if (CONF_EQ(topic, "plugin"))
+		} else if (CONF_EQ(topic, "plugin")) {
 			conf_parse_plugin(conf);
+		}
 	}
 
 	conf_debug(conf, "parser", "end");
+}
+
+static void
+conf_apply_log(const struct conf *conf)
+{
+	switch (conf->log_type) {
+	case LOG_TYPE_CONSOLE:
+		conf_debug(conf, "log", "verbose (%d) into console", conf->log_level);
+		irc_log_to_console();
+		break;
+	case LOG_TYPE_FILE:
+		conf_debug(conf, "log", "verbose (%d) into file %s", conf->log_level, conf->log_file);
+		irc_log_to_file(conf->log_file);
+		break;
+	case LOG_TYPE_SYSLOG:
+		conf_debug(conf, "log", "verbose (%d) into console", conf->log_level);
+		irc_log_to_syslog();
+		break;
+	}
+
+	irc_log_set_verbose(conf->log_level);
+	irc_log_set_template(conf->log_template);
+}
+
+static void
+conf_apply_rules(struct conf *conf)
+{
+	struct irc_rule *rule, *tmp;
+
+	DL_FOREACH_SAFE(conf->rules, rule, tmp) {
+		DL_DELETE(conf->rules, rule);
+		irc_bot_rule_insert(rule, -1);
+	}
+}
+
+static void
+conf_apply_servers(struct conf *conf)
+{
+	struct irc_server *server, *tmp;
+
+	LL_FOREACH_SAFE(conf->servers, server, tmp) {
+		LL_DELETE(conf->servers, server);
+		irc_bot_server_add(server);
+	}
+}
+
+static void
+conf_apply_plugins(struct conf *conf)
+{
+	struct irc_plugin *plugin, *tmp;
+
+	LL_FOREACH_SAFE(conf->plugins, plugin, tmp) {
+		LL_DELETE(conf->plugins, plugin);
+		irc_bot_plugin_add(plugin);
+	}
+}
+
+static void
+conf_apply_transport(struct conf *conf)
+{
+	int rc;
+
+	if (conf->tpt_uid != -1 && conf->tpt_gid != -1) {
+		conf_debug(conf, "transport", "binding on '%s' with %lld:%lld",
+		    conf->tpt, conf->tpt_uid, conf->tpt_gid);
+		rc = transport_bindp(conf->tpt, conf->tpt_uid, conf->tpt_gid);
+	} else {
+		conf_debug(conf, "transport", "binding on '%s'", conf->tpt);
+		rc = transport_bind(conf->tpt);
+	}
+
+	if (rc < 0)
+		irc_util_die("abort: %s: %s\n", conf->tpt, strerror(-rc));
 }
 
 void
@@ -851,19 +1024,28 @@ conf_open(const char *path)
 	nce_coro_spawn(&conf.lex);
 
 	for (;;) {
-		if (!nce_coro_resumable(&conf.parser))
+		if (nce_coro_resumable(&conf.parser))
+			nce_coro_resume(&conf.parser);
+		else
 			break;
 
-		nce_coro_resume(&conf.parser);
-
-		if (!nce_coro_resumable(&conf.lex))
+		if (nce_coro_resumable(&conf.lex))
+			nce_coro_resume(&conf.lex);
+		else
 			break;
-
-		nce_coro_resume(&conf.lex);
 	}
 
 	nce_coro_destroy(&conf.lex);
 	nce_coro_destroy(&conf.parser);
 
+	conf_apply_log(&conf);
+	conf_apply_rules(&conf);
+	conf_apply_servers(&conf);
+	conf_apply_plugins(&conf);
+	conf_apply_transport(&conf);
+
+	free(conf.log_file);
+	free(conf.log_template);
+	free(conf.tpt);
 	free(conf.text);
 }

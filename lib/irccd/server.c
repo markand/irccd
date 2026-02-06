@@ -1532,45 +1532,10 @@ irc_server_new(const char *name)
 }
 
 void
-irc_server_set_ident(struct irc_server *s,
-                     const char *nickname,
-                     const char *username,
-                     const char *realname)
-{
-	assert(s);
-	assert(nickname);
-	assert(username);
-	assert(realname);
-
-	/* must not be connected */
-	assert(!s->conn);
-
-	s->nickname = irc_util_strdupfree(s->nickname, nickname);
-	s->username = irc_util_strdupfree(s->username, username);
-	s->realname = irc_util_strdupfree(s->realname, realname);
-}
-
-void
-irc_server_set_params(struct irc_server *s,
-                      const char *hostname,
-                      unsigned int port,
-                      enum irc_server_flags flags)
-{
-	assert(s);
-	assert(hostname);
-
-
-	s->port     = port;
-	s->flags    = flags;
-}
-
-void
 irc_server_set_hostname(struct irc_server *s, const char *hostname)
 {
 	assert(s);
-
-	/* must not be connected */
-	assert(!s->conn);
+	assert(s->conn == NULL);
 
 	s->hostname = irc_util_strdupfree(s->hostname, hostname);
 }
@@ -1578,64 +1543,81 @@ irc_server_set_hostname(struct irc_server *s, const char *hostname)
 void
 irc_server_set_flags(struct irc_server *s, enum irc_server_flags flags)
 {
-	(void)s;
-	(void)flags;
+	assert(s);
+
+	s->flags = flags;
 }
 
 void
 irc_server_set_port(struct irc_server *s, unsigned int port)
 {
-	(void)s;
-	(void)port;
+	assert(s);
+	assert(s->conn == NULL);
+
+	s->port = port;
 }
 
 void
 irc_server_set_nickname(struct irc_server *s, const char *nickname)
 {
-	(void)s;
-	(void)nickname;
+	assert(s);
+	assert(s->conn == NULL);
+	assert(nickname);
+
+	s->nickname = irc_util_strdupfree(s->nickname, nickname);
 }
 
 void
 irc_server_set_username(struct irc_server *s, const char *username)
 {
-	(void)s;
-	(void)username;
+	assert(s);
+	assert(s->conn == NULL);
+	assert(username);
+
+	s->username = irc_util_strdupfree(s->username, username);
 }
 
 void
 irc_server_set_realname(struct irc_server *s, const char *realname)
 {
-	(void)s;
-	(void)realname;
-}
-
-void
-irc_server_set_ctcp(struct irc_server *s, const char *key, const char *value)
-{
-	(void)s;
-	(void)key;
-	(void)value;
-}
-
-void
-irc_server_set_prefix(struct irc_server *s, const char *prefix)
-{
 	assert(s);
+	assert(s->conn == NULL);
+	assert(realname);
+
+	s->realname = irc_util_strdupfree(s->realname, realname);
+}
+
+void
+irc_server_set_ctcp(struct irc_server *server, const char *key, const char *value)
+{
+	assert(server);
+	assert(key);
+	assert(value);
+
+	if (strcasecmp(key, "version") == 0)
+		server->ctcp_version = irc_util_strdupfree(server->ctcp_version, value);
+	else if (strcasecmp(key, "source") == 0)
+		server->ctcp_source = irc_util_strdupfree(server->ctcp_source, value);
+	else
+		WARN("invalid CTCP '%s'", key);
+}
+
+void
+irc_server_set_prefix(struct irc_server *server, const char *prefix)
+{
+	assert(server);
 	assert(prefix);
 
-	s->prefix = irc_util_strdupfree(s->prefix, prefix);
+	server->prefix = irc_util_strdupfree(server->prefix, prefix);
 }
 
 void
-irc_server_set_password(struct irc_server *s, const char *password)
+irc_server_set_password(struct irc_server *server, const char *password)
 {
-	assert(s);
+	assert(server);
+	assert(server->conn == NULL);
 
-	/* must not be connected */
-	assert(!s->conn);
-
-	s->password = irc_util_strdupfree(s->password, password);
+	server->password = irc_util_strdupfree(server->password, password);
 }
 
 void
@@ -1643,6 +1625,7 @@ irc_server_connect(struct irc_server *s)
 {
 	assert(s);
 	assert(s->hostname);
+	assert(s->port);
 	assert(s->nickname);
 	assert(s->username);
 	assert(s->realname);
@@ -1652,7 +1635,7 @@ irc_server_connect(struct irc_server *s)
 		return;
 	}
 
-#if !IRCCD_WITH_SSL == 1
+#if IRCCD_WITH_SSL == 1
 	if (s->flags & IRC_SERVER_FLAGS_SSL) {
 		irc_log_warn("server %s: SSL requested but not available", s->name);
 		return;

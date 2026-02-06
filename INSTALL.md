@@ -8,13 +8,12 @@ Requirements
 
 Build dependencies:
 
-- C99 and few features from C11 (stdatomics.h, stdnoreturn.h).
-- [Bison][] and [Flex][]: for configuration files.
-- [CMake][]: the cross platform build utility.
+- C23 compatible compiler(
+- [GNU make][]
 
 Optional runtime dependencies:
 
-- [OpenSSL][]: Used for SSL connections to IRC servers (recommended).
+- [LibreTLS][]: Used for SSL connections to IRC servers (recommended).
 - [CURL][]: Required for the Http Javascript API (and links plugin)..
 
 Basic installation
@@ -64,8 +63,6 @@ The following standard CMake options control installation directories.
 - `CMAKE_INSTALL_SHAREDIR`: data files (default: ${CMAKE_INSTALL_PREFIX}/share).
 - `CMAKE_INSTALL_MANDIR`: path to manual pages (default: ${CMAKE_INSTALL_PREFIX}/share/man).
 
-[Bison]: https://www.gnu.org/software/bison
-[CMake]: http://www.cmake.org
+[GNU Make]: https://www.gnu.org/software/make
 [CURL]: https://curl.se
-[Flex]: https://github.com/westes/flex
-[OpenSSL]: http://openssl.org
+[LibreTLS]: https://git.causal.agency/libretls
