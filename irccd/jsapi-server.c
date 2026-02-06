@@ -127,7 +127,7 @@ get_port(duk_context *ctx, duk_idx_t obj_idx)
 }
 
 static void
-get_ident(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *s)
+get_ident(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *)
 {
 	const char *nickname, *username, *realname;
 
@@ -138,7 +138,7 @@ get_ident(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *s)
 	if (!(realname = get_string(ctx, obj_idx, "realname", NULL)))
 		(void)duk_error(ctx, DUK_ERR_ERROR, "missing required 'realname' property");
 
-	irc_server_set_ident(s, nickname, username, realname);
+	//irc_server_set_ident(s, nickname, username, realname);
 }
 
 static void
@@ -157,7 +157,7 @@ get_params(duk_context *ctx, duk_idx_t obj_idx, struct irc_server *s)
 	port = get_port(ctx, obj_idx);
 
 	// TODO: more flags.
-	irc_server_set_params(s, hostname, port, flags);
+	//irc_server_set_params(s, hostname, port, flags);
 
 	duk_pop(ctx);
 }

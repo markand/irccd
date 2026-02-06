@@ -1565,17 +1565,6 @@ irc_server_set_params(struct irc_server *s,
 }
 
 void
-irc_server_set_ctcp(struct irc_server *s,
-                    const char *version,
-                    const char *source)
-{
-	assert(s);
-
-	s->ctcp_version = irc_util_strdupfree(s->ctcp_version, version);
-	s->ctcp_source  = irc_util_strdupfree(s->ctcp_source, source);
-}
-
-void
 irc_server_set_hostname(struct irc_server *s, const char *hostname)
 {
 	assert(s);
@@ -1587,22 +1576,47 @@ irc_server_set_hostname(struct irc_server *s, const char *hostname)
 }
 
 void
-irc_server_set_flags(struct irc_server *s, enum irc_server_flags flags);
+irc_server_set_flags(struct irc_server *s, enum irc_server_flags flags)
+{
+	(void)s;
+	(void)flags;
+}
 
 void
-irc_server_set_port(struct irc_server *s, unsigned int port);
+irc_server_set_port(struct irc_server *s, unsigned int port)
+{
+	(void)s;
+	(void)port;
+}
 
 void
-irc_server_set_nickname(struct irc_server *s, const char *nickname);
+irc_server_set_nickname(struct irc_server *s, const char *nickname)
+{
+	(void)s;
+	(void)nickname;
+}
 
 void
-irc_server_set_username(struct irc_server *s, const char *username);
+irc_server_set_username(struct irc_server *s, const char *username)
+{
+	(void)s;
+	(void)username;
+}
 
 void
-irc_server_set_realname(struct irc_server *s, const char *realname);
+irc_server_set_realname(struct irc_server *s, const char *realname)
+{
+	(void)s;
+	(void)realname;
+}
 
 void
-irc_server_set_ctcp(struct irc_server *s, const char *key, const char *value);
+irc_server_set_ctcp(struct irc_server *s, const char *key, const char *value)
+{
+	(void)s;
+	(void)key;
+	(void)value;
+}
 
 void
 irc_server_set_prefix(struct irc_server *s, const char *prefix)

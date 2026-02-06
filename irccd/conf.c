@@ -16,11 +16,19 @@
 #include <irccd/hook.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
+#include <irccd/plugin.h>
+#include <irccd/rule.h>
 #include <irccd/server.h>
 #include <irccd/util.h>
 
 #include "conf.h"
 #include "transport.h"
+
+/*
+ * TODO: server uniqueness
+ * TODO: hook uniqueness
+ * TODO: transport uniqueness
+ */
 
 #define CONF(Ptr, Field) \
         (IRC_UTIL_CONTAINER_OF(Ptr, struct conf, Field))
@@ -286,6 +294,15 @@ conf_next(struct conf *conf, union token *token)
 		nce_coro_off();
 
 	return token->type;
+}
+
+/*
+ * Put back the token in the parser coroutine without blocking.
+ */
+static inline void
+conf_rewind(struct conf *conf, union token *token)
+{
+	nce_coro_queue(&conf->parser, token, sizeof (*token));
 }
 
 /*
@@ -626,6 +643,33 @@ conf_parse_server_ctcp(struct conf *conf, struct irc_server *server)
 		conf_fatal(conf, "unterminated ctcp block");
 }
 
+static inline void
+conf_parse_server_ssl(struct conf *conf, struct irc_server *server)
+{
+	conf_debug(conf, "server", "using SSL");
+	irc_server_set_flags(server, server->flags | IRC_SERVER_FLAGS_SSL);
+}
+
+static void
+conf_parse_server_options(struct conf *conf, struct irc_server *server)
+{
+	union token token;
+
+	while (conf_next(conf, &token) == TOKEN_STRING) {
+		if (CONF_EQ(token.str.at, "AUTO-REJOIN")) {
+			conf_debug(conf, "server", "set 'auto-rejoin'");
+			irc_server_set_flags(server, server->flags | IRC_SERVER_FLAGS_AUTO_REJOIN);
+		} else if (CONF_EQ(token.str.at, "JOIN-INVITE")) {
+			conf_debug(conf, "server", "set 'join-invite'");
+			irc_server_set_flags(server, server->flags | IRC_SERVER_FLAGS_JOIN_INVITE);
+		} else
+			conf_fatal(conf, "invalid server option '%s'", token.str.at);
+	}
+
+	if (token.type != TOKEN_BLK_END)
+		conf_fatal(conf, "unterminated server options list");
+}
+
 static void
 conf_parse_server(struct conf *conf)
 {
@@ -653,6 +697,10 @@ conf_parse_server(struct conf *conf)
 			conf_parse_server_join(conf, server);
 		else if (CONF_EQ(str, "ctcp"))
 			conf_parse_server_ctcp(conf, server);
+		else if (CONF_EQ(str, "ssl"))
+			conf_parse_server_ssl(conf, server);
+		else if (CONF_EQ(str, "options"))
+			conf_parse_server_options(conf, server);
 	}
 
 	if (token.type != TOKEN_BLK_END)
@@ -666,6 +714,80 @@ conf_parse_server(struct conf *conf)
 		conf_fatal(conf, "ni ident set");
 
 	irc_bot_server_add(server);
+}
+
+static void
+conf_parse_rule_criteria(struct conf *conf,
+                         struct irc_rule *rule,
+                         const char *criteria)
+{
+	void (*adder)(struct irc_rule *, const char *) = NULL;
+	union token token;
+
+	if (CONF_EQ(criteria, "servers"))
+		adder = irc_rule_add_server;
+	else if (CONF_EQ(criteria, "channels"))
+		adder = irc_rule_add_channel;
+	else if (CONF_EQ(criteria, "origins"))
+		adder = irc_rule_add_origin;
+	else if (CONF_EQ(criteria, "plugins"))
+		adder = irc_rule_add_plugin;
+	else if (CONF_EQ(criteria, "events"))
+		adder = irc_rule_add_event;
+	else
+		conf_fatal(conf, "invalid rule criteria '%s'", criteria);
+
+	conf_begin(conf);
+
+	while (conf_next(conf, &token) == TOKEN_STRING) {
+		conf_debug(conf, "rule", "add '%s'", token.str.at);
+		adder(rule, token.str.at);
+	}
+
+	if (token.type != TOKEN_BLK_END)
+		conf_fatal(conf, "unterminated criteria list");
+}
+
+static void
+conf_parse_rule(struct conf *conf)
+{
+	enum irc_rule_action action;
+	struct irc_rule *rule;
+	union token token;
+	const char *str;
+
+	str = conf_string(conf);
+
+	if (CONF_EQ(str, "accept")) {
+		conf_debug(conf, "rule", "type accept");
+		action = IRC_RULE_ACCEPT;
+	} else if (CONF_EQ(str, "drop")) {
+		conf_debug(conf, "rule", "type drop");
+		action = IRC_RULE_DROP;
+	} else
+		conf_fatal(conf, "invalid action '%s'", str);
+
+	rule = irc_rule_new(action);
+
+	/* Block is optional */
+	if (conf_next(conf, &token) == TOKEN_BLK_BEGIN) {
+		while (conf_next(conf, &token) == TOKEN_STRING) {
+			conf_debug(conf, "rule", "parsing '%s' rule criteria", token.str.at);
+			conf_parse_rule_criteria(conf, rule, token.str.at);
+		}
+
+		if (token.type != TOKEN_BLK_END)
+			conf_fatal(conf, "unterminated rule block");
+	} else
+		conf_rewind(conf, &token);
+
+	irc_bot_rule_insert(rule, -1);
+}
+
+static void
+conf_parse_plugin(struct conf *conf)
+{
+	struct irc_plugin *plg;
 }
 
 static void
@@ -687,6 +809,10 @@ conf_parser_entry(struct nce_coro *self)
 			conf_parse_hook(conf);
 		else if (CONF_EQ(topic, "server"))
 			conf_parse_server(conf);
+		else if (CONF_EQ(topic, "rule"))
+			conf_parse_rule(conf);
+		else if (CONF_EQ(topic, "plugin"))
+			conf_parse_plugin(conf);
 	}
 
 	conf_debug(conf, "parser", "end");
@@ -727,6 +853,7 @@ conf_open(const char *path)
 	for (;;) {
 		if (!nce_coro_resumable(&conf.parser))
 			break;
+
 		nce_coro_resume(&conf.parser);
 
 		if (!nce_coro_resumable(&conf.lex))

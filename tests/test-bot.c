@@ -41,8 +41,8 @@ server_new(const char *name)
 	struct irc_server *s;
 
 	s = irc_server_new(name);
-	irc_server_set_ident(s, "test", "test", "test");
-	irc_server_set_params(s, "127.0.0.1", 6667, 0);
+	//irc_server_set_ident(s, "test", "test", "test");
+	//irc_server_set_params(s, "127.0.0.1", 6667, 0);
 
 	return s;
 }
