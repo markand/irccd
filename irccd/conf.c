@@ -44,12 +44,6 @@
 #include "conf.h"
 #include "transport.h"
 
-/*
- * TODO: server uniqueness
- * TODO: hook uniqueness
- * TODO: transport uniqueness
- */
-
 #define CONF(Ptr, Field) \
         (IRC_UTIL_CONTAINER_OF(Ptr, struct conf, Field))
 
@@ -537,6 +531,9 @@ conf_parse_log(struct conf *conf)
 static void
 conf_parse_transport(struct conf *conf)
 {
+	if (conf->tpt)
+		conf_fatal(conf, "transport already defined");
+
 	if (conf_string_is(conf, "with")) {
 		conf_keyword(conf, "uid");
 		conf->tpt_uid = conf_resolve_uid(conf, conf_string(conf));
@@ -565,6 +562,11 @@ conf_parse_hook(struct conf *conf)
 	char *name, *path;
 
 	name = conf_string_new(conf);
+
+	LL_FOREACH(conf->hooks, hook)
+		if (CONF_EQ(hook->name, name))
+			conf_fatal(conf, "hook '%s' already exists", name);
+
 	conf_keyword(conf, "to");
 	path = conf_string_new(conf);
 
@@ -687,13 +689,11 @@ conf_parse_server(struct conf *conf)
 
 	name = conf_string(conf);
 
-#if 0
-	if (irc_bot_server_get(name))
-		conf_fatal(conf, "server '%s' already exists", name);
-#endif
+	LL_FOREACH(conf->servers, server)
+		if (CONF_EQ(server->name, name))
+			conf_fatal(conf, "server '%s' already exists", name);
 
 	server = irc_server_new(name);
-
 	conf_begin(conf);
 
 	while (conf_next_is(conf, &token, TOKEN_STRING)) {
@@ -724,7 +724,7 @@ conf_parse_server(struct conf *conf)
 	if (!server->port)
 		conf_fatal(conf, "no port set");
 	if (!server->nickname || !server->username || !server->realname)
-		conf_fatal(conf, "ni ident set");
+		conf_fatal(conf, "no ident set");
 
 	LL_APPEND(conf->servers, server);
 }
@@ -862,6 +862,10 @@ conf_parse_plugin(struct conf *conf)
 
 	name = conf_string_new(conf);
 
+	LL_FOREACH(conf->plugins, plg)
+		if (CONF_EQ(plg->name, name))
+			conf_fatal(conf, "plugin '%s' already exists", name);
+
 	/* Either `to path` should follow or the option block */
 	if (conf_string_is(conf, "to"))
 		location = conf_string_new(conf);
@@ -882,6 +886,8 @@ conf_parse_plugin(struct conf *conf)
 
 	free(name);
 	free(location);
+
+	LL_APPEND(conf->plugins, plg);
 }
 
 /* }}} */
