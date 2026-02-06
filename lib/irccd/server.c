@@ -372,12 +372,6 @@ server_clear(struct irc_server *s)
 
 	s->prefixes  = irc_util_free(s->prefixes);
 	s->prefixesz = 0;
-
-	s->bufwhois.nickname = irc_util_free(s->bufwhois.nickname);
-	s->bufwhois.username = irc_util_free(s->bufwhois.username);
-	s->bufwhois.realname = irc_util_free(s->bufwhois.realname);
-	s->bufwhois.hostname = irc_util_free(s->bufwhois.hostname);
-	s->bufwhois.channels = irc_util_free(s->bufwhois.channels);
 }
 
 static void
@@ -799,17 +793,13 @@ handle_error(struct irc_server *server, struct msg *msg)
 		WARN("%s", msg->args[0]);
 }
 
+/*
+ * 319
+ */
 static void
-handle_whoisuser(struct irc_server *server, struct msg *msg)
-{
-	server->bufwhois.nickname = irc_util_strdup(msg->args[1]);
-	server->bufwhois.username = irc_util_strdup(msg->args[2]);
-	server->bufwhois.hostname = irc_util_strdup(msg->args[3]);
-	server->bufwhois.realname = irc_util_strdup(msg->args[5]);
-}
-
-static void
-handle_whoischannels(struct irc_server *server, struct msg *msg)
+handle_whoischannels(struct irc_server *server,
+                     struct irc_event_whois *ev,
+                     struct msg *msg)
 {
 	char *token, *p;
 	int modes;
@@ -819,33 +809,38 @@ handle_whoischannels(struct irc_server *server, struct msg *msg)
 
 	for (p = msg->args[2]; (token = strtok_r(p, " ", &p)); ) {
 		modes = irc_server_strip(server, (const char **)&token);
-		server->bufwhois.channels = irc_util_reallocarray(
-		    server->bufwhois.channels,
-		    server->bufwhois.channelsz + 1,
-		    sizeof (*server->bufwhois.channels)
-		);
 
-		server->bufwhois.channels[server->bufwhois.channelsz].name = irc_util_strdup(token);
-		server->bufwhois.channels[server->bufwhois.channelsz++].modes = modes;
+		ev->channels = irc_util_reallocarray(ev->channels,
+		    ev->channelsz + 1, sizeof (*ev->channels));
+		ev->channels[ev->channelsz].name = irc_util_strdup(token);
+		ev->channels[ev->channelsz++].modes = modes;
 	}
 }
 
-/*
- * TODO: refactor this to avoid using a temporary buffer.
- */
+static int
+conn_next(struct conn *conn, struct msg *msg);
+
 static void
-handle_endofwhois(struct irc_server *server, struct msg *)
+handle_whoisuser(struct irc_server *server, struct msg *msg)
 {
 	struct irc_event ev = {};
 
-	ev.server = server;
 	ev.type = IRC_EVENT_WHOIS;
-	ev.whois = server->bufwhois;
+	ev.server = server;
+	ev.whois.nickname = irc_util_strdup(msg->args[1]);
+	ev.whois.username = irc_util_strdup(msg->args[2]);
+	ev.whois.hostname = irc_util_strdup(msg->args[3]);
+	ev.whois.realname = irc_util_strdup(msg->args[5]);
+
+	/* Now yield until we get end of whois. */
+	do {
+		if (conn_next(server->conn, msg) < 0)
+			break;
+		if (strcmp(msg->cmd, "319") == 0)
+			handle_whoischannels(server, &ev.whois, msg);
+	} while (strcmp(msg->cmd, "318") != 0);
 
 	irc_bot_dispatch(&ev);
-
-	/* Get rid of buffered whois. */
-	memset(&server->bufwhois, 0, sizeof (server->bufwhois));
 }
 
 static const struct handler {
@@ -856,8 +851,6 @@ static const struct handler {
 	{ "001",        handle_connect          },
 	{ "005",        handle_support          },
 	{ "311",        handle_whoisuser        },
-	{ "318",        handle_endofwhois       },
-	{ "319",        handle_whoischannels    },
 	{ "353",        handle_names            },
 	{ "366",        handle_endofnames       },
 	{ "433",        handle_nicknameinuse    },
@@ -1284,8 +1277,10 @@ conn_next(struct conn *conn, struct msg *msg)
 	int rc;
 
 	while (!(pos = memmem(conn->in, conn->insz, "\r\n", 2))) {
-		if ((rc = conn_wait(conn)) < 0)
+		if ((rc = conn_wait(conn)) < 0) {
+			conn_reschedule(conn);
 			return rc;
+		}
 	}
 
 	length = pos - conn->in;
@@ -1347,9 +1342,6 @@ conn_ident(struct conn *conn)
 
 		handler(conn->parent, &msg);
 	}
-
-	if (rc < 0)
-		conn_reschedule(conn);
 }
 
 /*
@@ -1363,9 +1355,6 @@ conn_ready(struct conn *conn)
 
 	while ((rc = conn_next(conn, &msg)) == 0)
 		handler(conn->parent, &msg);
-
-	if (rc < 0)
-		conn_reschedule(conn);
 }
 
 static void

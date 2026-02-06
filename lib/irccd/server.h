@@ -293,13 +293,6 @@ struct irc_server {
 	/**
 	 * (private)
 	 *
-	 * Whois being constructed.
-	 */
-	struct irc_event_whois bufwhois;
-
-	/**
-	 * (private)
-	 *
 	 * Reference count.
 	 */
 	size_t refc;
