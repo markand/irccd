@@ -65,13 +65,9 @@ enum token_type {
 	TOKEN_STRING = '"'
 };
 
-union token {
+struct token {
 	enum token_type type;
-
-	struct {
-		enum token_type type;
-		char *at;
-	} str;
+	char *data;
 };
 
 enum log_type {
@@ -124,11 +120,12 @@ conf_fatal(struct conf *conf, const char *fmt, ...)
 	exit(1);
 }
 
+
 IRC_ATTR_PRINTF(3, 4)
 static inline void
-conf_debug(const struct conf *, const char *origin, const char *fmt, ...)
+conf_debug(const struct conf *conf, const char *origin, const char *fmt, ...)
 {
-#if 1
+#ifdef CONF_DEBUG
 	va_list ap;
 
 	printf("[%-10s] ", origin);
@@ -136,6 +133,10 @@ conf_debug(const struct conf *, const char *origin, const char *fmt, ...)
 	vprintf(fmt, ap);
 	va_end(ap);
 	printf("\n");
+#else
+	(void)conf;
+	(void)origin;
+	(void)fmt;
 #endif
 }
 
@@ -201,7 +202,7 @@ conf_lex_bskip(struct conf *conf)
  * Yield the given token.
  */
 static inline void
-conf_lex_yield(struct conf *conf, const union token *token)
+conf_lex_yield(struct conf *conf, const struct token *token)
 {
 	nce_coro_push(&conf->parser, token, sizeof (*token));
 }
@@ -214,7 +215,7 @@ static inline void
 conf_lex_yield0(struct conf *conf, enum token_type type)
 {
 	conf_debug(conf, "lex", "token %c", type);
-	conf_lex_yield(conf, &(const union token) {
+	conf_lex_yield(conf, &(const struct token) {
 		.type = type
 	});
 	conf_lex_bskip(conf);
@@ -246,11 +247,9 @@ conf_lex_qstring(struct conf *conf)
 	conf->column += 1;
 	conf->off += 1;
 
-	conf_lex_yield(conf, &(const union token) {
-		.str = {
-			.type = TOKEN_STRING,
-			.at   = start
-		}
+	conf_lex_yield(conf, &(const struct token) {
+		.type = TOKEN_STRING,
+		.data = start
 	});
 
 	/* Skip possible residual spaces. */
@@ -286,9 +285,9 @@ conf_lex_string(struct conf *conf)
 	save = *conf->off;
 	*conf->off = '\0';
 
-	conf_lex_yield(conf, &(const union token) {
-		.str.type = TOKEN_STRING,
-		.str.at   = start
+	conf_lex_yield(conf, &(const struct token) {
+		.type = TOKEN_STRING,
+		.data = start
 	});
 
 	*conf->off = save;
@@ -356,7 +355,7 @@ conf_lex_entry(struct nce_coro *self)
  * On end of content, this function stops parser coroutine.
  */
 static inline enum token_type
-conf_next(struct conf *conf, union token *token)
+conf_next(struct conf *conf, struct token *token)
 {
 	nce_coro_pull(&conf->parser, token, sizeof (*token));
 
@@ -370,7 +369,7 @@ conf_next(struct conf *conf, union token *token)
  * Pull next incoming typed token or keep it in the queue if doesn't match.
  */
 static inline int
-conf_next_is(struct conf *conf, union token *token, enum token_type type)
+conf_next_is(struct conf *conf, struct token *token, enum token_type type)
 {
 	nce_coro_pull(&conf->parser, token, sizeof (*token));
 
@@ -389,11 +388,11 @@ conf_next_is(struct conf *conf, union token *token, enum token_type type)
 static inline int
 conf_string_is(struct conf *conf, const char *what)
 {
-	union token token = {};
+	struct token token = {};
 	int rc = 0;
 
 	if (conf_next_is(conf, &token, TOKEN_STRING)) {
-		if (CONF_EQ(token.str.at, what))
+		if (CONF_EQ(token.data, what))
 			rc = 1;
 		else
 			nce_coro_queue(&conf->parser, &token, sizeof (token));
@@ -408,12 +407,12 @@ conf_string_is(struct conf *conf, const char *what)
 static char *
 conf_string(struct conf *conf)
 {
-	union token token = {};
+	struct token token = {};
 
 	if (conf_next(conf, &token) != TOKEN_STRING)
 		conf_fatal(conf, "string expected");
 
-	return token.str.at;
+	return token.data;
 }
 
 /*
@@ -458,7 +457,7 @@ conf_keyword(struct conf *conf, const char *keyword)
 static inline void
 conf_begin(struct conf *conf)
 {
-	union token token = {};
+	struct token token = {};
 
 	if (conf_next(conf, &token) != TOKEN_BLK_BEGIN)
 		conf_fatal(conf, "expected '%c' block start", TOKEN_BLK_BEGIN);
@@ -471,7 +470,7 @@ conf_begin(struct conf *conf)
 static inline int
 conf_begin_is(struct conf *conf)
 {
-	union token token = {};
+	struct token token = {};
 
 	return conf_next_is(conf, &token, TOKEN_BLK_BEGIN);
 }
@@ -482,7 +481,7 @@ conf_begin_is(struct conf *conf)
 static inline void
 conf_end(struct conf *conf)
 {
-	union token token = {};
+	struct token token = {};
 
 	if (conf_next(conf, &token) != TOKEN_BLK_END)
 		conf_fatal(conf, "expected '%c' block end", TOKEN_BLK_END);
@@ -636,13 +635,13 @@ conf_parse_server_join(struct conf *conf, struct irc_server *server)
 static void
 conf_parse_server_ctcp(struct conf *conf, struct irc_server *server)
 {
-	union token token = {};
+	struct token token = {};
 	char *key, *value;
 
 	conf_begin(conf);
 
 	while (conf_next_is(conf, &token, TOKEN_STRING)) {
-		key = irc_util_strdup(token.str.at);
+		key = irc_util_strdup(token.data);
 		value = conf_string_new(conf);
 		irc_server_set_ctcp(server, key, value);
 		free(key);
@@ -662,17 +661,17 @@ conf_parse_server_ssl(struct conf *conf, struct irc_server *server)
 static void
 conf_parse_server_options(struct conf *conf, struct irc_server *server)
 {
-	union token token;
+	struct token token;
 
 	while (conf_next(conf, &token) == TOKEN_STRING) {
-		if (CONF_EQ(token.str.at, "AUTO-REJOIN")) {
+		if (CONF_EQ(token.data, "AUTO-REJOIN")) {
 			conf_debug(conf, "server", "set 'auto-rejoin'");
 			irc_server_set_flags(server, server->flags | IRC_SERVER_FLAGS_AUTO_REJOIN);
-		} else if (CONF_EQ(token.str.at, "JOIN-INVITE")) {
+		} else if (CONF_EQ(token.data, "JOIN-INVITE")) {
 			conf_debug(conf, "server", "set 'join-invite'");
 			irc_server_set_flags(server, server->flags | IRC_SERVER_FLAGS_JOIN_INVITE);
 		} else
-			conf_fatal(conf, "invalid server option '%s'", token.str.at);
+			conf_fatal(conf, "invalid server option '%s'", token.data);
 	}
 
 	if (token.type != TOKEN_BLK_END)
@@ -684,7 +683,7 @@ conf_parse_server(struct conf *conf)
 {
 	struct irc_server *server;
 	const char *name;
-	union token token;
+	struct token token;
 
 	name = conf_string(conf);
 
@@ -698,23 +697,23 @@ conf_parse_server(struct conf *conf)
 	conf_begin(conf);
 
 	while (conf_next_is(conf, &token, TOKEN_STRING)) {
-		if (CONF_EQ(token.str.at, "hostname"))
+		if (CONF_EQ(token.data, "hostname"))
 			conf_parse_server_hostname(conf, server);
-		else if (CONF_EQ(token.str.at, "port"))
+		else if (CONF_EQ(token.data, "port"))
 			conf_parse_server_port(conf, server);
-		else if (CONF_EQ(token.str.at, "prefix"))
+		else if (CONF_EQ(token.data, "prefix"))
 			conf_parse_server_prefix(conf, server);
-		else if (CONF_EQ(token.str.at, "ident"))
+		else if (CONF_EQ(token.data, "ident"))
 			conf_parse_server_ident(conf, server);
-		else if (CONF_EQ(token.str.at, "password"))
+		else if (CONF_EQ(token.data, "password"))
 			conf_parse_server_password(conf, server);
-		else if (CONF_EQ(token.str.at, "join"))
+		else if (CONF_EQ(token.data, "join"))
 			conf_parse_server_join(conf, server);
-		else if (CONF_EQ(token.str.at, "ctcp"))
+		else if (CONF_EQ(token.data, "ctcp"))
 			conf_parse_server_ctcp(conf, server);
-		else if (CONF_EQ(token.str.at, "ssl"))
+		else if (CONF_EQ(token.data, "ssl"))
 			conf_parse_server_ssl(conf, server);
-		else if (CONF_EQ(token.str.at, "options"))
+		else if (CONF_EQ(token.data, "options"))
 			conf_parse_server_options(conf, server);
 	}
 
@@ -740,7 +739,7 @@ conf_parse_rule_criteria(struct conf *conf,
                          const char *criteria)
 {
 	void (*adder)(struct irc_rule *, const char *) = NULL;
-	union token token;
+	struct token token;
 
 	if (CONF_EQ(criteria, "servers"))
 		adder = irc_rule_add_server;
@@ -758,8 +757,8 @@ conf_parse_rule_criteria(struct conf *conf,
 	conf_begin(conf);
 
 	while (conf_next(conf, &token) == TOKEN_STRING) {
-		conf_debug(conf, "rule", "add '%s'", token.str.at);
-		adder(rule, token.str.at);
+		conf_debug(conf, "rule", "add '%s'", token.data);
+		adder(rule, token.data);
 	}
 
 	if (token.type != TOKEN_BLK_END)
@@ -771,7 +770,7 @@ conf_parse_rule(struct conf *conf)
 {
 	enum irc_rule_action action;
 	struct irc_rule *rule;
-	union token token;
+	struct token token;
 
 	if (conf_string_is(conf, "accept")) {
 		conf_debug(conf, "rule", "type accept");
@@ -786,8 +785,8 @@ conf_parse_rule(struct conf *conf)
 
 	if (conf_next_is(conf, &token, TOKEN_BLK_BEGIN)) {
 		while (conf_next(conf, &token) == TOKEN_STRING) {
-			conf_debug(conf, "rule", "parsing '%s' rule criteria", token.str.at);
-			conf_parse_rule_criteria(conf, rule, token.str.at);
+			conf_debug(conf, "rule", "parsing '%s' rule criteria", token.data);
+			conf_parse_rule_criteria(conf, rule, token.data);
 		}
 
 		if (token.type != TOKEN_BLK_END)
@@ -807,7 +806,7 @@ conf_parse_plugin_options(struct conf *conf,
                           const char *what)
 {
 	void (*setter)(struct irc_plugin *, const char *, const char *) = NULL;
-	union token token;
+	struct token token;
 	char *key, *value;
 
 	if (CONF_EQ(what, "config"))
@@ -822,7 +821,7 @@ conf_parse_plugin_options(struct conf *conf,
 	conf_begin(conf);
 
 	while (conf_next_is(conf, &token, TOKEN_STRING)) {
-		key = irc_util_strdup(token.str.at);
+		key = irc_util_strdup(token.data);
 		value = conf_string_new(conf);
 
 		conf_debug(conf, "plugin", "%s -> %s", key, value);
@@ -859,7 +858,7 @@ conf_parse_plugin(struct conf *conf)
 	struct irc_plugin *plg;
 	char *location = NULL;
 	char *name = NULL;
-	union token token;
+	struct token token;
 
 	name = conf_string_new(conf);
 
@@ -874,8 +873,8 @@ conf_parse_plugin(struct conf *conf)
 
 	if (conf_begin_is(conf)) {
 		while (conf_next_is(conf, &token, TOKEN_STRING)) {
-			conf_debug(conf, "plugin", "parsing '%s'", token.str.at);
-			conf_parse_plugin_options(conf, plg, token.str.at);
+			conf_debug(conf, "plugin", "parsing '%s'", token.data);
+			conf_parse_plugin_options(conf, plg, token.data);
 		}
 
 		conf_end(conf);
