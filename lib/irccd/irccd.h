@@ -21,6 +21,8 @@
 
 #include <stddef.h>
 
+#define IRC_BUF_LEN 512
+
 struct irc_event;
 struct irc_hook;
 struct irc_plugin;

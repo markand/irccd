@@ -24,7 +24,7 @@
 #include <ev.h>
 
 #include <irccd/attrs.h>
-#include <irccd/limits.h>
+#include <irccd/irccd.h>
 
 struct peer;
 

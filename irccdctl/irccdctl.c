@@ -31,7 +31,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <irccd/limits.h>
+#include <irccd/irccd.h>
 #include <irccd/util.h>
 
 static int verbose;

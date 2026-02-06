@@ -1559,10 +1559,7 @@ irc_server_set_params(struct irc_server *s,
 	assert(s);
 	assert(hostname);
 
-	/* must not be connected */
-	assert(!s->conn);
 
-	s->hostname = irc_util_strdupfree(s->hostname, hostname);
 	s->port     = port;
 	s->flags    = flags;
 }
@@ -1577,6 +1574,35 @@ irc_server_set_ctcp(struct irc_server *s,
 	s->ctcp_version = irc_util_strdupfree(s->ctcp_version, version);
 	s->ctcp_source  = irc_util_strdupfree(s->ctcp_source, source);
 }
+
+void
+irc_server_set_hostname(struct irc_server *s, const char *hostname)
+{
+	assert(s);
+
+	/* must not be connected */
+	assert(!s->conn);
+
+	s->hostname = irc_util_strdupfree(s->hostname, hostname);
+}
+
+void
+irc_server_set_flags(struct irc_server *s, enum irc_server_flags flags);
+
+void
+irc_server_set_port(struct irc_server *s, unsigned int port);
+
+void
+irc_server_set_nickname(struct irc_server *s, const char *nickname);
+
+void
+irc_server_set_username(struct irc_server *s, const char *username);
+
+void
+irc_server_set_realname(struct irc_server *s, const char *realname);
+
+void
+irc_server_set_ctcp(struct irc_server *s, const char *key, const char *value);
 
 void
 irc_server_set_prefix(struct irc_server *s, const char *prefix)

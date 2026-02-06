@@ -20,8 +20,6 @@ OS := $(shell uname -s)
 
 CC := clang
 PKGCONF := pkg-config
-LEX := flex
-YACC := bison
 
 -include config.mk
 
@@ -82,12 +80,6 @@ override CFLAGS += -Wall -Wextra -MMD
 
 %.a:
 	$(AR) -rc $@ $^
-
-%.c: %.l
-	$(LEX) -o $@ $<
-
-%.c: %.y
-	$(YACC) --output=$*.c --header=$*.h $<
 
 .PHONY: all
 all::
@@ -343,7 +335,6 @@ IRCCD = irccd/irccd
 IRCCD_SRCS += irccd/conf.c
 IRCCD_SRCS += irccd/dl-plugin.c
 IRCCD_SRCS += irccd/irccd.c
-IRCCD_SRCS += irccd/lex.c
 IRCCD_SRCS += irccd/peer.c
 IRCCD_SRCS += irccd/transport.c
 
@@ -394,12 +385,10 @@ endif
 # Export symbols for plugins to find them.
 $(IRCCD): private override LDFLAGS += -Wl,-E
 
-irccd/conf.o irccd/lex.o: private override CFLAGS += -Wno-unused-function -Wno-unneeded-internal-declaration
-
 all:: $(IRCCD)
 
 clean::
-	rm -f $(IRCCD) $(IRCCD_DEPS) $(IRCCD_OBJS) irccd/conf.c irccd/conf.h irccd/lex.c
+	rm -f $(IRCCD) $(IRCCD_DEPS) $(IRCCD_OBJS)
 
 install::
 	mkdir -p $(DESTDIR)$(BINDIR)

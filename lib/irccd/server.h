@@ -332,52 +332,26 @@ struct irc_server {
 struct irc_server *
 irc_server_new(const char *name);
 
-/**
- * Set the IRC user ident information.
- *
- * This function must be used before the server is connected.
- *
- * \pre s != NULL
- * \param s the server
- * \param nickname a new nickname to use
- * \param username the username (id before the host part)
- * \param realname the real name to show (e.g. in /whois)
- */
 void
-irc_server_set_ident(struct irc_server *s,
-                     const char *nickname,
-                     const char *username,
-                     const char *realname);
+irc_server_set_hostname(struct irc_server *s, const char *hostname);
 
-/**
- * Set IRC connection parameters.
- *
- * This function must be used before the server is connected.
- *
- * \pre s != NULL
- * \param s the server
- * \param hostname server hostname or IP address
- * \param port port number
- * \param flags optional flags
- */
 void
-irc_server_set_params(struct irc_server *s,
-                      const char *hostname,
-                      unsigned int port,
-                      enum irc_server_flags flags);
+irc_server_set_flags(struct irc_server *s, enum irc_server_flags flags);
 
-/**
- * Set or remove CTCP responses.
- *
- * \pre s != NULL
- * \param s the server
- * \param version a version to respond to CTCP version (or NULL to disable)
- * \param source a source to respond to CTCP source (or NULL to disable)
- */
 void
-irc_server_set_ctcp(struct irc_server *s,
-                    const char *version,
-                    const char *source);
+irc_server_set_port(struct irc_server *s, unsigned int port);
+
+void
+irc_server_set_nickname(struct irc_server *s, const char *nickname);
+
+void
+irc_server_set_username(struct irc_server *s, const char *username);
+
+void
+irc_server_set_realname(struct irc_server *s, const char *realname);
+
+void
+irc_server_set_ctcp(struct irc_server *s, const char *key, const char *value);
 
 /**
  * Set the command message prefix.

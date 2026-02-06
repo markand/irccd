@@ -37,6 +37,7 @@
 #include <irccd/server.h>
 #include <irccd/util.h>
 
+#include "conf.h"
 #include "dl-plugin.h"
 #include "peer.h"
 #include "transport.h"
@@ -50,10 +51,6 @@ static struct ev_signal sig_int;
 static struct ev_signal sig_term;
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
 static struct peer *peers;
-
-/* conf.y */
-void
-config_open(const char *);
 
 #if 0
 static void
@@ -92,6 +89,7 @@ run_info(void)
 static void
 run_paths(void)
 {
+#if 0
 	struct irc_plugin_loader *ld;
 	char paths[IRC_PATHS_LEN], extensions[IRC_EXTENSIONS_LEN], *p, *token;
 
@@ -117,6 +115,7 @@ run_paths(void)
 		if (ld->next)
 			printf("\n");
 	}
+#endif
 }
 
 static void
@@ -181,7 +180,7 @@ init(void)
 static inline void
 load(void)
 {
-	config_open(config);
+	conf_open(config);
 }
 
 static inline void
