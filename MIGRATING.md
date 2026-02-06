@@ -65,8 +65,8 @@ functions are needed.
 To create a new server dynamically one should now:
 
 1. Call `irc_server_new`,
-2. Set ident information `irc_server_set_ident`,
-3. Set connection information `irc_server_set_params`,
+2. Set ident information `irc_server_set_(nickname|realname|username)`,
+3. Set connection information `irc_server_set_(hostname|port)`,
 4. Set an optional password if needed `irc_server_set_password`,
 5. Call `irc_server_connect` (or `irc_bot_server_add` usually).
 

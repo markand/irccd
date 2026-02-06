@@ -24,6 +24,7 @@ C API
   `foo_init` and `foo_finish` otherwise.
 - Types that require string list are now implemented using NULL sentinel based
   lists.
+- The pollable interface has been removed in favor of libev.
 
 irccd
 -----
@@ -34,6 +35,15 @@ irccd
 - All deferred functions have been removed.
 - The server connection procedure is now implemented using coroutines for a
   more readable code logic.
+
+irccd.conf
+----------
+
+The configuration file has been simplified and has a syntax that only consists
+of strings, keyword and blocks. Lists and semicolons have been removed.
+
+The parser has been rewritten using a producer/consumer coroutine removing the
+need of bison/flex.
 
 misc
 ----

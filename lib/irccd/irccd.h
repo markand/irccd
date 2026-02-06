@@ -34,12 +34,15 @@ struct irc_server;
 extern "C" {
 #endif
 
+typedef void (*irc_observer_t)(const struct irc_event *);
+
 struct irccd {
 	struct irc_server *servers;
 	struct irc_plugin *plugins;
 	struct irc_plugin_loader *plugin_loaders;
 	struct irc_rule *rules;
 	struct irc_hook *hooks;
+	irc_observer_t observer;
 };
 
 /**
@@ -260,6 +263,14 @@ irc_bot_hook_clear(void);
  */
 void
 irc_bot_dispatch(const struct irc_event *ev);
+
+/**
+ * Register a function to be notified on every event.
+ *
+ * \param observer the notify function (maybe NULL)
+ */
+void
+irc_bot_observe(irc_observer_t observer);
 
 /**
  * Stop the event loop and destroy every resource associated with the bot.

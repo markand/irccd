@@ -49,12 +49,12 @@ static struct ev_signal sig_int;
 static struct ev_signal sig_term;
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
 
-static inline void
-broadcast(const struct irc_event *ev)
+static void
+broadcaster(const struct irc_event *ev)
 {
 	char buf[IRC_BUF_LEN] = {};
 
-	if (irc_event_str(ev, buf, sizeof (buf)))
+	if (irc_event_str(ev, buf, sizeof (buf)) == 0)
 		transport_broadcast(buf);
 }
 
@@ -115,10 +115,8 @@ run_version(void)
 }
 
 static int
-run(int argc, char **argv)
+run(int, char **argv)
 {
-	(void)argc;
-
 	static struct {
 		const char *name;
 		void (*exec)(void);
@@ -145,13 +143,14 @@ static void
 sig_cb(struct ev_signal *self, int)
 {
 	irc_log_info("irccd: stopping on signal %d", self->signum);
-	ev_break(EVBREAK_ALL);
+	nce_sched_break(NULL, EVBREAK_ALL);
 }
 
 static void
 init(void)
 {
 	irc_bot_init();
+	irc_bot_observe(broadcaster);
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
 
 #if IRCCD_WITH_JS == 1

@@ -209,12 +209,6 @@ irc_bot_init(void)
 	irc_log_to_console();
 }
 
-void *
-irc_bot_loop(void)
-{
-	return NULL;
-}
-
 int
 irc_bot_server_add(struct irc_server *s)
 {
@@ -579,6 +573,15 @@ irc_bot_dispatch(const struct irc_event *ev)
 
 	if (plgcmd && invokable(plgcmd, ev))
 		irc_plugin_handle(plgcmd, to_command(plgcmd, ev));
+
+	if (irccd->observer)
+		irccd->observer(ev);
+}
+
+void
+irc_bot_observe(irc_observer_t observer)
+{
+	bot.observer = observer;
 }
 
 void
