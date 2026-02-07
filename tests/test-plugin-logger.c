@@ -37,8 +37,11 @@ setUp(void)
 	remove(TOP "/tests/log");
 
 	server = irc_server_new("test");
-	irc_server_set_ident(server, "test", "test", "test");
-	irc_server_set_params(server, "127.0.0.1", 6667, 0);
+	irc_server_set_nickname(server, "test");
+	irc_server_set_username(server, "test");
+	irc_server_set_realname(server, "test");
+	irc_server_set_hostname(server, "127.0.0.1");
+	irc_server_set_port(server, 6667);
 	irc_server_connect(server);
 
 	plugin = js_plugin_open("logger", TOP "/plugins/logger/logger.js");

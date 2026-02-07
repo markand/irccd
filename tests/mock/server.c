@@ -54,98 +54,82 @@ irc_server_new(const char *name)
 }
 
 void
-irc_server_set_ident(struct irc_server *s,
-                     const char *nickname,
-                     const char *username,
-                     const char *realname)
+irc_server_set_hostname(struct irc_server *, const char *)
 {
-	(void)s;
-	(void)nickname;
-	(void)username;
-	(void)realname;
 }
 
 void
-irc_server_set_params(struct irc_server *s,
-                      const char *hostname,
-                      unsigned int port,
-                      enum irc_server_flags flags)
+irc_server_set_flags(struct irc_server *, enum irc_server_flags)
 {
-	(void)s;
-	(void)hostname;
-	(void)port;
-	(void)flags;
 }
 
 void
-irc_server_set_ctcp(struct irc_server *s,
-                    const char *version,
-                    const char *source)
+irc_server_set_port(struct irc_server *, unsigned int)
 {
-	(void)s;
-	(void)version;
-	(void)source;
 }
 
 void
-irc_server_set_prefix(struct irc_server *s, const char *prefix)
+irc_server_set_nickname(struct irc_server *, const char *)
 {
-	(void)s;
-	(void)prefix;
 }
 
 void
-irc_server_set_password(struct irc_server *s, const char *password)
+irc_server_set_username(struct irc_server *, const char *)
 {
-	(void)s;
-	(void)password;
 }
 
 void
-irc_server_connect(struct irc_server *s)
+irc_server_set_realname(struct irc_server *, const char *)
 {
-	(void)s;
 }
 
 void
-irc_server_disconnect(struct irc_server *s)
+irc_server_set_ctcp(struct irc_server *, const char *, const char *)
 {
-	(void)s;
 }
 
 void
-irc_server_reconnect(struct irc_server *s)
+irc_server_set_prefix(struct irc_server *, const char *)
 {
-	(void)s;
+}
+
+void
+irc_server_set_password(struct irc_server *, const char *)
+{
+}
+
+void
+irc_server_connect(struct irc_server *)
+{
+}
+
+void
+irc_server_disconnect(struct irc_server *)
+{
+}
+
+void
+irc_server_reconnect(struct irc_server *)
+{
 }
 
 const struct irc_channel *
-irc_server_channels_find(struct irc_server *s, const char *name)
+irc_server_channels_find(struct irc_server *, const char *)
 {
-	(void)s;
-	(void)name;
-
 	return NULL;
 }
 
 IRC_ATTR_PRINTF(2, 3)
 int
-irc_server_send(struct irc_server *s, const char *fmt, ...)
+irc_server_send(struct irc_server *, const char *, ...)
 {
-	(void)s;
-	(void)fmt;
-
 	return 0;
 }
 
 IRC_ATTR_PRINTF(2, 0)
 int
-irc_server_send_va(struct irc_server *s, const char *fmt, va_list ap)
+irc_server_send_va(struct irc_server *, const char *, va_list)
 {
-	(void)s;
-	(void)fmt;
-	(void)ap;
-
 	return 0;
 }
 
@@ -231,11 +215,8 @@ irc_server_whois(struct irc_server *s, const char *target)
 }
 
 int
-irc_server_strip(const struct irc_server *s, const char **nickname)
+irc_server_strip(const struct irc_server *, const char **)
 {
-	(void)s;
-	(void)nickname;
-
 	return 0;
 }
 
