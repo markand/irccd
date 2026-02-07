@@ -35,6 +35,8 @@ irccd
 - All deferred functions have been removed.
 - The server connection procedure is now implemented using coroutines for a
   more readable code logic.
+- Hooks are now executed synchronously, they must not block (or as minimal as
+  possible).
 
 irccd.conf
 ----------

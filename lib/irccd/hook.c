@@ -20,8 +20,8 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdarg.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <utlist.h>
@@ -131,87 +131,6 @@ make_args(const struct irc_hook *h, const struct irc_event *ev)
 	return ret;
 }
 
-static void
-child_cb(struct ev_child *self, int revents)
-{
-	(void)revents;
-
-	struct irc_hook_child *child;
-	struct irc_hook *parent;
-
-	child = IRC_UTIL_CONTAINER_OF(self, struct irc_hook_child, child);
-	parent = child->parent;
-
-	if (WIFEXITED(self->rstatus))
-		irc_log_debug("hook %s: exited with code %d", parent->name, WEXITSTATUS(self->rstatus));
-	else if (WIFSIGNALED(self->rstatus))
-		irc_log_debug("hook %s: terminated on signal %d", parent->name, WTERMSIG(self->rstatus));
-
-	ev_child_stop(self);
-	ev_timer_stop(&child->timer);
-
-	LL_DELETE(child->parent->children, child);
-	free(child);
-}
-
-static void
-append(struct irc_hook *h, pid_t pid)
-{
-	struct irc_hook_child *child;
-
-	child = irc_util_calloc(1, sizeof (*child));
-	child->pid = pid;
-	child->parent = h;
-
-	ev_child_init(&child->child, child_cb, child->pid, 0);
-	ev_child_start(&child->child);
-
-	LL_APPEND(h->children, child);
-}
-
-static void
-timer_cb(struct ev_timer *self, int revents)
-{
-	(void)revents;
-
-	struct irc_hook_child *child;
-
-	child = IRC_UTIL_CONTAINER_OF(self, struct irc_hook_child, timer);
-
-	irc_log_warn("hook: would not die, sending SIGKILL");
-	kill(child->pid, SIGKILL);
-}
-
-static inline int
-child_exists(const struct irc_hook *hook, const struct irc_hook_child *child)
-{
-	const struct irc_hook_child *it;
-
-	LL_FOREACH(hook->children, it)
-		if (it == child)
-			return 1;
-
-	return 0;
-}
-
-static void
-stop(struct irc_hook *hook, struct irc_hook_child *child)
-{
-	irc_log_debug("hook %s: stopping active children", hook->name);
-
-	/* Start a timer in case it wouldn't stop on SIGTERM. */
-	ev_timer_init(&child->timer, timer_cb, 5.0, 0.0);
-	ev_timer_start(&child->timer);
-
-	/*
-	 * Note: the child_cb removes the child from the parent hook so we have
-	 * to check if the hook is still present rather than dereferencing the
-	 * pointer itself.
-	 */
-	while (child_exists(hook, child))
-		ev_run(EVRUN_ONCE);
-}
-
 struct irc_hook *
 irc_hook_new(const char *name, const char *path)
 {
@@ -235,6 +154,7 @@ irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 
 	char **args;
 	pid_t pid;
+	int status;
 
 	if (!(args = make_args(h, ev)))
 		return;
@@ -246,14 +166,16 @@ irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 	case 0:
 		execv(h->path, args);
 		irc_log_warn("hook %s: %s", h->name, strerror(errno));
-		exit(1);
+		_exit(1);
 		break;
 	default:
-		/*
-		 * Append a hook child handle and wait for it to terminate
-		 * asynchronously.
-		 */
-		append(h, pid);
+		while (waitpid(pid, &status, 0) < 0 && errno == EINTR)
+			continue;
+
+		if (WIFEXITED(status))
+			irc_log_debug("hook %s: exited with code %d", h->name, WEXITSTATUS(status));
+		else if (WIFSIGNALED(status))
+			irc_log_debug("hook %s: terminated on signal %d", h->name, WTERMSIG(status));
 		break;
 	}
 
@@ -264,11 +186,6 @@ void
 irc_hook_free(struct irc_hook *h)
 {
 	assert(h);
-
-	struct irc_hook_child *child, *tmp;
-
-	LL_FOREACH_SAFE(h->children, child, tmp)
-		stop(h, child);
 
 	free(h->name);
 	free(h->path);

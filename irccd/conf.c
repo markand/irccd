@@ -979,9 +979,24 @@ conf_apply_plugins(struct conf *conf)
 }
 
 static void
+conf_apply_hooks(struct conf *conf)
+{
+	struct irc_hook *hook, *tmp;
+
+	LL_FOREACH_SAFE(conf->hooks, hook, tmp) {
+		LL_DELETE(conf->hooks, hook);
+		irc_log_info("hook %s: registered", hook->name);
+		irc_bot_hook_add(hook);
+	}
+}
+
+static void
 conf_apply_transport(struct conf *conf)
 {
 	int rc;
+
+	if (!conf->tpt)
+		return;
 
 	if (conf->tpt_uid != -1 && conf->tpt_gid != -1)
 		conf_debug(conf, "transport", "binding on '%s' with %lld:%lld",
@@ -1046,6 +1061,7 @@ conf_open(const char *path)
 	conf_apply_rules(&conf);
 	conf_apply_servers(&conf);
 	conf_apply_plugins(&conf);
+	conf_apply_hooks(&conf);
 	conf_apply_transport(&conf);
 
 	free(conf.log_file);
