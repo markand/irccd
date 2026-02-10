@@ -19,6 +19,8 @@
 #ifndef IRCCD_CONFIG_H
 #define IRCCD_CONFIG_H
 
+#define IRCCD_MESSAGE_LEN 512
+
 /**
  * \brief Irccd major version number.
  */

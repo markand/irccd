@@ -56,7 +56,7 @@ extern "C" {
 #define IRC_SERVER_DEFAULT_CTCP_SOURCE "http://hg.malikania.fr/irccd"
 
 struct irc_channel;
-struct irc_server_conn;
+struct irc_server_coro;
 
 /**
  * \brief IRC server options.
@@ -226,7 +226,6 @@ struct irc_server {
 
 	/**
 	 * (read-only, optional)
-	 *
 	 */
 	char *casemapping;
 
@@ -283,26 +282,9 @@ struct irc_server {
 	 * \cond IRC_PRIVATE
 	 */
 
-	/**
-	 * (private)
-	 *
-	 * Private connection handle.
-	 */
-	void *conn;
-
-	/**
-	 * (private)
-	 *
-	 * Reference count.
-	 */
-	size_t refc;
-
-	/**
-	 * (private)
-	 *
-	 * Next server in the linked list.
-	 */
-	struct irc_server *next;
+	struct irc_server_coro *coroutine;   /* pimpl coroutine */
+	size_t refc;                         /* reference count */
+	struct irc_server *next;             /* next in linked list */
 
 	/**
 	 * \endcond IRC_PRIVATE

@@ -72,6 +72,13 @@ To create a new server dynamically one should now:
 
 All of the server fields are now accessible as read-only for convenience.
 
+- The function `irc_server_nick` has been removed, use
+  `irc_server_set_nickname`.
+- The function `irc_server_set_params` has been split into individual functions:
+  `irc_server_set_(hostname|port|flags)`.
+- The function `irc_server_set_ident` has been split into individual functions:
+  `irc_server_set_(nickname|realname|username)`.
+
 Build system
 ------------
 
