@@ -19,16 +19,34 @@
 #ifndef IRCCD_TRANSPORT_H
 #define IRCCD_TRANSPORT_H
 
-#include <sys/types.h>
+/**
+ * \file transport.h
+ * \brief Remote command support.
+ */
 
-#include "limits.h"
-
+/**
+ * Open and bind transport for irccdctl and peers.
+ *
+ * \param path path to the socket (not NULL)
+ * \param uid the uid to change owner (or -1 ignore)
+ * \param gid the gid to change owner (or -1 ignore)
+ * \return 0 on success
+ * \return -E<*> on error
+ */
 int
-transport_start(const char *, long long uid, long long gid);
+transport_start(const char *path, long long uid, long long gid);
 
+/**
+ * Transmit a message to every connected peer.
+ *
+ * \param data the string to send (not NULL)
+ */
 void
 transport_broadcast(const char *data);
 
+/**
+ * Stop the transport and close all connected peers.
+ */
 void
 transport_stop(void);
 

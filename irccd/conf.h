@@ -20,6 +20,11 @@
 #define IRCCD_CONF_H
 
 /**
+ * \file conf.h
+ * \brief Configuration file parser.
+ */
+
+/**
  * Open and execute configuration file at given path.
  *
  * \param file the irccd.conf file to execute

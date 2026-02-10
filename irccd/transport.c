@@ -147,6 +147,8 @@ transport_stop(void)
 {
 	struct peer *peer, *tmp;
 
+	nce_coro_destroy(&fd_co.coro);
+
 	/* Connection socket. */
 	if (fd != -1)
 		close(fd);

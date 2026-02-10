@@ -114,7 +114,6 @@ conf_fatal(struct conf *conf, const char *fmt, ...)
 	exit(1);
 }
 
-
 IRC_ATTR_PRINTF(3, 4)
 static inline void
 conf_debug(const struct conf *conf, const char *origin, const char *fmt, ...)

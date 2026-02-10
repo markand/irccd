@@ -23,8 +23,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <ev.h>
-
 #include <utlist.h>
 
 #include <nce/nce.h>
