@@ -638,7 +638,7 @@ js_plugin_loader_new(void)
 	struct irc_plugin_loader *ldr;
 
 	ldr = irc_util_calloc(1, sizeof (*ldr));
-	irc_plugin_loader_init(ldr, IRCCD_LIBDIR "/irccd/", "js");
+	irc_plugin_loader_init(ldr, IRCCD_LIBDIR "/irccd", "js");
 
 	ldr->open   = wrap_open;
 	ldr->finish = wrap_finish;

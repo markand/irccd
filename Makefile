@@ -43,6 +43,7 @@ LIBDIR ?= $(PREFIX)/lib
 LOCALSTATEDIR ?= $(PREFIX)/var
 MANDIR ?= $(PREFIX)/share/man
 SYSCONFDIR ?= $(PREFIX)/etc
+VARDIR ?= $(PREFIX)/var
 
 LIBBSD_CFLAGS ?= $(shell $(PKGCONF) --cflags libbsd-overlay)
 LIBBSD_LDFLAGS ?= $(shell $(PKGCONF) --libs libbsd-overlay)

@@ -77,9 +77,8 @@ run_info(void)
 static void
 run_paths(void)
 {
-#if 0
 	struct irc_plugin_loader *ld;
-	char paths[IRC_PATHS_LEN], extensions[IRC_EXTENSIONS_LEN], *p, *token;
+	char *paths, *extensions, *p, *token;
 
 	printf("%-16s%s\n", "cache:", IRCCD_CACHEDIR);
 	printf("%-16s%s\n", "config:", IRCCD_SYSCONFDIR);
@@ -89,8 +88,8 @@ run_paths(void)
 
 	LL_FOREACH(irccd->plugin_loaders, ld) {
 		printf("Plugins with extensions:");
-		irc_util_strlcpy(extensions, ld->extensions, sizeof (extensions));
-		irc_util_strlcpy(paths, ld->paths, sizeof (paths));
+		extensions = irc_util_strdup(ld->extensions);
+		paths = irc_util_strdup(ld->paths);
 
 		for (p = extensions; (token = strtok_r(p, ":", &p)); )
 			printf(" %s", token);
@@ -102,8 +101,10 @@ run_paths(void)
 
 		if (ld->next)
 			printf("\n");
+
+		free(paths);
+		free(extensions);
 	}
-#endif
 }
 
 static void

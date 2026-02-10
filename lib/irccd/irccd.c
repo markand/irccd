@@ -318,7 +318,7 @@ irc_bot_plugin_search(const char *name, const char *path)
 				continue;
 
 			p = open_plugin(ldr, name, path);
-		} else if (paths) {
+		} else if (ldr->paths) {
 			/* Copy the paths to tokenize it. */
 			paths = irc_util_strdup(ldr->paths);
 
@@ -330,10 +330,10 @@ irc_bot_plugin_search(const char *name, const char *path)
 				if ((p = find_plugin(ldr, token, name)))
 					break;
 			}
+
+			free(paths);
 		}
 	}
-
-	free(paths);
 
 	if (!p) {
 		irc_log_warn("irccd: could not find plugin %s", name);

@@ -349,7 +349,7 @@ Directory_mkdir(duk_context* ctx)
 	/* Copy the directory to iterate over '/'. */
 	irc_util_strlcpy(path, duk_require_string(ctx, 0), sizeof (path));
 
-	for (char *p = p + 1; *p; ++p) {
+	for (char *p = path + 1; *p; ++p) {
 		if (*p == '/') {
 			*p = 0;
 			mkpath(ctx, path);
