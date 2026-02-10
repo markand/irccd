@@ -174,23 +174,20 @@ plugin_list_set(struct peer *p,
 	return 0;
 }
 
-#if 0
-
-static const char *
-rule_list_to_spaces(char * const *value)
+static void
+rule_list_to_string(FILE *fp, char * const *values)
 {
-	static char buf[IRC_RULE_LEN];
+	if (values) {
+		for (char * const *c = values; *c; ++c) {
+			fprintf(fp, "%s", *c);
 
-	irc_util_strlcpy(buf, value, sizeof (buf));
+			if (c[1])
+				fputc(' ', fp);
+		}
+	}
 
-	for (char *p = buf; *p; ++p)
-		if (*p == ':')
-			*p = ' ';
-
-	return buf;
+	fprintf(fp, "\n");
 }
-
-#endif
 
 /*
  * HOOK-ADD name path
@@ -584,13 +581,11 @@ cmd_rule_list(struct peer *p, char *line)
 
 	DL_FOREACH(irccd->rules, rule) {
 		fprintf(fp, "%s\n", rule->action == IRC_RULE_ACCEPT ? "accept" : "drop");
-#if 0
-		fprintf(fp, "%s\n", rule_list_to_spaces(rule->servers));
-		fprintf(fp, "%s\n", rule_list_to_spaces(rule->channels));
-		fprintf(fp, "%s\n", rule_list_to_spaces(rule->origins));
-		fprintf(fp, "%s\n", rule_list_to_spaces(rule->plugins));
-		fprintf(fp, "%s\n", rule_list_to_spaces(rule->events));
-#endif
+		rule_list_to_string(fp, rule->servers);
+		rule_list_to_string(fp, rule->channels);
+		rule_list_to_string(fp, rule->origins);
+		rule_list_to_string(fp, rule->plugins);
+		rule_list_to_string(fp, rule->events);
 	}
 
 	if (feof(fp) || ferror(fp)) {

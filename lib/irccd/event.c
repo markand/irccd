@@ -95,11 +95,9 @@ irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 		    ev->topic.topic);
 		break;
 	case IRC_EVENT_WHOIS:
-#if 0
-		snprintf(str, strsz, "EVENT-WHOIS %s %s %s %s %s %s",
+		snprintf(str, strsz, "EVENT-WHOIS %s %s %s %s %s",
 		    ev->server->name, ev->whois.nickname, ev->whois.username,
-		    ev->whois.realname, ev->whois.hostname, ev->whois.channels);
-#endif
+		    ev->whois.realname, ev->whois.hostname);
 		break;
 	default:
 		break;

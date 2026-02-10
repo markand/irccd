@@ -755,13 +755,16 @@ conf_parse_rule_criteria(struct conf *conf,
 
 	conf_begin(conf);
 
-	while (conf_next(conf, &token) == TOKEN_STRING) {
+	while (conf_next_is(conf, &token, TOKEN_STRING)) {
 		conf_debug(conf, "rule", "add '%s'", token.data);
 		adder(rule, token.data);
+
+		/* Pull optional comma or break. */
+		if (!conf_next_is(conf, &token, TOKEN_COMMA))
+			break;
 	}
 
-	if (token.type != TOKEN_BLK_END)
-		conf_fatal(conf, "unterminated criteria list");
+	conf_end(conf);
 }
 
 static void

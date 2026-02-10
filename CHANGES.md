@@ -42,7 +42,7 @@ irccd.conf
 ----------
 
 The configuration file has been simplified and has a syntax that only consists
-of strings, keyword and blocks. Lists and semicolons have been removed.
+of strings, integers, keyword and blocks/lists. Semicolons have been removed.
 
 The parser has been rewritten using a producer/consumer coroutine removing the
 need of bison/flex.
