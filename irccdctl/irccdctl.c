@@ -50,7 +50,7 @@ poll(void)
 	char *nl;
 
 	while (!(nl = strstr(in, "\n"))) {
-		char buf[IRC_BUF_LEN] = {0};
+		char buf[IRC_BUF_LEN] = {};
 		ssize_t nr;
 
 		if ((nr = recv(sock, buf, sizeof (buf) - 1, 0)) <= 0)
@@ -143,7 +143,7 @@ ok(void)
 static void
 show_connect(char *line)
 {
-	const char *args[2] = {0};
+	const char *args[2] = {};
 
 	if (irc_util_split(line, args, 2, ' ') == 2) {
 		printf("%-16s%s\n", "event:", "onConnect");
@@ -154,7 +154,7 @@ show_connect(char *line)
 static void
 show_disconnect(char *line)
 {
-	const char *args[2] = {0};
+	const char *args[2] = {};
 
 	if (irc_util_split(line, args, 2, ' ') == 2) {
 		printf("%-16s%s\n", "event:", "onDisonnect");
@@ -165,7 +165,7 @@ show_disconnect(char *line)
 static void
 show_invite(char *line)
 {
-	const char *args[5] = {0};
+	const char *args[5] = {};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s%s\n", "event:", "onInvite");
@@ -179,7 +179,7 @@ show_invite(char *line)
 static void
 show_join(char *line)
 {
-	const char *args[4] = {0};
+	const char *args[4] = {};
 
 	if (irc_util_split(line, args, 4, ' ') == 4) {
 		printf("%-16s%s\n", "event:", "onJoin");
@@ -192,7 +192,7 @@ show_join(char *line)
 static void
 show_kick(char *line)
 {
-	const char *args[6] = {0};
+	const char *args[6] = {};
 
 	if (irc_util_split(line, args, 6, ' ') >= 5) {
 		printf("%-16s%s\n", "event:", "onKick");
@@ -207,7 +207,7 @@ show_kick(char *line)
 static void
 show_me(char *line)
 {
-	const char *args[5] = {0};
+	const char *args[5] = {};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s%s\n", "event:", "onMe");
@@ -221,7 +221,7 @@ show_me(char *line)
 static void
 show_message(char *line)
 {
-	const char *args[5] = {0};
+	const char *args[5] = {};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s%s\n", "event:", "onMessage");
@@ -235,7 +235,7 @@ show_message(char *line)
 static void
 show_mode(char *line)
 {
-	const char *args[8] = {0};
+	const char *args[8] = {};
 
 	if (irc_util_split(line, args, 8, ' ') >= 5) {
 		printf("%-16s%s\n", "event:", "onMode");
@@ -254,7 +254,7 @@ show_mode(char *line)
 static void
 show_nick(char *line)
 {
-	const char *args[4] = {0};
+	const char *args[4] = {};
 
 	if (irc_util_split(line, args, 4, ' ') == 4) {
 		printf("%-16s%s\n", "event:", "onNick");
@@ -267,7 +267,7 @@ show_nick(char *line)
 static void
 show_notice(char *line)
 {
-	const char *args[5] = {0};
+	const char *args[5] = {};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s%s\n", "event:", "onNotice");
@@ -281,7 +281,7 @@ show_notice(char *line)
 static void
 show_part(char *line)
 {
-	const char *args[5] = {0};
+	const char *args[5] = {};
 
 	if (irc_util_split(line, args, 5, ' ') >= 4) {
 		printf("%-16s%s\n", "event:", "onPart");
@@ -295,7 +295,7 @@ show_part(char *line)
 static void
 show_topic(char *line)
 {
-	const char *args[5] = {0};
+	const char *args[5] = {};
 
 	if (irc_util_split(line, args, 5, ' ') >= 4) {
 		printf("%-16s%s\n", "event:", "onTopic");
@@ -309,7 +309,7 @@ show_topic(char *line)
 static void
 show_whois(char *line)
 {
-	const char *args[6] = {0};
+	const char *args[6] = {};
 
 	if (irc_util_split(line, args, 6, ' ') >= 4) {
 		printf("%-16s%s\n", "event:", "onWhois");
@@ -410,34 +410,22 @@ response_list(const char *cmd)
 }
 
 static void
-cmd_hook_add(int argc, char **argv)
+cmd_hook_add(int, char **argv)
 {
-	(void)argc;
-	(void)argv;
-
-	++argv;
-
-	req("HOOK-ADD %s %s", argv[0], argv[1]);
+	req("HOOK-ADD %s %s", argv[1], argv[2]);
 	ok();
 }
 
 static void
-cmd_hook_list(int argc, char **argv)
+cmd_hook_list(int, char **)
 {
-	(void)argc;
-	(void)argv;
-
 	response_list("HOOK-LIST");
 }
 
 static void
-cmd_hook_remove(int argc, char **argv)
+cmd_hook_remove(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("HOOK-REMOVE %s", argv[0]);
+	req("HOOK-REMOVE %s", argv[1]);
 	ok();
 }
 
@@ -457,15 +445,11 @@ cmd_plugin_config(int argc, char **argv)
  *     author
  */
 static void
-cmd_plugin_info(int argc, char **argv)
+cmd_plugin_info(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
 	const char *response;
 
-	req("PLUGIN-INFO %s", argv[0]);
+	req("PLUGIN-INFO %s", argv[1]);
 
 	if (strncmp((response = poll()), "OK ", 3) != 0)
 		irc_util_die("abort: failed to retrieve plugin information\n");
@@ -478,22 +462,15 @@ cmd_plugin_info(int argc, char **argv)
 }
 
 static void
-cmd_plugin_list(int argc, char **argv)
+cmd_plugin_list(int, char **)
 {
-	(void)argc;
-	(void)argv;
-
 	response_list("PLUGIN-LIST");
 }
 
 static void
-cmd_plugin_load(int argc, char **argv)
+cmd_plugin_load(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("PLUGIN-LOAD %s", argv[0]);
+	req("PLUGIN-LOAD %s", argv[1]);
 	ok();
 }
 
@@ -506,11 +483,8 @@ cmd_plugin_path(int argc, char **argv)
 static void
 cmd_plugin_reload(int argc, char **argv)
 {
-	--argc;
-	++argv;
-
-	if (argc == 1)
-		req("PLUGIN-RELOAD %s", argv[0]);
+	if (argc == 2)
+		req("PLUGIN-RELOAD %s", argv[1]);
 	else
 		req("PLUGIN-RELOAD");
 
@@ -526,11 +500,8 @@ cmd_plugin_template(int argc, char **argv)
 static void
 cmd_plugin_unload(int argc, char **argv)
 {
-	--argc;
-	++argv;
-
-	if (argc == 1)
-		req("PLUGIN-UNLOAD %s", argv[0]);
+	if (argc == 2)
+		req("PLUGIN-UNLOAD %s", argv[1]);
 	else
 		req("PLUGIN-UNLOAD");
 
@@ -540,8 +511,8 @@ cmd_plugin_unload(int argc, char **argv)
 static void
 cmd_rule_add(int argc, char **argv)
 {
+	char out[IRC_BUF_LEN] = {};
 	FILE *fp;
-	char out[IRC_BUF_LEN];
 	int ch;
 
 	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
@@ -611,11 +582,8 @@ cmd_rule_edit(int argc, char **argv)
  *     (repeat for every rule in <n>)
  */
 static void
-cmd_rule_list(int argc, char **argv)
+cmd_rule_list(int, char **)
 {
-	(void)argc;
-	(void)argv;
-
 	size_t num = 0;
 
 	req("RULE-LIST");
@@ -656,13 +624,9 @@ cmd_rule_move(int argc, char **argv)
 }
 
 static void
-cmd_rule_remove(int argc, char **argv)
+cmd_rule_remove(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("RULE-REMOVE %s", argv[0]);
+	req("RULE-REMOVE %s", argv[1]);
 	ok();
 }
 
@@ -711,11 +675,8 @@ cmd_server_connect(int argc, char **argv)
 static void
 cmd_server_disconnect(int argc, char **argv)
 {
-	--argc;
-	++argv;
-
-	if (argc == 1)
-		req("SERVER-DISCONNECT %s", argv[0]);
+	if (argc == 2)
+		req("SERVER-DISCONNECT %s", argv[1]);
 	else
 		req("SERVER-DISCONNECT");
 
@@ -731,14 +692,10 @@ cmd_server_disconnect(int argc, char **argv)
  *     chan1 chan2 chanN
  */
 static void
-cmd_server_info(int argc, char **argv)
+cmd_server_info(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
 	char *list;
-	const char *args[16] = {0};
+	const char *args[16] = {};
 
 	req("SERVER-INFO %s", argv[0]);
 
@@ -768,102 +725,71 @@ cmd_server_info(int argc, char **argv)
 static void
 cmd_server_join(int argc, char **argv)
 {
-	--argc;
-	++argv;
-
-	if (argc >= 3)
-		req("SERVER-JOIN %s %s %s", argv[0], argv[1], argv[2]);
+	if (argc >= 4)
+		req("SERVER-JOIN %s %s %s", argv[1], argv[2], argv[3]);
 	else
-		req("SERVER-JOIN %s %s", argv[0], argv[1]);
+		req("SERVER-JOIN %s %s", argv[1], argv[2]);
 
 	ok();
 }
 
 static void
-cmd_server_list(int argc, char **argv)
+cmd_server_list(int, char **)
 {
-	(void)argc;
-	(void)argv;
-
 	response_list("SERVER-LIST");
 }
 
 static void
-cmd_server_message(int argc, char **argv)
+cmd_server_message(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("SERVER-MESSAGE %s %s %s", argv[0], argv[1], argv[2]);
+	req("SERVER-MESSAGE %s %s %s", argv[1], argv[2], argv[3]);
 	ok();
 }
 
 static void
-cmd_server_me(int argc, char **argv)
+cmd_server_me(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("SERVER-ME %s %s %s", argv[0], argv[1], argv[2]);
+	req("SERVER-ME %s %s %s", argv[1], argv[2], argv[3]);
 	ok();
 }
 
 static void
 cmd_server_mode(int argc, char **argv)
 {
-	--argc;
-	++argv;
-
-	req("SERVER-MODE %s %s %s%c%s", argv[0], argv[1], argv[2],
-	    argc >= 4 ? ' '     : '\0',
-	    argc >= 4 ? argv[3] : "");
+	req("SERVER-MODE %s %s %s%c%s", argv[1], argv[2], argv[3],
+	    argc >= 5 ? ' '     : '\0',
+	    argc >= 5 ? argv[4] : "");
 	ok();
 }
 
 static void
-cmd_server_nick(int argc, char **argv)
+cmd_server_nick(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("SERVER-NICK %s %s", argv[0], argv[1]);
+	req("SERVER-NICK %s %s", argv[1], argv[2]);
 	ok();
 }
 
 static void
-cmd_server_notice(int argc, char **argv)
+cmd_server_notice(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("SERVER-NOTICE %s %s %s", argv[0], argv[1], argv[2]);
+	req("SERVER-NOTICE %s %s %s", argv[1], argv[2], argv[3]);
 	ok();
 }
 
 static void
 cmd_server_part(int argc, char **argv)
 {
-	--argc;
-	++argv;
-
 	/* Let's advertise irccd a bit. */
-	req("SERVER-PART %s %s %s", argv[0], argv[1],
-	    argc >= 3 ? argv[2] : "irccd is shutting down");
+	req("SERVER-PART %s %s %s", argv[1], argv[2],
+	    argc >= 4 ? argv[3] : "irccd is shutting down");
 	ok();
 }
 
 static void
 cmd_server_reconnect(int argc, char **argv)
 {
-	--argc;
-	++argv;
-
-	if (argc == 1)
-		req("SERVER-RECONNECT %s", argv[0]);
+	if (argc == 2)
+		req("SERVER-RECONNECT %s", argv[1]);
 	else
 		req("SERVER-RECONNECT");
 
@@ -871,23 +797,16 @@ cmd_server_reconnect(int argc, char **argv)
 }
 
 static void
-cmd_server_topic(int argc, char **argv)
+cmd_server_topic(int, char **argv)
 {
-	(void)argc;
-
-	++argv;
-
-	req("SERVER-TOPIC %s %s %s", argv[0], argv[1], argv[2]);
+	req("SERVER-TOPIC %s %s %s", argv[1], argv[2], argv[3]);
 	ok();
 }
 
 static void
-cmd_watch(int argc, char **argv)
+cmd_watch(int, char **)
 {
-	(void)argc;
-	(void)argv;
-
-	struct timeval tv = {0};
+	struct timeval tv = {};
 	char *ev;
 
 	/* Enable watch. */
