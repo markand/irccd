@@ -8,7 +8,7 @@ Requirements
 
 Build dependencies:
 
-- C23 compatible compiler(
+- C23 compatible compiler
 - [GNU make][]
 
 Optional runtime dependencies:
@@ -21,47 +21,45 @@ Basic installation
 
 This is the quick way to install irccd.
 
-	tar xvzf irccd-x.y.z-tar.xz
-	cmake -S irccd-x.y.z -B build
-	cmake --build build --target all
-	sudo cmake --build build --target install
+	tar -xvf irccd-x.y.z-tar.xz
+	make
+	doas make install
 
 ### Disabling plugins
 
-For every plugin, an option `IRCCD_WITH_PLUGIN_<NAME>` is presented and set to
-on by default. Substitute `<NAME>` with the plugin uppercase name (e.g. `ASK`).
+For every plugin, an option `PLUGIN_<NAME>` is available and set to on by
+default. Substitute `<NAME>` with the plugin uppercase name (e.g. `ASK`).
 
-	cmake build -DIRCCD_WITH_PLUGIN_ASK=Off
+	make PLUGIN_ASK=0
 
 ### Systemd service
 
 The systemd service file is installed by default if the machine is running
-systemd, it's possible to force the option using `IRCCD_WITH_SYSTEMD` to `On` or
-`Off`.
+systemd, it's possible to force the option using `SYSTEMD` to `1` or `0`.
 
-	cmake build -DIRCCD_WITH_SYSTEMD=Off
+	make SYSTEMD=0
 
 ### Other options
 
 The following options are available:
 
-- `IRCCD_WITH_MAN`: installation of manpages.
-- `IRCCD_WITH_JS`: Javascript support (and all Javascript plugins).
-- `IRCCD_WITH_SSL`: OpenSSL support.
-- `IRCCD_WITH_TESTS`: building of tests.
-- `IRCCD_WITH_EXAMPLES`: plugin templates.
-- `IRCCD_WITH_PKGCONFIG`: pkg-config file installation.
-- `IRCCD_WITH_PKGCONFIGDIR`: path to pkg-config directory installation.
+- `MAN`: installation of manpages.
+- `JS`: Javascript support (and all Javascript plugins).
+- `SSL`: OpenSSL support.
+- `TESTS`: building of tests.
+- `HTTP`: enable HTTP support (with libcurl dependency).
 
-The following standard CMake options control installation directories.
+The following make variables define installation paths:
 
-- `CMAKE_INSTALL_PREFIX`: root directory for installing (default: /usr/local).
-- `CMAKE_INSTALL_BINDIR`: binaries (default: ${CMAKE_INSTALL_PREFIX}/bin).
-- `CMAKE_INSTALL_SYSCONFDIR`: config files (default: ${CMAKE_INSTALL_PREFIX}/etc).
-- `CMAKE_INSTALL_LIBDIR`: libraries (default: ${CMAKE_INSTALL_PREFIX}/lib).
-- `CMAKE_INSTALL_INCLUDEDIR`: header files (default: ${CMAKE_INSTALL_PREFIX}/include).
-- `CMAKE_INSTALL_SHAREDIR`: data files (default: ${CMAKE_INSTALL_PREFIX}/share).
-- `CMAKE_INSTALL_MANDIR`: path to manual pages (default: ${CMAKE_INSTALL_PREFIX}/share/man).
+- `PREFIX`: root directory for installing (default: /usr/local).
+- `BINDIR`: binaries (default: $(PREFIX)/bin).
+- `DATADIR`: sample files (default: $(PREFIX)/share).
+- `SYSCONFDIR`: config files (default: $(PREFIX)/etc).
+- `LIBDIR`: libraries (default: $(PREFIX)/lib).
+- `INCLUDEDIR`: header files (default: $(PREFIX)/include).
+- `SHAREDIR`: data files (default: $(PREFIX)/share).
+- `MANDIR`: path to manual pages (default: $(PREFIX)/share/man).
+- `VARDIR`: local state files (default: $(PREFIX)/var).
 
 [GNU Make]: https://www.gnu.org/software/make
 [CURL]: https://curl.se

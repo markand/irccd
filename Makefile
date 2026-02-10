@@ -40,7 +40,6 @@ BINDIR ?= $(PREFIX)/bin
 DATADIR ?= $(PREFIX)/share
 INCLUDEDIR ?= $(PREFIX)/include
 LIBDIR ?= $(PREFIX)/lib
-LOCALSTATEDIR ?= $(PREFIX)/var
 MANDIR ?= $(PREFIX)/share/man
 SYSCONFDIR ?= $(PREFIX)/etc
 VARDIR ?= $(PREFIX)/var
