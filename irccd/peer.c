@@ -647,30 +647,26 @@ cmd_rule_remove(struct peer *p, char *line)
 static int
 cmd_server_connect(struct peer *p, char *line)
 {
-	(void)line;
-
-#if 0
-	const char *args[6] = {0};
-	int ssl;
-	struct irc_server *s;
+	const char *args[6] = {};
+	struct irc_server *server;
 
 	if (parse(line, args, 6) != 6)
 		return EINVAL;
 	if (irc_bot_server_get(args[0]))
 		return EEXIST;
 
+	server = irc_server_new(args[0]);
+	irc_server_set_hostname(server, args[1]);
+	irc_server_set_port(server, atoi(args[2]));
+	irc_server_set_nickname(server, args[3]);
+	irc_server_set_username(server, args[4]);
+	irc_server_set_realname(server, args[5]);
+
 	/* If port starts with +, it means SSL support. */
-	if ((ssl = args[2][0] == '+'))
-		++args[2];
+	if (args[2][0] == '+')
+		irc_server_set_flags(server, server->flags |= IRC_SERVER_FLAGS_SSL);
 
-	s = irc_server_new(args[0], args[3], args[4], args[5], args[1], atoi(args[2]));
-	s->flags |= IRC_SERVER_FLAGS_AUTO_RECO;
-
-	if (ssl)
-		s->flags |= IRC_SERVER_FLAGS_SSL;
-
-	irc_bot_server_add(s);
-#endif
+	irc_bot_server_add(server);
 
 	return ok(p);
 }

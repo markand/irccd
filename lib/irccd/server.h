@@ -83,12 +83,12 @@ enum irc_server_flags {
 	/**
 	 * Don't attempt to connect to IPv4 address.
 	 */
-	IRC_SERVER_FLAGS_NO_IPV4        = (1 << 3),
+	IRC_SERVER_FLAGS_NO_IPV4 = (1 << 3),
 
 	/**
 	 * Don't attempt to connect to IPv6 address.
 	 */
-	IRC_SERVER_FLAGS_NO_IPV6        = (1 << 4)
+	IRC_SERVER_FLAGS_NO_IPV6 = (1 << 4)
 };
 
 /**

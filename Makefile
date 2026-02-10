@@ -573,6 +573,7 @@ ifeq ($(TESTS), 1)
 #
 
 TESTS_LIB_SRCS += lib/irccd/channel.c
+TESTS_LIB_SRCS += lib/irccd/conn.c
 TESTS_LIB_SRCS += lib/irccd/hook.c
 TESTS_LIB_SRCS += lib/irccd/irccd.c
 TESTS_LIB_SRCS += lib/irccd/log.c
@@ -580,7 +581,6 @@ TESTS_LIB_SRCS += lib/irccd/plugin.c
 TESTS_LIB_SRCS += lib/irccd/rule.c
 TESTS_LIB_SRCS += lib/irccd/subst.c
 TESTS_LIB_SRCS += lib/irccd/util.c
-
 TESTS_LIB_SRCS += irccd/dl-plugin.c
 TESTS_LIB_SRCS += irccd/unicode.c
 
@@ -611,50 +611,52 @@ TESTS_LIB_SRCS += tests/mock/server.c
 TESTS_LIB_OBJS = $(TESTS_LIB_SRCS:.c=.o)
 TESTS_LIB_DEPS = $(TESTS_LIB_SRCS:.c=.d)
 
-TESTS += tests/test-bot
-TESTS += tests/test-channel
-TESTS += tests/test-dl-plugin
-TESTS += tests/test-event
-TESTS += tests/test-rule
-TESTS += tests/test-subst
-TESTS += tests/test-util
+TESTS_EXE += tests/test-bot
+TESTS_EXE += tests/test-channel
+TESTS_EXE += tests/test-dl-plugin
+TESTS_EXE += tests/test-event
+TESTS_EXE += tests/test-rule
+TESTS_EXE += tests/test-subst
+TESTS_EXE += tests/test-util
 
 ifeq ($(JS), 1)
-	TESTS += tests/test-jsapi-chrono
-	TESTS += tests/test-jsapi-directory
-	TESTS += tests/test-jsapi-file
-	TESTS += tests/test-jsapi-irccd
-	TESTS += tests/test-jsapi-system
-	TESTS += tests/test-jsapi-timer
-	TESTS += tests/test-jsapi-unicode
-	TESTS += tests/test-jsapi-util
-	TESTS += tests/test-plugin-ask
-	TESTS += tests/test-plugin-auth
-	TESTS += tests/test-plugin-hangman
-	TESTS += tests/test-plugin-history
-	TESTS += tests/test-plugin-joke
-	TESTS += tests/test-plugin-logger
-	TESTS += tests/test-plugin-plugin
-	TESTS += tests/test-plugin-tictactoe
+	TESTS_EXE += tests/test-jsapi-chrono
+	TESTS_EXE += tests/test-jsapi-directory
+	TESTS_EXE += tests/test-jsapi-file
+	TESTS_EXE += tests/test-jsapi-irccd
+	TESTS_EXE += tests/test-jsapi-system
+	TESTS_EXE += tests/test-jsapi-timer
+	TESTS_EXE += tests/test-jsapi-unicode
+	TESTS_EXE += tests/test-jsapi-util
+	TESTS_EXE += tests/test-plugin-ask
+	TESTS_EXE += tests/test-plugin-auth
+	TESTS_EXE += tests/test-plugin-hangman
+	TESTS_EXE += tests/test-plugin-history
+	TESTS_EXE += tests/test-plugin-joke
+	TESTS_EXE += tests/test-plugin-logger
+	TESTS_EXE += tests/test-plugin-plugin
+	TESTS_EXE += tests/test-plugin-tictactoe
 endif
 
-TESTS_DEPS = $(addsuffix .d,$(TESTS))
+TESTS_DEPS = $(addsuffix .d,$(TESTS_EXE))
 
 TESTS_CFLAGS += $(LIBUNITY_CFLAGS)
 TESTS_CFLAGS += $(LIBIRCCD_CFLAGS)
+TESTS_CFLAGS += $(LIBNCE_CFLAGS)
 TESTS_CFLAGS += -DTOP=\"$(CURDIR)\"
 TESTS_CFLAGS += -DIRCCD_EXECUTABLE=\"$(IRCCD)\"
 TESTS_CFLAGS += -I.
 
 TESTS_LDFLAGS += $(LIBIRCCD_LDFLAGS)
+TESTS_LDFLAGS += $(LIBNCE_LDFLAGS)
 
-$(TESTS): $(TESTS_LIB_OBJS) $(LIBUNITY) $(LIBEV_STATIC) | $(IRCCD)
+$(TESTS_EXE): $(TESTS_LIB_OBJS) $(LIBUNITY) $(LIBNCE_STATIC) | $(IRCCD)
 
 ifeq ($(JS), 1)
 TESTS_CFLAGS += $(LIBDUKTAPE_CFLAGS)
 TESTS_LDFLAGS += $(LIBDUKTAPE_LDFLAGS)
 
-$(TESTS): $(LIBDUKTAPE_STATIC)
+$(TESTS_EXE): $(LIBDUKTAPE_STATIC)
 endif
 
 ifeq ($(HTTP), 1)
@@ -662,8 +664,8 @@ TESTS_CFLAGS += $(LIBCURL_CFLAGS)
 TESTS_LDFLAGS += $(LIBCURL_LDFLAGS)
 endif
 
-$(TESTS): private override CFLAGS += $(TESTS_CFLAGS)
-$(TESTS): private override LDLIBS += $(TESTS_LDFLAGS)
+$(TESTS_EXE): private override CFLAGS += $(TESTS_CFLAGS)
+$(TESTS_EXE): private override LDLIBS += $(TESTS_LDFLAGS)
 
 # special test file that export its own symbols.
 ifeq ($(OS), Linux)
@@ -672,14 +674,14 @@ endif
 
 $(TESTS_LIB_OBJS): private override CFLAGS += $(LIBIRCCD_CFLAGS)
 
-all:: $(TESTS)
+all:: $(TESTS_EXE)
 
 clean::
 	rm -f $(TESTS_LIB_OBJS) $(TESTS_LIB_DEPS)
-	rm -f $(TESTS) $(TESTS_DEPS) $(TESTS_OBJS)
+	rm -f $(TESTS_EXE) $(TESTS_DEPS) $(TESTS_OBJS)
 
 .PHONY:
-tests: $(TESTS)
+tests: $(TESTS_EXE)
 	for t in $^; do ./$$t; done
 
 -include $(TESTS_LIB_DEPS)

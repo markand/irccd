@@ -18,6 +18,7 @@
 
 #include <unity.h>
 
+#include <irccd/conn.h>
 #include <irccd/event.h>
 
 void
@@ -33,40 +34,35 @@ tearDown(void)
 static void
 basics_parse_simple(void)
 {
-#if 0
 	/* This is a TOPIC message. */
-	struct irc__conn conn = {
-		.in = ":malikania.fr 332 boris #test :Welcome to #test :: a testing channel\r\n"
-	};
-	struct irc__conn_msg msg = {0};
+	static const char *line = ":malikania.fr 332 boris #test :Welcome to #test :: a testing channel";
+	struct conn_msg msg = {};
 
-	irc__conn_poll(&conn, &msg);
+	irc__conn_msg_parse(&msg, line, strlen(line));
 
 	TEST_ASSERT_EQUAL_STRING("malikania.fr", msg.prefix);
 	TEST_ASSERT_EQUAL_STRING("332", msg.cmd);
 	TEST_ASSERT_EQUAL_STRING("boris", msg.args[0]);
 	TEST_ASSERT_EQUAL_STRING("#test", msg.args[1]);
 	TEST_ASSERT_EQUAL_STRING("Welcome to #test :: a testing channel", msg.args[2]);
-#endif
+
+	irc__conn_msg_finish(&msg);
 }
 
 static void
 basics_parse_noprefix(void)
 {
-#if 0
 	/* Ping messages usually don't have a prefix. */
-	struct irc__conn conn = {
-		.in = "PING :malikania.fr\r\n"
-	};
-	struct irc__conn_msg msg = {0};
+	static const char *line = "PING :malikania.fr";
+	struct conn_msg msg = {};
 
-	irc__conn_poll(&conn, &msg);
+	irc__conn_msg_parse(&msg, line, strlen(line));
 
-	GREATEST_ASSERT(!msg.prefix);
+	TEST_ASSERT(!msg.prefix);
 	TEST_ASSERT_EQUAL_STRING("PING", msg.cmd);
 	TEST_ASSERT_EQUAL_STRING("malikania.fr", msg.args[0]);
 
-#endif
+	irc__conn_msg_finish(&msg);
 }
 
 int

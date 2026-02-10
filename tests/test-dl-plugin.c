@@ -32,11 +32,19 @@
 #include <irccd/server.h>
 #include <irccd/util.h>
 
+#include "mock/server.h"
+
+static struct irc_server *server;
 static struct irc_plugin *plugin;
+
+static struct mock_server *mock;
 
 void
 setUp(void)
 {
+	server = irc_server_new("test");
+	mock = IRC_UTIL_CONTAINER_OF(server, struct mock_server, parent);
+
 	if ((plugin = dl_plugin_open("plugin-dl-example", NULL)) == NULL)
 		TEST_FAIL();
 }
@@ -45,6 +53,7 @@ void
 tearDown(void)
 {
 	irc_plugin_finish(plugin);
+	irc_server_decref(server);
 }
 
 static void
@@ -101,22 +110,15 @@ test_templates_list(void)
 static void
 test_calls_simple(void)
 {
-#if 0
-	struct irc__conn conn = {0};
-	struct irc_server server = {
-		.state = IRC_SERVER_STATE_CONNECTED,
-		.conn = &conn
-	};
 	struct irc_event ev = {
-		.server = &server
+		.server = server
 	};
 
 	irc_plugin_load(plugin);
 	irc_plugin_unload(plugin);
 	irc_plugin_reload(plugin);
 	irc_plugin_handle(plugin, &ev);
-	TEST_ASSERT_EQUAL_STRING("EVENT\r\n", server.conn->out);
-#endif
+	TEST_ASSERT_EQUAL_STRING(mock->out->line, "message #test hi");
 }
 
 int
@@ -259,7 +261,7 @@ plugin_dl_example_get_paths(void)
 void
 plugin_dl_example_event(const struct irc_event *ev)
 {
-	irc_server_send(ev->server, "EVENT");
+	irc_server_message(ev->server, "#test", "hi");
 }
 
 void
