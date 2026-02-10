@@ -62,18 +62,18 @@
 #define IRCCD_DATADIR "@SHAREDIR@/irccd"
 
 /**
- * \brief Set to 1 if HTTP is enabled, 0 otherwise
+ * \brief Defined if HTTP support is enabled.
  */
-#define IRCCD_WITH_HTTP @HTTP@
+@HTTP@
 
 /**
- * \brief Set to 1 if Javascript is enabled, 0 otherwise
+ * \brief Defined if Javascript support is enabled.
  */
-#define IRCCD_WITH_JS @JS@
+@JS@
 
 /**
- * \brief Set to 1 if OpenSSL is enabled, 0 otherwise
+ * \brief Defined if SSL/TLS support is enabled.
  */
-#define IRCCD_WITH_SSL @SSL@
+@SSL@
 
 #endif /* !IRCCD_CONFIG_H */

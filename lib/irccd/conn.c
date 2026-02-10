@@ -34,7 +34,7 @@
 
 #include "config.h"
 
-#if IRCCD_WITH_SSL == 1
+#ifdef IRCCD_WITH_SSL
 #       include <tls.h>
 #endif
 
@@ -245,7 +245,7 @@ conn_connect(struct conn *conn)
 	if (rc < 0)
 		conn_reschedule(conn);
 
-#if IRCCD_WITH_SSL == 1
+#ifdef IRCCD_WITH_SSL
 	/*
 	 * Now go with SSL if needed. It does not require that much aside a new
 	 * handle. All handshake process will be done transparently.
@@ -313,7 +313,7 @@ conn_tcp_send(struct conn *conn, const void *buf, size_t bufsz, int *events)
 	return ns;
 }
 
-#if IRCCD_WITH_SSL == 1
+#ifdef IRCCD_WITH_SSL
 
 static inline ssize_t
 conn_tls_want(const struct conn *conn, ssize_t rc, int *events)
@@ -558,7 +558,7 @@ conn_io_finalizer(struct nce_coro *self)
 		conn->ai = NULL;
 	}
 
-#if IRCCD_WITH_SSL
+#ifdef IRCCD_WITH_SSL
 	if (conn->tls) {
 		tls_close(conn->tls);
 		tls_free(conn->tls);
@@ -683,7 +683,7 @@ irc__conn_spawn(struct conn *conn, struct irc_server *server)
 
 	conn->parent = server;
 
-#if IRCCD_WITH_SSL == 1
+#ifdef IRCCD_WITH_SSL
 	if (server->flags & IRC_SERVER_FLAGS_SSL) {
 		conn->recv = conn_tls_recv;
 		conn->send = conn_tls_send;

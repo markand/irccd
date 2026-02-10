@@ -293,16 +293,36 @@ LIBIRCCD_CFLAGS += $(LIBSSL_CFLAGS)
 LIBIRCCD_LDFLAGS += $(LIBSSL_LDFLAGS)
 endif
 
+#
+# Macro to expand
+#
+#   #define IRCCD_WITH_<FOO>
+#   #undef IRCCD_WITH_<FOO>
+#
+# Used for config.h generation.
+#
+define sed.define =
+#define IRCCD_WITH_$(1)
+endef
+
+define sed.undef =
+#undef IRCCD_WITH_$(1)
+endef
+
+define sed.enable =
+$(intcmp $($(1)),0,,$(call sed.undef,$(1)),$(call sed.define,$(1)))
+endef
+
 $(LIBIRCCD_DIR)/irccd/config.h: $(LIBIRCCD_DIR)/irccd/config.h.in
 	sed \
-		-e "s,@HTTP@,$(HTTP),g" \
-		-e "s,@JS@,$(JS),g" \
+		-e "s,@HTTP@,$(call sed.enable,HTTP),g" \
+		-e "s,@JS@,$(call sed.enable,JS),g" \
 		-e "s,@LIBDIR@,$(LIBDIR),g" \
 		-e "s,@MAJOR@,$(MAJOR),g" \
 		-e "s,@MINOR@,$(MINOR),g" \
 		-e "s,@PATCH@,$(PATCH),g" \
 		-e "s,@SHAREDIR@,$(SHAREDIR),g" \
-		-e "s,@SSL@,$(SSL),g" \
+		-e "s,@SSL@,$(call sed.enable,SSL),g" \
 		-e "s,@SYSCONFDIR@,$(SYSCONFDIR),g" \
 		-e "s,@VARDIR@,$(VARDIR),g" \
 		< $< > $@

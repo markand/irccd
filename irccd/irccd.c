@@ -39,7 +39,7 @@
 #include "dl-plugin.h"
 #include "transport.h"
 
-#if IRCCD_WITH_JS == 1
+#ifdef IRCCD_WITH_JS
 #       include "js-plugin.h"
 #endif
 
@@ -59,12 +59,12 @@ broadcaster(const struct irc_event *ev)
 static void
 run_info(void)
 {
-#if IRCCD_WITH_JS == 1
+#ifdef IRCCD_WITH_JS
 	const char *with_js = "yes";
 #else
 	const char *with_js = "no";
 #endif
-#if IRCCD_WITH_SSL == 1
+#ifdef IRCCD_WITH_SSL
 	const char *with_ssl = "yes";
 #else
 	const char *with_ssl = "no";
@@ -152,7 +152,7 @@ init(void)
 	irc_bot_observe(broadcaster);
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
 
-#if IRCCD_WITH_JS == 1
+#ifdef IRCCD_WITH_JS
 	irc_bot_plugin_loader_add(js_plugin_loader_new());
 #endif
 

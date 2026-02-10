@@ -88,7 +88,7 @@ struct conn {
 	struct nce_coro producer;
 
 	/* OpenBSD's nice libtls. */
-#if IRCCD_WITH_SSL == 1
+#ifdef IRCCD_WITH_SSL
 	struct tls *tls;
 #endif
 

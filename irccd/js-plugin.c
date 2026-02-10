@@ -499,7 +499,7 @@ init(const char *name, const char *path, const char *script)
 	jsapi_directory_load(js->ctx);
 	jsapi_file_load(js->ctx);
 	jsapi_hook_load(js->ctx);
-#if IRCCD_WITH_HTTP == 1
+#ifdef IRCCD_WITH_HTTP
 	jsapi_http_load(js->ctx);
 #endif
 	jsapi_logger_load(js->ctx);

@@ -866,7 +866,7 @@ irc_server_connect(struct irc_server *server)
 		return;
 	}
 
-#if IRCCD_WITH_SSL == 1
+#ifdef IRCCD_WITH_SSL
 	if (server->flags & IRC_SERVER_FLAGS_SSL) {
 		WARN("SSL requested but not available");
 		return;
